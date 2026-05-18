@@ -1552,7 +1552,7 @@ function rCompras(el){
       _cGuardando=true;
       var prov=($("cprov")||{}).value||"";
       if(!prov.trim()){alert("Ingresa el proveedor");_cGuardando=false;return}
-      var validLines=lineas.filter(function(l){return l.nombre.trim()&&parseFloat(l.cantidad)>0});
+      var validLines=lineas.filter(function(l){return (l.nombre||l.sku||'').trim()&&parseFloat(l.cantidad)>0;});
       if(!validLines.length){alert("Agrega al menos un producto");_cGuardando=false;return}
       var total=calcTotal();
       var body={
@@ -1560,11 +1560,11 @@ function rCompras(el){
         fecha:($("cfecha")||{}).value||hoy(),
         proveedor:prov,
         proveedor_id:0,
-        producto_nombre:validLines.map(function(l){return l.nombre}).join(", "),
-        descripcion:validLines.length+" producto(s)",producto_nombre:validLines.map(function(l){return l.nombre}).join(", "),
-        tipo_inv:validLines[0].tipo_inv,
+        producto_nombre:validLines.map(function(l){return l.nombre||l.sku||""}).join(", "),
+        descripcion:validLines.length+" producto(s)",
+        tipo_inv:validLines[0].tipo_inv||"insumo",
         cantidad:validLines.reduce(function(a,l){return a+parseFloat(l.cantidad||0)},0),
-        pu:validLines.length===1?parseFloat(validLines[0].pu):total,
+        pu:validLines.length===1?parseFloat(validLines[0].pu||0):total,
         total:total,
         responsable:($("cresp")||{}).value||"",
         lineas:validLines
