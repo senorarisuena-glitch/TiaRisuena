@@ -379,7 +379,7 @@ function sGET(t,q){
 }
 function sPOST(t,b){
   if(IS_PROD){
-    return fetch(SU+"/rest/v1/"+t,{method:"POST",headers:{"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(b)}).then(function(r){return r.json()}).catch(function(){return{}});
+    return fetch(SU+"/rest/v1/"+t,{method:"POST",headers:{"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(d){if(r.ok)return d;console.error("POST "+t+" error:",d);toast("Error al guardar: "+(d.message||d.hint||JSON.stringify(d)),"err");return{};});}).catch(function(e){console.error(e);return{};});
   }
   var rows=dbg(t);
   // Dedup: for movimientos, check same fecha+monto+movimiento+cuenta within 2 seconds
@@ -1561,7 +1561,7 @@ function rCompras(el){
         proveedor:prov,
         proveedor_id:0,
         producto_nombre:validLines.map(function(l){return l.nombre}).join(", "),
-        desc:validLines.length+" producto(s)",
+        descripcion:validLines.length+" producto(s)",producto_nombre:validLines.map(function(l){return l.nombre}).join(", "),
         tipo_inv:validLines[0].tipo_inv,
         cantidad:validLines.reduce(function(a,l){return a+parseFloat(l.cantidad||0)},0),
         pu:validLines.length===1?parseFloat(validLines[0].pu):total,
@@ -2123,7 +2123,7 @@ function rEnvios(el){
               proveedor:repNom,
               proveedor_id:0,
               producto_nombre:"Servicio de envío",
-              desc:"Ruta #"+autoE+" · "+pedsMapped.length+" pedido(s)",
+              descripcion:"Ruta #"+autoE+" · "+pedsMapped.length+" pedido(s)",
               tipo_inv:"servicio",
               cantidad:1,
               pu:costoEnvio,
