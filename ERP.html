@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ERP · Sistema de Gestión</title>
+<title>ERP</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0D1117;color:#E6EDF3;font-family:monospace;min-height:100vh}
@@ -334,7 +334,7 @@ function syncCatalogo(cb){
   });
 }
 
-var IS_PROD=location.hostname.indexOf("netlify")>=0||location.hostname.indexOf(".")>0&&location.hostname!=="localhost";
+var IS_PROD=true; // Force production mode
 
 /* DB layer */
 function dbg(t){try{return JSON.parse(localStorage.getItem("erp_"+t)||"[]")}catch(e){return[]}}
