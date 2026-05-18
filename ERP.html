@@ -2322,9 +2322,9 @@ function rProductos(el){
       cat=Array.isArray(cat)?cat:[];
       if(!cat.length){seedFromCatalogo();return;}
       var seen={},dupes=[];
-      cat.forEach(function(p){if(seen[p.sku])dupes.push(p.id);else seen[p.sku]=p;});
+      cat.forEach(function(p){var k=p.sku||p.nombre;if(!k)return;if(seen[k])dupes.push(p.id);else{p.sku=k;seen[k]=p;}});
       dupes.forEach(function(id){sDEL("productos","id=eq."+id);});
-      prods=Object.keys(seen).sort().map(function(n){return seen[n];});
+      prods=Object.keys(seen).sort().map(function(n){var p=seen[n];p.sku=p.sku||p.nombre||n;return p;});
       syncCatalogoSKU();
       renderList();
     });
