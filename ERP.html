@@ -322,11 +322,11 @@ function syncCatalogo(cb){
     if(cat.length){
       var tipoVals=["insumo","terminado","mixto","otro"];
       cat.forEach(function(p){
-        if(!p.nombre)return;
+        if(!p.sku&&!p.nombre)return;
         // Fix bad categoria that equals a tipo value
         var catFixed=(p.categoria&&tipoVals.indexOf(p.categoria)<0)?p.categoria:"";
-        var idx=CATALOGO_SKU.findIndex(function(s){return s.sku===p.nombre;});
-        var entry={sku:p.nombre,desc:p.descripcion||p.nombre,cat:catFixed,tipo:p.tipo||"insumo"};
+        var idx=CATALOGO_SKU.findIndex(function(s){return s.sku===(p.sku||p.nombre);});
+        var entry={sku:p.sku||p.nombre,desc:p.descripcion||(p.sku||p.nombre),cat:catFixed,tipo:p.tipo||"insumo"};
         if(idx>=0){CATALOGO_SKU[idx]=entry;}else{CATALOGO_SKU.push(entry);}
       });
     }
@@ -475,17 +475,7 @@ function doLogin(){
   buildNav();
   var first=MODS.find(function(m){return CU.p[m.k]});
   if(first)goMod(first.k);
-  if(!localStorage.getItem("erp_reset_inv")){
-    localStorage.setItem("erp_reset_inv","1");
-    var TABLAS_RESET=["ventas","movimientos","produccion","envios","compras","seguimientos","pedidos","inventario","clientes"];
-    var ov=document.createElement("div");
-    ov.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:monospace;color:#E6EDF3;gap:6px";
-    ov.innerHTML='<div style="font-size:16px;color:#00C896">Limpiando datos de prueba...</div><div id="rstMsg2" style="color:#E3B341;font-size:13px"></div>';
-    document.body.appendChild(ov);
-    function borrarT(t){return sGET(t,"select=id&limit=2000").then(function(rows){rows=Array.isArray(rows)?rows:[];return rows.reduce(function(p,r){return p.then(function(){return sDEL(t,"id=eq."+r.id);});},Promise.resolve());}).catch(function(){});}
-    TABLAS_RESET.reduce(function(p,t){return p.then(function(){var m=document.getElementById("rstMsg2");if(m)m.textContent=t+"...";return borrarT(t);});},Promise.resolve())
-    .then(function(){ov.remove();location.reload();});
-  }
+
 }
 function doLogout(){CU=null;$("login-page").style.display="flex";$("app").style.display="none";$("lp").value="";$("lerr").style.display="none"}
 
@@ -2316,8 +2306,8 @@ function rProductos(el){
   function syncCatalogoSKU(){
     // Sync Supabase productos into CATALOGO_SKU memory array
     prods.forEach(function(p){
-      var idx=CATALOGO_SKU.findIndex(function(s){return s.sku===p.nombre;});
-      var entry={sku:p.nombre,desc:p.descripcion||p.nombre,cat:p.categoria||"",tipo:p.tipo||"insumo"};
+      var idx=CATALOGO_SKU.findIndex(function(s){return s.sku===(p.sku||p.nombre);});
+      var entry={sku:p.sku||p.nombre,desc:p.descripcion||(p.sku||p.nombre),cat:p.categoria||"",tipo:p.tipo||"insumo"};
       if(idx>=0){CATALOGO_SKU[idx]=entry;}else{CATALOGO_SKU.push(entry);}
     });
   }
@@ -2350,7 +2340,7 @@ function rProductos(el){
       var f=prods.filter(function(p){
         if(filtroTipo&&p.tipo!==filtroTipo)return false;
         if(filtroCat&&p.categoria!==filtroCat)return false;
-        if(filtroQ&&(p.nombre+p.descripcion+p.categoria).toLowerCase().indexOf(filtroQ.toLowerCase())<0)return false;
+        if(filtroQ&&((p.sku||p.nombre||'')+p.descripcion+p.categoria).toLowerCase().indexOf(filtroQ.toLowerCase())<0)return false;
         return true;
       });
       var tbody=document.getElementById("cat_tbody");if(!tbody)return;
@@ -2360,7 +2350,7 @@ function rProductos(el){
         var tipoColor={insumo:"#4A9EFF",terminado:"#00C896",mixto:"#E3B341",otro:"#C084FC"}[p.tipo]||"#8B949E";
         var idx=prods.indexOf(p);
         return '<tr>'+
-          '<td style="font-weight:700;color:#E6EDF3">'+p.nombre+'</td>'+
+          '<td style="font-weight:700;color:#E6EDF3">'+(p.sku||p.nombre)+'</td>'+
           '<td style="color:#8B949E;font-size:11px">'+(p.descripcion||"—")+'</td>'+
           '<td style="font-size:11px;color:#C084FC">'+(p.categoria||"—")+'</td>'+
           '<td>'+bdg(tipoLabel?tipoLabel.l:p.tipo,tipoColor)+'</td>'+
@@ -2401,7 +2391,7 @@ function rProductos(el){
     sDEL("productos","id=eq."+id).then(function(){
       // Also remove from CATALOGO_SKU memory
       var p=prods.find(function(x){return x.id===id;});
-      if(p){var si=CATALOGO_SKU.findIndex(function(s){return s.sku===p.nombre;});if(si>=0)CATALOGO_SKU.splice(si,1);}
+      if(p){var si=CATALOGO_SKU.findIndex(function(s){return s.sku===(p.sku||p.nombre);});if(si>=0)CATALOGO_SKU.splice(si,1);}
       load();toast("SKU eliminado","err");
     });
   };
@@ -2413,7 +2403,7 @@ function rProductos(el){
     allCats2.sort();
 
     var html='<div class="mod"><div style="display:flex;justify-content:space-between;margin-bottom:20px">';
-    html+='<h1 style="font-size:18px;font-weight:700">'+(esEd?"Editar":"Nuevo")+" SKU"+(esEd?" — "+pe.nombre:"")+'</h1>';
+    html+='<h1 style="font-size:18px;font-weight:700">'+(esEd?"Editar":"Nuevo")+" SKU"+(esEd?" — "+(pe.sku||pe.nombre):"")+'</h1>';
     html+='<button class="btn btn-g" onclick="goMod(&apos;productos&apos;)">← Cancelar</button></div>';
     html+='<div class="card" style="max-width:600px">';
     html+=fi("SKU (código único)",'<input id="prnombre" type="text" value="'+(esEd?pe.sku||"":"")+'" placeholder="Ej: P1, GALLOEX, BHO1..." autofocus style="text-transform:uppercase">');
