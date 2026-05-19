@@ -563,7 +563,15 @@ function rPedidos(el){
 
       html+='<div style="font-size:10px;color:#8B949E;letter-spacing:.1em;margin-bottom:10px;font-weight:700">TICKETS POR ENTREGAR ('+sinRuta.length+')</div>';
       if(!sinRuta.length)html+='<div class="empty" style="margin-bottom:16px">Sin tickets pendientes ✓</div>';
-      else sinRuta.forEach(function(p){html+=pedCard(p);});
+      else sinRuta.forEach(function(p){
+        html+=pedCard(p);
+        // Boton entrega en oficina — solo si no esta en ruta
+        if(!p.num_envio){
+          html+='<div style="margin:-6px 0 10px 0;text-align:right">';
+          html+='<button onclick="pedEntregaOficina(&apos;'+p.id+'&apos;)" style="background:rgba(0,200,150,.15);border:1px solid #00C896;color:#00C896;border-radius:2px;padding:6px 14px;font-family:monospace;font-size:11px;cursor:pointer;font-weight:700">🏪 Entrega en Oficina</button>';
+          html+='</div>';
+        }
+      });
 
       html+='<div style="height:1px;background:#30363D;margin:16px 0"></div>';
       html+='<div style="font-size:10px;color:#8B949E;letter-spacing:.1em;margin-bottom:10px;font-weight:700">RUTAS ACTIVAS ('+rutasPend.length+')</div>';
@@ -646,7 +654,23 @@ function rPedidos(el){
       render(pedidos.concat(erpPeds),envios);
     });
   }
-  window.pedFiltro=function(f){filtro=f;load()};
+  window.pedFiltro=function(f){filtro=f;load();};
+  window.pedEntregaOficina=function(id){
+    if(!confirm("¿Marcar como entregado en oficina?"))return;
+    var fecha=new Date().toLocaleDateString("es-MX");
+    // Find seguimiento for this pedido
+    sGET("seguimientos","pedido_id=eq."+String(id)).then(function(segs){
+      var seg=segs&&segs[0];
+      var proms=[];
+      // Update pedido status
+      proms.push(sPATCH("pedidos","id=eq."+id,{status:"entregado"}));
+      if(seg){
+        var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha,nota:"Entrega en oficina"}]);
+        proms.push(sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}));
+      }
+      Promise.all(proms).then(function(){toast("✅ Entregado en oficina");load();});
+    });
+  };
   window.pedConc=function(id){
     sGET("ventas","select=ticket&order=ticket.desc&limit=1").then(function(rows){
       var maxT=rows&&rows[0]?rows[0].ticket:0;
@@ -812,13 +836,14 @@ function rVentas(el){
     sGET("ventas","id=eq."+id).then(function(rows){
       var v=rows&&rows[0];
       sDEL("ventas","id=eq."+id).then(function(){
+        var proms=[];
         if(v&&v.ticket){
-          sDEL("lotes","tipo=eq.venta&ref_id=eq."+v.ticket).then(function(){
-            load();toast("Eliminado","err");
-          });
-        } else {
-          load();toast("Eliminado","err");
+          // Borrar lotes de venta
+          proms.push(sDEL("lotes","tipo=eq.venta&ref_id=eq."+v.ticket));
+          // Borrar seguimiento ligado a este ticket
+          proms.push(sDEL("seguimientos","pedido_ticket=eq."+v.ticket));
         }
+        Promise.all(proms).then(function(){load();toast("Eliminado","err");});
       });
     });
   };
@@ -2756,7 +2781,7 @@ function rClientes(el){
       } else {
         var maxCod=0;clientes.forEach(function(x){var n=parseInt((x.codigo||"CLI000").replace("CLI",""));if(n>maxCod)maxCod=n});
         var num=maxCod+1;var codigo="CLI"+(num<10?"00":num<100?"0":"")+num;
-        body={codigo:codigo,nombre:nom.trim(),apodo:($("clap")||{}).value||"",telefono:tel.trim(),direccion:($("cldir")||{}).value||"",facebook:($("clfb")||{}).value||"",password:($("clpw")||{}).value||"",coins:0,gastado:0,pedidos:0};
+        body={codigo:codigo,nombre:nom.trim(),apodo:($("clap")||{}).value||"",telefono:tel.trim().replace(/\D/g,"").slice(-10),direccion:($("cldir")||{}).value||"",facebook:($("clfb")||{}).value||"",password:($("clpw")||{}).value||"",coins:0,saldo_mxn:0,gastado:0,pedidos_count:0};
         sPOST("clientes",body).then(function(){load();goMod("clientes");toast("Cliente "+codigo+" registrado")});
       }
     };
