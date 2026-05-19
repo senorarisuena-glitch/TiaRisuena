@@ -1113,29 +1113,6 @@ async function registrarUsuario(){
 }
 
 
-async function loginUsuario(){
-  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
-  var pass=(document.getElementById('lPass')||{}).value||'';
-  var msg=document.getElementById('loginMsg');
-  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
-  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
-  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
-  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
-  if(!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-  // Check password if user has one
-  if(res.data.password&&res.data.password!==''){
-    if(!pass){if(msg){msg.textContent='Ingresa tu contraseña';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-    if(pass!==res.data.password){if(msg){msg.textContent='Contraseña incorrecta';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-  }
-  S.user=res.data;guardarSesionLocal(res.data);
-  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
-  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
-  // Clear fields
-  var lp=document.getElementById('lPass');if(lp)lp.value='';
-  var wrap=document.getElementById('lPassWrap');if(wrap)wrap.style.display='none';
-}
-
-
 function cerrarSesion(){
   S.user = null;
   S.cart = [];
@@ -1187,18 +1164,6 @@ async function registrarUsuario(){
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
-}
-async function loginUsuario(){
-  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
-  var msg=document.getElementById('loginMsg');
-  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
-  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
-  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
-  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
-  if(res.error||!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-  S.user=res.data;guardarSesionLocal(res.data);
-  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
-  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
 }
 function cerrarSesion(){S.user=null;S.cart=[];localStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
@@ -3106,18 +3071,6 @@ async function registrarUsuario(){
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
-}
-async function loginUsuario(){
-  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
-  var msg=document.getElementById('loginMsg');
-  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
-  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
-  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
-  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
-  if(res.error||!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-  S.user=res.data;guardarSesionLocal(res.data);
-  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
-  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
 }
 function cerrarSesion(){S.user=null;S.cart=[];localStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
