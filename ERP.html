@@ -807,7 +807,21 @@ function rVentas(el){
     } else {vForm(null);}
   };
   window.vEdit=function(id){vForm(ventas.find(function(v){return v.id===id}))};
-  window.vDel=function(id){sDEL("ventas","id=eq."+id).then(function(){load();toast("Eliminado","err")})};
+  window.vDel=function(id){
+    if(!confirm("¿Eliminar venta? Esto revertirá el inventario."))return;
+    sGET("ventas","id=eq."+id).then(function(rows){
+      var v=rows&&rows[0];
+      sDEL("ventas","id=eq."+id).then(function(){
+        if(v&&v.ticket){
+          sDEL("lotes","tipo=eq.venta&ref_id=eq."+v.ticket).then(function(){
+            load();toast("Eliminado","err");
+          });
+        } else {
+          load();toast("Eliminado","err");
+        }
+      });
+    });
+  };
 
   function vForm(ve){
     var esEd=!!ve;
@@ -1549,7 +1563,21 @@ function rCompras(el){
   }
   window.cNueva=function(){cForm(null)};
   window.cEdit=function(id){cForm(compras.find(function(c){return c.id===id}))};
-  window.cDel=function(id){sDEL("compras","id=eq."+id).then(function(){load();toast("Eliminado","err")})};
+  window.cDel=function(id){
+    if(!confirm("¿Eliminar compra? Esto revertirá el inventario."))return;
+    sGET("compras","id=eq."+id).then(function(rows){
+      var co=rows&&rows[0];
+      sDEL("compras","id=eq."+id).then(function(){
+        if(co&&co.id){
+          sDEL("lotes","tipo=eq.compra&ref_id=eq."+co.id).then(function(){
+            load();toast("Eliminado","err");
+          });
+        } else {
+          load();toast("Eliminado","err");
+        }
+      });
+    });
+  };
 
   function cForm(ce){
     var esEd=!!ce;
@@ -1773,7 +1801,21 @@ function rProduccion(el){
   }
 
   window.pNuevo=function(){pForm();};
-  window.pDel=function(id){if(confirm("¿Eliminar lote?"))sDEL("produccion","id=eq."+id).then(function(){load();toast("Eliminado","err");});};
+  window.pDel=function(id){
+    if(!confirm("¿Eliminar lote? Esto revertirá el inventario."))return;
+    sGET("produccion","id=eq."+id).then(function(rows){
+      var p=rows&&rows[0];
+      sDEL("produccion","id=eq."+id).then(function(){
+        if(p&&p.num_lote){
+          sDEL("lotes","tipo=eq.produccion&ref_id=eq."+p.num_lote).then(function(){
+            load();toast("Eliminado","err");
+          });
+        } else {
+          load();toast("Eliminado","err");
+        }
+      });
+    });
+  };
 
   function pForm(){
     var autoL=prod.length?Math.max.apply(null,prod.map(function(x){return x.num_lote||0}))+1:1;
