@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>La Tía Risueña</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZBEWPVjQl2viizDl7KH1RTwtWWRmtrig&libraries=places&language=es"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDZBEWPVjQl2viizDl7KH1RTwtWWRmtrig&libraries=places&language=es" async defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -1107,7 +1105,7 @@ async function registrarUsuario(){
     gastado:0,pedidos_count:0
   }).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -1185,7 +1183,7 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -1222,7 +1220,7 @@ async function llenarPerfil(){
   await cargarLogros();await cargarPedidosUsuario();
 }
 async function cargarLogros(){
-  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
+  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
   var todos=r1.data||[];var misIds=(r2.data||[]).map(function(x){return x.logro_id;});
   var el=document.getElementById('pLogros');if(!el)return;
   el.innerHTML=todos.map(function(l){var ob=misIds.indexOf(l.id)>=0;
@@ -1234,7 +1232,7 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('pedidos').select('*').eq('cliente_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
   var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
@@ -1502,7 +1500,7 @@ async function registrarUsuario(){
 
   // Registrar transacción de bienvenida
   await sb.from('coins_transacciones').insert({
-    cliente_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
+    usuario_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
   });
 
   S.user = data;
@@ -1616,7 +1614,7 @@ async function llenarPerfil(){
 async function cargarLogros(){
   const u = S.user;
   const {data:todosLogros} = await sb.from('logros').select('*');
-  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
+  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
   const misIds = (misLogros||[]).map(x=>x.logro_id);
 
   const el = document.getElementById('pLogros');
@@ -1638,7 +1636,7 @@ async function cargarLogros(){
 
 function toggleDetalle(btn){var pid=btn.dataset.xid||btn.dataset.pid;var el=document.querySelector('.det-'+pid);if(!el)return;var s=el.style.display!=='none';el.style.display=s?'none':'block';btn.textContent=s?'📋 Ver detalle':'▲ Ocultar';}
 async function cargarPedidosUsuario(){
-  var res = await sb.from('pedidos').select('*').eq('cliente_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res = await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data = res.data;
   var el = document.getElementById('pPedidos');
   if(!el) return;
@@ -1758,7 +1756,7 @@ function pagarEnvioEfectivo(pedidoId){
         var newCoins = (S.user.coins||0)+cashback;
         sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id).then(function(){
           S.user.coins=newCoins;updUI();
-          sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'credito',cantidad:cashback,descripcion:'Cashback 20% envio efectivo'});
+          sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'credito',cantidad:cashback,descripcion:'Cashback 20% envio efectivo'});
           notif('🪙 +'+cashback+' coins cashback!');
         });
       }
@@ -1775,7 +1773,7 @@ function pagarEnvioDigital(pedidoId,costo){
 function initPedidosRealtime(){
   if(!sb||!S.user||window._pedidosChannel)return;
   window._pedidosChannel = sb.channel('pedidos-user-'+S.user.id)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'cliente_id=eq.'+S.user.id},
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
     function(payload){
       var p=payload.new;
       var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'Tu pedido se esta empacando',en_camino:'Tu pedido esta en camino!',entregado:'Tu pedido fue entregado!'};
@@ -1809,7 +1807,7 @@ async function verificarLogros(){
   if(!S.user) return;
   const u = S.user;
   const {data:todosLogros} = await sb.from('logros').select('*');
-  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
+  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
   const misIds = (misLogros||[]).map(x=>x.logro_id);
 
   for(const l of (todosLogros||[])){
@@ -1818,7 +1816,7 @@ async function verificarLogros(){
     if(l.tipo==='compras' && u.pedidos_count >= l.condicion_valor) cumplido=true;
     if(l.tipo==='gasto' && u.gastado >= l.condicion_valor) cumplido=true;
     if(cumplido){
-      await sb.from('usuario_logros').insert({cliente_id:u.id, logro_id:l.id});
+      await sb.from('usuario_logros').insert({usuario_id:u.id, logro_id:l.id});
       notif('🏆 Logro desbloqueado: '+l.nombre);
     }
   }
@@ -1888,7 +1886,7 @@ async function cargarPedidosActivos(){
   if(!el||!S.user||!sb)return;
 
   var res=await sb.from('pedidos').select('*')
-    .eq('cliente_id',S.user.id)
+    .eq('usuario_id',S.user.id)
     .not('status','eq','entregado')
     .order('created_at',{ascending:false})
     .limit(5);
@@ -1965,7 +1963,7 @@ async function cargarPedidosActivos(){
   if(!window._cartRealtimeInit&&S.user){
     window._cartRealtimeInit=true;
     sb.channel('cart-orders-'+S.user.id)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'cliente_id=eq.'+S.user.id},
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
       function(payload){
         var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
         notif(labels[payload.new.status]||'Pedido actualizado');
@@ -2038,7 +2036,7 @@ async function confirmarYEnviar(metodo){
 
   // Guardar pedido en Supabase
   const {data:pedido, error} = await sb.from('pedidos').insert({
-    cliente_id: S.user.id,
+    usuario_id: S.user.id,
     folio, nb:nombre, tel, dir,
     items: prods, regalos: gifts, total,
     pago: metodo, pagado,
@@ -2053,7 +2051,7 @@ async function confirmarYEnviar(metodo){
     const newCoins = (S.user.coins||0) - total;
     await sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id);
     await sb.from('coins_transacciones').insert({
-      cliente_id:S.user.id, tipo:'debito', cantidad:total,
+      usuario_id:S.user.id, tipo:'debito', cantidad:total,
       descripcion:'Pago pedido '+folio
     });
     S.user.coins = newCoins;
@@ -2572,7 +2570,7 @@ async function confirmarPedido(){
   var folio='TIA-'+Date.now().toString().slice(-6);
   var pagado=_ckMetodo==='coins';
   var res=await sb.from('pedidos').insert({
-    cliente_id:S.user.id,folio:folio,
+    usuario_id:S.user.id,folio:folio,
     nb:nombre.trim(),tel:tel.replace(/\D/g,''),dir:dir.trim(),
     items:prods,regalos:gifts,total:total,
     pago:_ckMetodo,
@@ -2585,7 +2583,7 @@ async function confirmarPedido(){
     var nc=(S.user.coins||0)-total;
     var ur=await sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single();
     if(ur.data)S.user=ur.data;
-    await sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
+    await sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
   }
   var ng=(S.user.gastado||0)+total;var nc2=(S.user.pedidos_count||0)+1;
   var uu=await sb.from('clientes').update({gastado:ng,pedidos_count:nc2}).eq('id',S.user.id).select().single();
@@ -3104,7 +3102,7 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -3141,7 +3139,7 @@ async function llenarPerfil(){
   await cargarLogros();await cargarPedidosUsuario();
 }
 async function cargarLogros(){
-  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
+  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
   var todos=r1.data||[];var misIds=(r2.data||[]).map(function(x){return x.logro_id;});
   var el=document.getElementById('pLogros');if(!el)return;
   el.innerHTML=todos.map(function(l){var ob=misIds.indexOf(l.id)>=0;
@@ -3153,7 +3151,7 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('pedidos').select('*').eq('cliente_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
   var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
@@ -3252,6 +3250,15 @@ async function init(){
 }
 window.addEventListener('load',init);
 
+// ── FUNCIONES LOGIN (movidas aquí para evitar renderizado como texto) ──
+async function checkPassField(){
+  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
+  if(tel.length<10)return;
+  var res=await sb.from('clientes').select('password').eq('telefono',tel).single();
+  var wrap=document.getElementById('lPassWrap');
+  if(wrap)wrap.style.display=(res.data&&res.data.password)?'block':'none';
+}
+
 </script>
 
 
@@ -3283,35 +3290,4 @@ window.addEventListener('load',init);
   <button class="bnav" id="bn-coins" onclick="goPage('coins')"><span>🪙</span><span>Coins</span></button>
 </div>
 </body>
-</html>async function checkPassField(){
-  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
-  if(tel.length<10)return;
-  var res=await sb.from('clientes').select('password').eq('telefono',tel).single();
-  var wrap=document.getElementById('lPassWrap');
-  if(wrap)wrap.style.display=(res.data&&res.data.password)?'block':'none';
-}
-
-async function loginUsuario(){
-  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
-  var pass=(document.getElementById('lPass')||{}).value||'';
-  var msg=document.getElementById('loginMsg');
-  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
-  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
-  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
-  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
-  if(!res.data){
-    if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}
-    if(btnL)btnL.disabled=false;return;
-  }
-  if(res.data.password&&res.data.password!==''){
-    if(!pass){if(msg){msg.textContent='Ingresa tu contraseña';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-    if(pass!==res.data.password){if(msg){msg.textContent='Contraseña incorrecta';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
-  }
-  S.user=res.data;guardarSesionLocal(res.data);
-  notif('Bienvenido '+(res.data.apodo||res.data.nombre)+'!');
-  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
-  var lp=document.getElementById('lPass');if(lp)lp.value='';
-  var wrap=document.getElementById('lPassWrap');if(wrap)wrap.style.display='none';
-}
-
-
+</html>
