@@ -628,7 +628,8 @@ function rPedidos(el){
       var allSegs=Array.isArray(res[1])?res[1]:[];
       var envios=Array.isArray(res[2])?res[2]:[];
       var allVentas=Array.isArray(res[3])?res[3]:[];
-      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"});
+      var ventaTickets=new Set(allVentas.map(function(v){return String(v.ticket);}));
+      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&ventaTickets.has(String(s.pedido_ticket));});
       var erpPeds=erpSegs.map(function(s){
         var envio=envios.find(function(e){
           return (e.pedidos||[]).some(function(p){return String(p.ticket)===String(s.pedido_ticket);});
@@ -761,24 +762,27 @@ function rVentas(el){
       Promise.all([
         sGET("ventas","order=ticket.desc"),
         sGET("clientes","order=codigo"),
-        sGET("compras","order=id"),
-        sGET("produccion","order=id")
+        sGET("lotes","order=fecha,id")
       ]).then(function(res){
         ventas=Array.isArray(res[0])?res[0]:[];
         clientes=Array.isArray(res[1])?res[1]:[];
-        var compras=Array.isArray(res[2])?res[2]:[];
-        var prodLotes=Array.isArray(res[3])?res[3]:[];
-        // Calcular stock real de terminados
+        var lotes=Array.isArray(res[2])?res[2]:[];
+        // Calcular stock desde lotes — fuente única de verdad
         var stock={};
-        compras.forEach(function(co){
-          if(co.tipo_inv==="servicio")return;
-          var lineas=co.lineas&&co.lineas.length?co.lineas:[{nombre:co.producto_nombre,tipo_inv:co.tipo_inv,cantidad:parseFloat(co.cantidad)||0,pu:parseFloat(co.pu)||0}];
-          lineas.forEach(function(l){if(!l.nombre||l.tipo_inv!=="terminado")return;if(!stock[l.nombre])stock[l.nombre]={cantidad:0,costo_unit:0};stock[l.nombre].cantidad+=parseFloat(l.cantidad)||0;if(parseFloat(l.pu)>0)stock[l.nombre].costo_unit=parseFloat(l.pu);});
+        lotes.forEach(function(lt){
+          if(!lt.sku)return;
+          var ci=CATALOGO_SKU.find(function(s){return s.sku===lt.sku;});
+          // Solo terminado y mixto para ventas
+          if(ci&&ci.tipo!=="terminado"&&ci.tipo!=="mixto")return;
+          if(!stock[lt.sku])stock[lt.sku]={cantidad:0,costo_unit:0};
+          var cant=parseFloat(lt.cantidad)||0;
+          if(lt.movimiento==="entrada"){
+            stock[lt.sku].cantidad+=cant;
+            if(parseFloat(lt.costo_unit)>0)stock[lt.sku].costo_unit=parseFloat(lt.costo_unit);
+          } else {
+            stock[lt.sku].cantidad-=cant;
+          }
         });
-        prodLotes.forEach(function(p){
-          if(p.producto_nombre&&p.piezas&&p.tipo_inv==="terminado"){if(!stock[p.producto_nombre])stock[p.producto_nombre]={cantidad:0,costo_unit:0};stock[p.producto_nombre].cantidad+=parseFloat(p.piezas)||0;if(parseFloat(p.costo_unitario)>0)stock[p.producto_nombre].costo_unit=parseFloat(p.costo_unitario);}
-        });
-        ventas.forEach(function(v){(Array.isArray(v.lineas)?v.lineas:[]).forEach(function(l){var nom=l.desc||l.nombre;if(!nom)return;if(!stock[nom])stock[nom]={cantidad:0,costo_unit:0};stock[nom].cantidad-=parseFloat(l.cant||l.cantidad||0);});});
         inv=Object.keys(stock).map(function(n){return{nombre:n,cantidad:stock[n].cantidad,costo_unit:stock[n].costo_unit};}).filter(function(x){return x.cantidad>0;}).sort(function(a,b){return a.nombre>b.nombre?1:-1;});
         renderList();
       });
@@ -842,6 +846,7 @@ function rVentas(el){
           proms.push(sDEL("lotes","tipo=eq.venta&ref_id=eq."+v.ticket));
           // Borrar seguimiento ligado a este ticket
           proms.push(sDEL("seguimientos","pedido_ticket=eq."+v.ticket));
+          if(v.pedido_id)proms.push(sDEL("seguimientos","pedido_id=eq."+v.pedido_id));
         }
         Promise.all(proms).then(function(){load();toast("Eliminado","err");});
       });
