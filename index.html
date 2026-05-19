@@ -713,6 +713,12 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
       <div class="stitle">📋 MIS PEDIDOS</div>
       <div id="pPedidos" style="padding:0 12px 12px"></div>
       <div class="stitle">✏️ MIS DATOS</div>
+      <!-- Banner perfil incompleto -->
+      <div id="banner-perfil-incompleto" style="display:none;margin:0 12px 10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:10px 14px">
+        <div style="font-family:'Cinzel',serif;font-size:.65rem;color:var(--red);margin-bottom:4px">⚠️ PERFIL INCOMPLETO</div>
+        <div id="banner-perfil-msg" style="font-size:.6rem;color:var(--muted);line-height:1.5"></div>
+        <div style="font-size:.58rem;color:var(--red);margin-top:6px">Completa tus datos para poder hacer pedidos.</div>
+      </div>
       <div style="padding:0 12px 20px;display:flex;flex-direction:column;gap:10px">
         <div class="user-field"><label>TELEFONO</label><input class="user-inp" id="eTel" readonly style="opacity:.6"></div>
         <div class="user-field"><label>DIRECCION PRINCIPAL</label>
@@ -1183,6 +1189,16 @@ async function llenarPerfil(){
   else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
   val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
   await cargarLogros();await cargarPedidosUsuario();
+  // Verificar perfil incompleto
+  var banner=document.getElementById('banner-perfil-incompleto');
+  var bannerMsg=document.getElementById('banner-perfil-msg');
+  if(banner&&bannerMsg){
+    var faltantes=[];
+    if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
+    if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
+    if(faltantes.length>0){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
+    else{banner.style.display='none';}
+  }
 }
 async function cargarLogros(){
   var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
@@ -2510,6 +2526,16 @@ function llenarCkDatos(){
 async function confirmarPedido(){
   var errEl=document.getElementById('ck-error');if(errEl)errEl.style.display='none';
   if(!S.user){notif('Regístrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}
+  // Verificar perfil completo antes de hacer pedido
+  var u=S.user;
+  var perfilIncompleto=[];
+  if(!u.direccion||!u.direccion.trim())perfilIncompleto.push('dirección');
+  if(!u.password||!u.password.trim())perfilIncompleto.push('contraseña');
+  if(perfilIncompleto.length>0){
+    notif('⚠️ Completa tu perfil antes de hacer un pedido','var(--red)');
+    setTimeout(function(){goPage('usuario');},1200);
+    return;
+  }
   var nombre=(document.getElementById('ck-nombre')||{}).value||'';
   var tel=(document.getElementById('ck-tel')||{}).value||'';
   var dir=(document.getElementById('ck-dir')||{}).value||'';
@@ -3090,6 +3116,16 @@ async function llenarPerfil(){
   else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
   val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
   await cargarLogros();await cargarPedidosUsuario();
+  // Verificar perfil incompleto
+  var banner=document.getElementById('banner-perfil-incompleto');
+  var bannerMsg=document.getElementById('banner-perfil-msg');
+  if(banner&&bannerMsg){
+    var faltantes=[];
+    if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
+    if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
+    if(faltantes.length>0){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
+    else{banner.style.display='none';}
+  }
 }
 async function cargarLogros(){
   var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
