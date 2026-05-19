@@ -921,11 +921,11 @@ const S = {
 
 // ── CART PERSISTENCE ──────────────────────
 function saveCart(){
-  try{ localStorage.setItem('tia_cart', JSON.stringify(S.cart)); }catch(e){}
+  try{ sessionStorage.setItem('tia_cart', JSON.stringify(S.cart)); }catch(e){}
 }
 function loadCart(){
   try{
-    var saved = localStorage.getItem('tia_cart');
+    var saved = sessionStorage.getItem('tia_cart');
     if(saved){ S.cart = JSON.parse(saved); }
   }catch(e){ S.cart = []; }
 }
@@ -1122,20 +1122,20 @@ async function registrarUsuario(){
 function cerrarSesion(){
   S.user = null;
   S.cart = [];
-  localStorage.removeItem('tia_cid');
+  sessionStorage.removeItem('tia_cid');
   updUI();
   mostrarRegistro();
   notif('👋 Sesión cerrada');
 }
 
 function guardarSesionLocal(user){
-  try{ localStorage.setItem('tia_uid', user.id); }catch(e){}
+  try{ sessionStorage.setItem('tia_uid', user.id); }catch(e){}
 }
 
 async function cargarSesion(){
   try{
     if(!sb)return;
-    var cid=localStorage.getItem('tia_cid');
+    var cid=sessionStorage.getItem('tia_cid');
     if(!cid)return;
     var res=await sb.from('clientes').select('*').eq('id',cid).single();
     if(res.data){S.user=res.data;updUI();}
@@ -1171,7 +1171,7 @@ async function registrarUsuario(){
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
 }
-function cerrarSesion(){S.user=null;S.cart=[];localStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
+function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
   var u=S.user;if(!u)return;
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
@@ -1314,11 +1314,11 @@ window.addEventListener('load',init);
 
 
 function saveCart(){
-  try{ localStorage.setItem('tia_cart', JSON.stringify(S.cart)); }catch(e){}
+  try{ sessionStorage.setItem('tia_cart', JSON.stringify(S.cart)); }catch(e){}
 }
 function loadCart(){
   try{
-    var saved = localStorage.getItem('tia_cart');
+    var saved = sessionStorage.getItem('tia_cart');
     if(saved){ S.cart = JSON.parse(saved); }
   }catch(e){ S.cart = []; }
 }
@@ -1528,20 +1528,20 @@ async function loginUsuario(){
 function cerrarSesion(){
   S.user = null;
   S.cart = [];
-  localStorage.removeItem('tia_cid');
+  sessionStorage.removeItem('tia_cid');
   updUI();
   mostrarRegistro();
   notif('👋 Sesión cerrada');
 }
 
 function guardarSesionLocal(user){
-  try{ localStorage.setItem('tia_uid', user.id); }catch(e){}
+  try{ sessionStorage.setItem('tia_uid', user.id); }catch(e){}
 }
 
 async function cargarSesion(){
   try{
     if(!sb) return;
-    const uid = localStorage.getItem('tia_cid');
+    const uid = sessionStorage.getItem('tia_cid');
     if(!uid) return;
     const {data} = await sb.from('clientes').select('*').eq('id',uid).single();
     if(data){ S.user=data; updUI(); }
@@ -1768,9 +1768,7 @@ async function actualizarDatos(){
   if(!S.user) return;
   var newPass=(document.getElementById('ePass')||{}).value||'';
   if(newPass&&newPass.length<4){notif('La contraseña debe tener al menos 4 caracteres','var(--red)');return;}
-  var niv=getNivel(S.user?S.user.gastado||0:0);
   var upd={
-    nivel: niv.lvl.nombre,
     direccion: (document.getElementById('eDir1')||{value:''}).value.trim()||null,
     facebook:   (document.getElementById('eFb')||{value:''}).value.trim()||null,
     email:      (document.getElementById('eEmail')||{value:''}).value.trim()||null,
@@ -3068,8 +3066,8 @@ function mostrarRegistro(){document.getElementById('view-registro').style.displa
 function mostrarLogin(){document.getElementById('view-registro').style.display='none';document.getElementById('view-login').style.display='block';document.getElementById('view-perfil').style.display='none';}
 function mostrarPerfil(){document.getElementById('view-registro').style.display='none';document.getElementById('view-login').style.display='none';document.getElementById('view-perfil').style.display='block';}
 function renderUsuarioPage(){if(S.user){mostrarPerfil();llenarPerfil();}else{mostrarRegistro();}}
-function guardarSesionLocal(u){try{localStorage.setItem('tia_cid',u.id);}catch(e){}}
-async function cargarSesion(){try{if(!sb)return;var uid=localStorage.getItem('tia_cid');if(!uid)return;var res=await sb.from('clientes').select('*').eq('id',uid).single();if(res.data){S.user=res.data;updUI();}}catch(e){console.log('session:',e);}}
+function guardarSesionLocal(u){try{sessionStorage.setItem('tia_cid',u.id);}catch(e){}}
+async function cargarSesion(){try{if(!sb)return;var uid=sessionStorage.getItem('tia_cid');if(!uid)return;var res=await sb.from('clientes').select('*').eq('id',uid).single();if(res.data){S.user=res.data;updUI();}}catch(e){console.log('session:',e);}}
 async function registrarUsuario(){
   var nombre=(document.getElementById('rNombre')||{}).value||'';
   var apodo=(document.getElementById('rApodo')||{}).value||'';
@@ -3098,7 +3096,7 @@ async function registrarUsuario(){
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
 }
-function cerrarSesion(){S.user=null;S.cart=[];localStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
+function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
   var u=S.user;if(!u)return;
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
