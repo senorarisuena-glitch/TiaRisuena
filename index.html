@@ -625,18 +625,21 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
             <label>CONTRASEÑA <span style="font-size:.55rem;color:var(--muted)">(opcional — recomendada para mayor seguridad)</span></label>
             <input class="user-inp" id="rPass" type="password" placeholder="Crea tu contraseña (mín. 4 caracteres)">
           </div>
-          <div class="user-field"><label>DIRECCION DE ENTREGA *</label>
+          <div class="user-field"><label>DIRECCIÓN DE ENTREGA *</label>
             <div id="dir-opciones" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div>
             <div style="position:relative">
               <input class="user-inp" id="rDir1" placeholder="Escribe tu calle..." autocomplete="off" style="padding-right:36px">
               <button onclick="usarUbicacion('rDir1')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">📍</button>
             </div>
           </div>
-          <div class="user-field"><label>DIRECCION ALTERNATIVA</label>
-            <div style="position:relative">
-              <input class="user-inp" id="rDir2" placeholder="Opcional" autocomplete="off" style="padding-right:36px">
-              <button onclick="usarUbicacion('rDir2')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">📍</button>
-            </div>
+          <div class="user-field">
+            <label>FACEBOOK (link de tu perfil)</label>
+            <input class="user-inp" id="rFb" placeholder="https://facebook.com/tu-perfil">
+          </div>
+          <div class="user-field">
+            <label>CORREO ELECTRÓNICO</label>
+            <input class="user-inp" id="rEmail" type="email" placeholder="tu@correo.com">
+          </div>
           </div>
           <button class="btn-gold" onclick="registrarUsuario()" id="btnRegistrar">⚔️ Unirme al Reino</button>
           <div id="regMsg" style="font-size:.65rem;text-align:center;color:var(--muted);min-height:20px"></div>
@@ -717,17 +720,13 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
       <div class="stitle">✏️ MIS DATOS</div>
       <div style="padding:0 12px 20px;display:flex;flex-direction:column;gap:10px">
         <div class="user-field"><label>TELEFONO</label><input class="user-inp" id="eTel" readonly style="opacity:.6"></div>
-        <div class="user-field"><label>DIRECCION PRINCIPAL</label>
+        <div class="user-field"><label>DIRECCIÓN DE ENTREGA</label>
           <div style="position:relative">
             <input class="user-inp" id="eDir1" placeholder="Calle, numero, colonia" style="padding-right:36px">
             <button onclick="usarUbicacion('eDir1')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">📍</button>
           </div>
         </div>
-        <div class="user-field"><label>DIRECCION ALTERNATIVA</label>
-          <div style="position:relative">
-            <input class="user-inp" id="eDir2" placeholder="Opcional" style="padding-right:36px">
-            <button onclick="usarUbicacion('eDir2')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">📍</button>
-          </div>
+        
         </div>
         <div class="user-field"><label>FACEBOOK</label><input class="user-inp" id="eFb" placeholder="Tu Facebook"></div>
         <div class="user-field"><label>CORREO</label><input class="user-inp" id="eEmail" type="email"></div>
@@ -1107,6 +1106,7 @@ async function registrarUsuario(){
     gastado:0,pedidos_count:0
   }).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  
   await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
@@ -1185,6 +1185,7 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  
   await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
@@ -1234,7 +1235,7 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('pedidos').select('*').eq('cliente_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
   var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
@@ -1501,9 +1502,7 @@ async function registrarUsuario(){
   }
 
   // Registrar transacción de bienvenida
-  await sb.from('coins_transacciones').insert({
-    cliente_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
-  });
+  
 
   S.user = data;
   S.coins = 100;
@@ -1638,7 +1637,7 @@ async function cargarLogros(){
 
 function toggleDetalle(btn){var pid=btn.dataset.xid||btn.dataset.pid;var el=document.querySelector('.det-'+pid);if(!el)return;var s=el.style.display!=='none';el.style.display=s?'none':'block';btn.textContent=s?'📋 Ver detalle':'▲ Ocultar';}
 async function cargarPedidosUsuario(){
-  var res = await sb.from('pedidos').select('*').eq('cliente_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res = await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data = res.data;
   var el = document.getElementById('pPedidos');
   if(!el) return;
@@ -1775,7 +1774,7 @@ function pagarEnvioDigital(pedidoId,costo){
 function initPedidosRealtime(){
   if(!sb||!S.user||window._pedidosChannel)return;
   window._pedidosChannel = sb.channel('pedidos-user-'+S.user.id)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'cliente_id=eq.'+S.user.id},
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
     function(payload){
       var p=payload.new;
       var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'Tu pedido se esta empacando',en_camino:'Tu pedido esta en camino!',entregado:'Tu pedido fue entregado!'};
@@ -1819,7 +1818,18 @@ async function verificarLogros(){
     if(l.tipo==='gasto' && u.gastado >= l.condicion_valor) cumplido=true;
     if(cumplido){
       await sb.from('usuario_logros').insert({cliente_id:u.id, logro_id:l.id});
-      notif('🏆 Logro desbloqueado: '+l.nombre);
+      const LCOIN={primera_batalla:150,veterano:300,conquistador:600,leyenda:1500,primer_tributo:150,guerrero_rico:450,gran_senor:900,emperador:1500};
+      const cr=LCOIN[l.codigo]||0;
+      if(cr>0){
+        const nc=(u.coins||0)+cr;
+        const {data:uu}=await sb.from('clientes').update({coins:nc}).eq('id',u.id).select().single();
+        if(uu)S.user=uu;
+        await sb.from('coins_transacciones').insert({cliente_id:u.id,tipo:'credito',cantidad:cr,descripcion:'Logro: '+l.nombre});
+        notif('🏆 '+l.nombre+' +'+cr+' coins!');
+      } else {
+        notif('🏆 Logro desbloqueado: '+l.nombre);
+      }
+      updUI();
     }
   }
 }
@@ -1888,7 +1898,7 @@ async function cargarPedidosActivos(){
   if(!el||!S.user||!sb)return;
 
   var res=await sb.from('pedidos').select('*')
-    .eq('cliente_id',S.user.id)
+    .eq('usuario_id',S.user.id)
     .not('status','eq','entregado')
     .order('created_at',{ascending:false})
     .limit(5);
@@ -1965,7 +1975,7 @@ async function cargarPedidosActivos(){
   if(!window._cartRealtimeInit&&S.user){
     window._cartRealtimeInit=true;
     sb.channel('cart-orders-'+S.user.id)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'cliente_id=eq.'+S.user.id},
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
       function(payload){
         var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
         notif(labels[payload.new.status]||'Pedido actualizado');
@@ -2038,7 +2048,7 @@ async function confirmarYEnviar(metodo){
 
   // Guardar pedido en Supabase
   const {data:pedido, error} = await sb.from('pedidos').insert({
-    cliente_id: S.user.id,
+    usuario_id: S.user.id,
     folio, nb:nombre, tel, dir,
     items: prods, regalos: gifts, total,
     pago: metodo, pagado,
@@ -2052,10 +2062,7 @@ async function confirmarYEnviar(metodo){
   if(metodo==='coins'){
     const newCoins = (S.user.coins||0) - total;
     await sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id);
-    await sb.from('coins_transacciones').insert({
-      cliente_id:S.user.id, tipo:'debito', cantidad:total,
-      descripcion:'Pago pedido '+folio
-    });
+    
     S.user.coins = newCoins;
   }
 
@@ -2572,7 +2579,7 @@ async function confirmarPedido(){
   var folio='TIA-'+Date.now().toString().slice(-6);
   var pagado=_ckMetodo==='coins';
   var res=await sb.from('pedidos').insert({
-    cliente_id:S.user.id,folio:folio,
+    usuario_id:S.user.id,folio:folio,
     nb:nombre.trim(),tel:tel.replace(/\D/g,''),dir:dir.trim(),
     items:prods,regalos:gifts,total:total,
     pago:_ckMetodo,
@@ -2585,7 +2592,8 @@ async function confirmarPedido(){
     var nc=(S.user.coins||0)-total;
     var ur=await sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single();
     if(ur.data)S.user=ur.data;
-    await sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
+    await sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pago pedido '+folio});
+    
   }
   var ng=(S.user.gastado||0)+total;var nc2=(S.user.pedidos_count||0)+1;
   var uu=await sb.from('clientes').update({gastado:ng,pedidos_count:nc2}).eq('id',S.user.id).select().single();
@@ -3104,6 +3112,7 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  
   await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
@@ -3153,7 +3162,7 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('pedidos').select('*').eq('cliente_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
   var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
