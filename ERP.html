@@ -1339,8 +1339,14 @@ function rBancos(el){
     html+=fi("TIPO PAGO",selHtml("btp",["Efectivo","Transferencia","Depósito"].map(function(t){return{v:t,l:t}}),esEd?me.tipo_pago:"Efectivo"));
     html+='<div class="fi"><label>MOVIMIENTO</label><select id="bmov" onchange="updateRef()" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="">— seleccionar —</option>'+["Venta","Gasto","Pago Proveedores","Pago Repartidores","Inversion"].map(function(t){return'<option value="'+t+'"'+(( esEd?me.movimiento:"Venta")===t?" selected":"")+'>'+t+'</option>'}).join("")+'</select></div>';
     html+='</div><div class="card">';
-    html+=fi("CONCEPTO",'<input id="bconc" list="bgastos_list" type="text" value="'+(esEd?me.concepto||"":"")+'"><datalist id="bgastos_list">'+"<option value=\"Sueldos\">"+"<option value=\"Renta\">"+"<option value=\"Luz\">"+"<option value=\"Agua\">"+"<option value=\"Internet\">"+"<option value=\"Comidas\">"+"<option value=\"Herramientas\">"+"<option value=\"Transporte\">"+"<option value=\"Gasolina\">"+"<option value=\"Teléfono\">"+"<option value=\"Marketing\">"+"<option value=\"Publicidad\">"+"<option value=\"Mantenimiento\">"+"<option value=\"Limpieza\">"+"<option value=\"Papelería\">"+"<option value=\"Seguridad\">"+"<option value=\"Empaque\">"+"<option value=\"Envíos\">"+"<option value=\"Devoluciones\">"+"<option value=\"Otros gastos\">"+'</datalist>');
     html+='<div class="fi" id="brefwrap"><label>REFERENCIA / VINCULACIÓN</label><div id="brefextra"></div><input id="bref" type="text" value="'+(esEd?me.gasto_ticket||"":"") +'" placeholder="# ticket, compra, envío..." style="display:none"></div>';
+    var GASTOS_TIPOS=["Sueldos","Renta","Luz","Agua","Gas","Internet","Teléfono","Comidas","Herramientas","Transporte","Gasolina","Uber / Taxi","Parquímetro","Marketing","Publicidad","Redes Sociales","Mantenimiento","Limpieza","Papelería","Seguridad","Empaque","Materiales","Envíos / Mensajería","Devoluciones","Multas / Recargos","Honorarios","Contabilidad","Legal","Capacitación","Suscripciones","Compras menores","Otros gastos"];
+    var concVal=esEd?me.concepto||"":"";
+    // Auto-set concepto based on movimiento type
+    var autoConc={Venta:"Venta",'Pago Proveedores':'Pago Proveedores','Pago Repartidores':'Pago Repartidores'};
+    html+='<div class="fi"><label>DESCRIPCIÓN</label>';
+    html+='<input id="bconc" list="bgastos_list" type="text" value="'+concVal+'" placeholder="Describe el concepto...">';
+    html+='<datalist id="bgastos_list">'+GASTOS_TIPOS.map(function(g){return'<option value="'+g+'">';}).join("")+'</datalist></div>';
     html+=fi("MONTO ($)",'<input id="bmonto" type="number" value="'+(esEd?me.monto:"0")+'">');
     html+='<div class="fi"><label>TIPO</label><div style="display:flex;gap:8px">';
     html+='<button id="bing" onclick="bSetEg(false);setTimeout(updateRef,30)" style="flex:1;padding:8px;border-radius:2px;font-family:monospace;font-size:12px;cursor:pointer;background:'+((!esEd||!me.egreso)?"rgba(0,200,150,.2)":"transparent")+';border:1px solid '+((!esEd||!me.egreso)?"#00C896":"#30363D")+';color:'+((!esEd||!me.egreso)?"#00C896":"#8B949E")+'">Ingreso</button>';
@@ -1352,9 +1358,13 @@ function rBancos(el){
     // Wire onchange for movimiento and egreso toggle
     function updateRef(){
       var mov=($("bmov")||{}).value||"";
+      // Auto-set concepto/descripcion
+      var autoConc={Venta:"Venta","Pago Proveedores":"Pago Proveedores","Pago Repartidores":"Pago Repartidores"};
+      var concEl=$("bconc");
+      if(concEl&&autoConc[mov]&&!esEd){concEl.value=autoConc[mov];}
       // Auto egreso for Pago Proveedores
-      if((mov==="Pago Proveedores"||mov==="Pago Repartidores")&&!egreso){egreso=true;var b1=$("bing"),b2=$("beg");if(b1){b1.style.background="transparent";b1.style.borderColor="#30363D";b1.style.color="#8B949E"}if(b2){b2.style.background="rgba(248,81,73,.2)";b2.style.borderColor="#F85149";b2.style.color="#F85149"}}
-      if(mov==="Venta"){egreso=false;var b1=$("bing"),b2=$("beg");if(b1){b1.style.background="rgba(0,200,150,.2)";b1.style.borderColor="#00C896";b1.style.color="#00C896"}if(b2){b2.style.background="transparent";b2.style.borderColor="#30363D";b2.style.color="#8B949E"}}
+      if((mov==="Pago Proveedores"||mov==="Pago Repartidores"||mov==="Gasto")&&!egreso){egreso=true;var b1=$("bing"),b2=$("beg");if(b1){b1.style.background="transparent";b1.style.borderColor="#30363D";b1.style.color="#8B949E"}if(b2){b2.style.background="rgba(248,81,73,.2)";b2.style.borderColor="#F85149";b2.style.color="#F85149"}}
+      if(mov==="Venta"||mov==="Inversion"){egreso=false;var b1=$("bing"),b2=$("beg");if(b1){b1.style.background="rgba(0,200,150,.2)";b1.style.borderColor="#00C896";b1.style.color="#00C896"}if(b2){b2.style.background="transparent";b2.style.borderColor="#30363D";b2.style.color="#8B949E"}}
       var bref=document.getElementById("brefextra");
       if(!bref)return;
       bref.innerHTML="";
@@ -2773,17 +2783,29 @@ function rReportes(el){
     var vTot=vF.reduce(function(a,v){return a+parseFloat(v.monto_venta||0);},0);
     // Costo de ventas: suma de (cant × costo_unit del inventario) por línea vendida
     var cVen=vF.reduce(function(a,v){
+      // Use costo_productos if available, else calculate from lineas
+      if(parseFloat(v.costo_productos||0)>0) return a+parseFloat(v.costo_productos);
       return a+(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
-        var nom=l.desc||l.nombre||"";
-        var invItem=inv.find(function(x){return x.nombre===nom;});
-        var cu=invItem?parseFloat(invItem.costo_unit||0):parseFloat(l.cu||0);
+        var nom=l.sku||l.desc||l.nombre||"";
+        var invItem=inv.find(function(x){return x.nombre===nom||x.sku===nom;});
+        var cu=parseFloat(l.costo_unit||l.cu||0)||(invItem?parseFloat(invItem.costoUnit||invItem.costo_unit||0):0);
         return b+(parseFloat(l.cant||l.cantidad||0)*cu);
       },0);
     },0);
     var uBruta=vTot-cVen;
-    var gastosMovs=mF.filter(function(m){return m.egreso&&(m.movimiento==="Gasto"||m.movimiento==="Pago Repartidores");});
-    var gastos=gastosMovs.reduce(function(a,m){return a+parseFloat(m.monto||0);},0);
-    var gastosMap={};gastosMovs.forEach(function(m){var k=m.movimiento;gastosMap[k]=(gastosMap[k]||0)+parseFloat(m.monto||0);});var gastosDetalle=Object.keys(gastosMap).map(function(k){return{concepto:k,monto:gastosMap[k]};});
+    var gastosMovs=mF.filter(function(m){return m.egreso&&(m.movimiento==="Gasto"||m.movimiento==="Pago Repartidores"||m.movimiento==="Inversion");});
+    var gastosSoloGastos=mF.filter(function(m){return m.egreso&&(m.movimiento==="Gasto"||m.movimiento==="Pago Repartidores");});
+    var gastos=gastosSoloGastos.reduce(function(a,m){return a+parseFloat(m.monto||0);},0);
+    var gastosMap={};gastosSoloGastos.forEach(function(m){var k=(m.concepto&&m.concepto!==m.movimiento)?m.concepto:m.movimiento;gastosMap[k]=(gastosMap[k]||0)+parseFloat(m.monto||0);});
+    // Agregar envios del periodo como gasto devengado (aunque no se haya pagado)
+    var enviosDelPeriodo=enviosRep.filter(function(e){
+      var a=parseInt((e.fecha||"").slice(0,4)),m2=parseInt((e.fecha||"").slice(5,7)),d2=parseInt((e.fecha||"").slice(8,10));
+      return a===ai&&(!mi||m2===mi)&&(!di||d2===di)&&parseFloat(e.costo_total||0)>0;
+    });
+    var gastoEnvios=enviosDelPeriodo.reduce(function(a,e){return a+parseFloat(e.costo_total||0);},0);
+    if(gastoEnvios>0){gastosMap["Envíos / Repartidores"]=(gastosMap["Envíos / Repartidores"]||0)+gastoEnvios;}
+    gastos+=gastoEnvios;
+    var gastosDetalle=Object.keys(gastosMap).map(function(k){return{concepto:k,monto:gastosMap[k]};});
     var uNeta=uBruta-gastos;
     var cobros=mF.filter(function(m){return !m.egreso&&m.movimiento==="Venta";}).reduce(function(a,m){return a+parseFloat(m.monto||0);},0);
     var gOp=gastos;
@@ -2815,23 +2837,11 @@ function rReportes(el){
       return a+(ad>0.01?ad:0);
     },0);
 
-    // Deuda repartidores
-    var pagosRep={};
-    movs.forEach(function(m){
-      if(m.movimiento==="Pago Proveedores"&&m.egreso){
-        (m.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-          var mt=ref.trim().match(/Compra #(\d+)/);
-          if(mt){
-            var envServ=comprasRep.find(function(co){return co.tipo_inv==="servicio"&&co.num_compra===parseInt(mt[1]);});
-            if(envServ){var am=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosRep[envServ.num_compra]=(pagosRep[envServ.num_compra]||0)+(am?parseFloat(am[1]):parseFloat(m.monto||0));}
-          }
-        });
-      }
-    });
-    var deudaRep=comprasRep.filter(function(co){return co.tipo_inv==="servicio";}).reduce(function(a,co){
-      var ad=Math.max(0,parseFloat(co.total||0)-(pagosRep[co.num_compra]||0));
-      return a+(ad>0.01?ad:0);
-    },0);
+    // Deuda repartidores — desde envios directamente
+    var pagosRepMovs=movs.filter(function(m){return m.movimiento==="Pago Repartidores"&&m.egreso;});
+    var totalPagadoRep=pagosRepMovs.reduce(function(a,m){return a+parseFloat(m.monto||0);},0);
+    var totalDeudaEnvios=enviosRep.reduce(function(a,e){return a+parseFloat(e.costo_total||0);},0);
+    var deudaRep=Math.max(0,totalDeudaEnvios-totalPagadoRep);
 
     var totalPasivos=inv2+deudaProv+deudaRep;
     var uNetaReal=activos-totalPasivos;
