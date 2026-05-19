@@ -2735,13 +2735,15 @@ function rReportes(el){
       sGET("movimientos","order=fecha"),
       sGET("compras","order=num_compra"),
       sGET("envios","order=num_envio"),
-      sGET("produccion","order=id")
+      sGET("produccion","order=id"),
+      sGET("lotes","order=fecha,id")
     ]).then(function(res){
       ventas=Array.isArray(res[0])?res[0]:[];
       movs=Array.isArray(res[1])?res[1]:[];
       comprasRep=Array.isArray(res[2])?res[2]:[];
       enviosRep=Array.isArray(res[3])?res[3]:[];
       prodRepLotes=Array.isArray(res[4])?res[4]:[];
+      var lotesRep=Array.isArray(res[5])?res[5]:[];
       // Calcular inventario real
       var stock={};
       function ensR(n,t,cu){if(!stock[n])stock[n]={tipo:t||"insumo",cantidad:0,cu:cu||0};}
@@ -2824,7 +2826,25 @@ function rReportes(el){
     movs.forEach(function(m){saldos[m.cuenta_id]=(saldos[m.cuenta_id]||0)+(m.egreso?-parseFloat(m.monto||0):parseFloat(m.monto||0));});
     var efec=CUENTAS.reduce(function(a,ct){return a+Math.max(0,saldos[ct.id]||0);},0);
     var porCobrar=ventas.reduce(function(a,v){return a+parseFloat(v.adeudo||0);},0);
-    var valInv=inv.reduce(function(a,i){return a+parseFloat(i.costo_total||0);},0);
+    // valInv desde lotes — misma lógica que pestaña Inventario
+    var stockLotes={};
+    lotesRep.forEach(function(lt){
+      if(!lt.sku)return;
+      if(!stockLotes[lt.sku])stockLotes[lt.sku]={cantidad:0,cu:0};
+      var cant=parseFloat(lt.cantidad)||0;
+      var cu=parseFloat(lt.costo_unit)||0;
+      if(lt.movimiento==="entrada"){
+        stockLotes[lt.sku].cantidad+=cant;
+        if(cu>0)stockLotes[lt.sku].cu=cu;
+      } else {
+        stockLotes[lt.sku].cantidad-=cant;
+      }
+    });
+    var valInv=Object.keys(stockLotes).reduce(function(a,sku){
+      var s=stockLotes[sku];
+      var q=Math.max(0,s.cantidad);
+      return a+(q*s.cu);
+    },0);
     var activos=efec+porCobrar+valInv;
 
     // Inversión socios (todos los movs)
@@ -2933,23 +2953,29 @@ function rReportes(el){
           });
         }
       });
-      // Build repartidor debt from compras tipo servicio
+      // Build repartidor debt from envios directly (si se borra envio desaparece)
+      var totalPagadoReps=movs.filter(function(m){return m.movimiento==="Pago Repartidores"&&m.egreso;}).reduce(function(a,m){return a+parseFloat(m.monto||0);},0);
       var repDeuda={};
-      comprasRep.filter(function(co){return co.tipo_inv==="servicio";}).forEach(function(co){
-        var pagado=pagosRepMap[co.num_compra]||0;
-        var adeudo=Math.max(0,parseFloat(co.total||0)-pagado);
-        if(adeudo<0.01)return;
-        var rep=co.proveedor||"Sin nombre";
-        // Find ruta info from desc
-        var rutaMatch=(co.desc||"").match(/Ruta #(\d+)/);
-        var numRuta=rutaMatch?rutaMatch[1]:null;
-        var env=numRuta?enviosAll.find(function(e){return String(e.num_envio)===String(numRuta);}):null;
-        var fecha=env?env.fecha:co.fecha;
-        var peds=env?(env.pedidos||[]).length:0;
+      enviosAll.filter(function(e){return parseFloat(e.costo_total||0)>0;}).forEach(function(e){
+        var rep=e.repartidor||"Sin nombre";
+        var costo=parseFloat(e.costo_total||0);
         if(!repDeuda[rep])repDeuda[rep]={adeudo:0,rutas:[]};
-        repDeuda[rep].adeudo+=adeudo;
-        repDeuda[rep].rutas.push({num:co.num_compra,ruta:numRuta,fecha:fecha,costo:parseFloat(co.total||0),pagado:pagado,adeudo:adeudo,peds:peds});
+        repDeuda[rep].rutas.push({num:e.num_envio,ruta:e.num_envio,fecha:e.fecha,costo:costo,pagado:0,adeudo:costo,peds:(e.pedidos||[]).length});
       });
+      // Subtract payments proportionally
+      var totalEnviosCosto=enviosAll.reduce(function(a,e){return a+parseFloat(e.costo_total||0);},0);
+      if(totalPagadoReps>0&&totalEnviosCosto>0){
+        Object.keys(repDeuda).forEach(function(rep){
+          var propPagado=totalPagadoReps*(repDeuda[rep].rutas.reduce(function(a,r){return a+r.costo;},0)/totalEnviosCosto);
+          repDeuda[rep].adeudo=Math.max(0,repDeuda[rep].rutas.reduce(function(a,r){return a+r.costo;},0)-propPagado);
+        });
+      } else {
+        Object.keys(repDeuda).forEach(function(rep){
+          repDeuda[rep].adeudo=repDeuda[rep].rutas.reduce(function(a,r){return a+r.costo;},0);
+        });
+      }
+      // Remove reps with no debt
+      Object.keys(repDeuda).forEach(function(rep){if(repDeuda[rep].adeudo<0.01)delete repDeuda[rep];});
       var provDeuda={};
       comprasRep.filter(function(co){return co.tipo_inv!=="servicio";}).forEach(function(co){
         var pagado=pagosMap[co.num_compra]||0;
