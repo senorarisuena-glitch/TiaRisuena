@@ -629,7 +629,7 @@ function rPedidos(el){
       var envios=Array.isArray(res[2])?res[2]:[];
       var allVentas=Array.isArray(res[3])?res[3]:[];
       var ventaTickets=new Set(allVentas.map(function(v){return String(v.ticket);}));
-      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&ventaTickets.has(String(s.pedido_ticket));});
+      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&(ventaTickets.has(String(s.pedido_ticket)));});
       var erpPeds=erpSegs.map(function(s){
         var envio=envios.find(function(e){
           return (e.pedidos||[]).some(function(p){return String(p.ticket)===String(s.pedido_ticket);});
@@ -659,18 +659,33 @@ function rPedidos(el){
   window.pedEntregaOficina=function(id){
     if(!confirm("¿Marcar como entregado en oficina?"))return;
     var fecha=new Date().toLocaleDateString("es-MX");
-    // Find seguimiento for this pedido
-    sGET("seguimientos","pedido_id=eq."+String(id)).then(function(segs){
-      var seg=segs&&segs[0];
-      var proms=[];
-      // Update pedido status
+    var proms=[];
+    // id puede ser "seg_XXX" (ERP) o numero (tienda)
+    var isErpSeg=String(id).indexOf("seg_")===0;
+    if(isErpSeg){
+      // ERP: update seguimiento directly
+      var segId=String(id).replace("seg_","");
+      sGET("seguimientos","id=eq."+segId).then(function(segs){
+        var seg=segs&&segs[0];
+        if(seg){
+          var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha,nota:"Entrega en oficina"}]);
+          sPATCH("seguimientos","id=eq."+segId,{estado:"entregado",historial:hist}).then(function(){
+            toast("✅ Entregado en oficina");load();
+          });
+        }
+      });
+    } else {
+      // Tienda: update pedido + seguimiento
       proms.push(sPATCH("pedidos","id=eq."+id,{status:"entregado"}));
-      if(seg){
-        var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha,nota:"Entrega en oficina"}]);
-        proms.push(sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}));
-      }
-      Promise.all(proms).then(function(){toast("✅ Entregado en oficina");load();});
-    });
+      sGET("seguimientos","pedido_id=eq."+String(id)).then(function(segs){
+        var seg=segs&&segs[0];
+        if(seg){
+          var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha,nota:"Entrega en oficina"}]);
+          proms.push(sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}));
+        }
+        Promise.all(proms).then(function(){toast("✅ Entregado en oficina");load();});
+      });
+    }
   };
   window.pedConc=function(id){
     sGET("ventas","select=ticket&order=ticket.desc&limit=1").then(function(rows){
