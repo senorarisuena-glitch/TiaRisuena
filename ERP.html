@@ -412,6 +412,14 @@ function sPATCH(t,q,b){
   if(m)rows=rows.map(function(r){return String(r[m[1]])===String(m[2])?Object.assign({},r,b):r});
   dbs(t,rows);return Promise.resolve(true);
 }
+function sPostLote(body){
+  // Auto-assign num_movimiento
+  return sGET("lotes","select=num_movimiento&order=num_movimiento.desc&limit=1").then(function(rows){
+    var last=Array.isArray(rows)&&rows[0]?parseInt(rows[0].num_movimiento)||0:0;
+    body.num_movimiento=last+1;
+    return sPOST("lotes",body);
+  });
+}
 function sDEL(t,q){
   if(IS_PROD){
     return fetch(SU+"/rest/v1/"+t+"?"+q,{method:"DELETE",headers:{"apikey":SK,"Authorization":"Bearer "+SK}}).then(function(r){return r.ok}).catch(function(){return false});
@@ -645,11 +653,43 @@ function rPedidos(el){
       var ticket=maxT+1;
       sGET("pedidos","id=eq."+id).then(function(pr){
         var ped=pr&&pr[0];if(!ped)return;
-        sPOST("ventas",{ticket:ticket,fecha:hoy(),cliente_id:0,cliente_nombre:ped.nb,monto_venta:ped.total||0,adeudo:ped.total||0,cobrado:0,costo_productos:0,utilidad:ped.total||0,pct_util:0,origen:"tienda",pedido_id:String(ped.id),lineas:ped.items||[]}).then(function(){
-          sPOST("seguimientos",{id:String(Date.now()),pedido_id:String(ped.id),pedido_ticket:ticket,cliente:ped.nb,tel:ped.tel,dir:ped.dir,total:ped.total||0,estado:"preparando",fecha_creado:hoy(),historial:[{estado:"preparando",fecha:hoy()}]}).then(function(){
-            sPATCH("pedidos","id=eq."+id,{pedido_status:"concretado"}).then(function(){toast("✓ Ticket #"+ticket+" creado");load()});
+        // Buscar cliente_id por telefono
+        var buscarCli=ped.usuario_id?Promise.resolve(ped.usuario_id):sGET("clientes","telefono=eq."+(ped.tel||"")+"&select=id&limit=1").then(function(r){return r&&r[0]?r[0].id:0;});
+        buscarCli.then(function(cliId){
+        // Enriquecer lineas con precio_venta unitario
+        var items=Array.isArray(ped.items)?ped.items:[];
+        var totalMonto=parseFloat(ped.total)||0;
+        var lineasEnriq=items.map(function(l){
+          var qty=parseFloat(l.qty||l.quantity||l.cant||1);
+          var price=parseFloat(l.price||l.unit_price||l.precio||0);
+          return Object.assign({},l,{
+            sku:l.sku||l.nombre||l.name||"",
+            cant:qty,
+            precio_venta:price,
+            costo_unit:0,
+            utilidad_unit:price
           });
         });
+        sPOST("ventas",{
+          ticket:ticket,fecha:hoy(),
+          cliente_id:cliId||0,
+          cliente_nombre:ped.nb||ped.nombre_cliente||"",
+          monto_venta:totalMonto,
+          adeudo:ped.pagado?0:totalMonto,
+          cobrado:ped.pagado?totalMonto:0,
+          costo_productos:0,utilidad:totalMonto,pct_util:0,
+          origen:"tienda",
+          pedido_id:String(ped.id),
+          folio_tienda:ped.folio||"",
+          dir_entrega:ped.dir||"",
+          metodo_pago:ped.pago||ped.metodo_pago||"efectivo",
+          lineas:lineasEnriq
+        }).then(function(){
+          sPOST("seguimientos",{id:String(Date.now()),pedido_id:String(ped.id),pedido_ticket:ticket,cliente:ped.nb,tel:ped.tel,dir:ped.dir,total:ped.total||0,estado:"preparando",fecha_creado:hoy(),historial:[{estado:"preparando",fecha:hoy()}]}).then(function(){
+            sPATCH("pedidos","id=eq."+id,{status:"concretado"}).then(function(){toast("✓ Ticket #"+ticket+" creado");load()});
+          });
+        });
+        }); // end buscarCli
       });
     });
   };
@@ -858,6 +898,10 @@ function rVentas(el){
 
     html+='</div>';
     html+=fi("MONTO TOTAL ($)",'<input id="vmonto" type="number" value="'+(esEd?ve.monto_venta:0)+'" oninput="renderVForm()">');
+    var si_sel='background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:7px 10px;font-size:12px;color:#E6EDF3;width:100%';
+    html+=fi("MÉTODO DE PAGO",'<select id="vmetodo" style="'+si_sel+'"><option value="efectivo"'+(esEd&&ve.metodo_pago==="efectivo"?" selected":"")+'>Efectivo</option><option value="transferencia"'+(esEd&&ve.metodo_pago==="transferencia"?" selected":"")+'>Transferencia</option><option value="deposito"'+(esEd&&ve.metodo_pago==="deposito"?" selected":"")+'>Depósito</option><option value="coins"'+(esEd&&ve.metodo_pago==="coins"?" selected":"")+'>Coins</option></select>');
+    html+=fi("DIR. ENTREGA",'<input id="vdir" type="text" placeholder="Dirección de entrega (opcional)" value="'+(esEd&&ve.dir_entrega?ve.dir_entrega:"")+'">');
+    html+=fi("HORARIO",'<input id="vhorario" type="text" placeholder="Ej: 3-5pm" value="'+(esEd&&ve.horario_entrega?ve.horario_entrega:"")+'">');
     html+='</div>';
     html+='<div class="card"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em;margin-bottom:12px">RESUMEN</div><div id="vresumen"></div></div>';
     html+='</div>';
@@ -1027,7 +1071,35 @@ function rVentas(el){
       var monto=parseFloat(($("vmonto")||{}).value)||t.tv;
       if(!cliId||!cliNom.trim()){alert("Debes seleccionar un cliente de la lista");return}
       var util=monto-t.tc;
-      var body={ticket:autoT,fecha:($("vfecha")||{}).value||hoy(),cliente_id:parseInt(cliId)||0,cliente_nombre:cliNom,monto_venta:monto,adeudo:esEd?ve.adeudo:monto,cobrado:esEd?ve.cobrado:0,costo_productos:t.tc,utilidad:util,pct_util:monto>0?util/monto:0,origen:"erp",lineas:lineas};
+      // Enriquecer lineas con precio_venta, costo_unit y utilidad_unit proporcional
+      var totalCosto=t.tc||0;
+      var lineasEnriq=lineas.map(function(l){
+        var precioUnit=parseFloat(l.precio||l.p||0);
+        var cantUnit=parseFloat(l.cant||l.cantidad||1);
+        var costoUnit=totalCosto>0&&monto>0?(totalCosto*(precioUnit*cantUnit/monto)/Math.max(cantUnit,1)):0;
+        return Object.assign({},l,{
+          precio_venta:parseFloat(precioUnit.toFixed(2)),
+          costo_unit:parseFloat(costoUnit.toFixed(4)),
+          utilidad_unit:parseFloat((precioUnit-costoUnit).toFixed(4))
+        });
+      });
+      var body={
+        ticket:autoT,
+        fecha:($("vfecha")||{}).value||hoy(),
+        cliente_id:parseInt(cliId)||0,
+        cliente_nombre:cliNom,
+        monto_venta:monto,
+        adeudo:esEd?ve.adeudo:monto,
+        cobrado:esEd?ve.cobrado:0,
+        costo_productos:t.tc,
+        utilidad:util,
+        pct_util:monto>0?util/monto:0,
+        origen:"erp",
+        dir_entrega:($("vdir")||{}).value||"",
+        horario_entrega:($("vhorario")||{}).value||"",
+        metodo_pago:($("vmetodo")||{}).value||"efectivo",
+        lineas:lineasEnriq
+      };
       var p=vid?sPATCH("ventas","id=eq."+vid,body):sPOST("ventas",body);
       p.then(function(res){
         // Si es nueva venta, crear seguimiento para que aparezca en Pedidos
@@ -1048,7 +1120,19 @@ function rVentas(el){
             historial:[{estado:"preparando",fecha:hoy()}]
           });
         }
-        _vGuardando=false;load();goMod("ventas");toast(vid?"Venta actualizada":"Venta registrada");
+        if(!vid){
+          // SALIDA: cada SKU vendido
+          var ventaLineas=Array.isArray(body.lineas)?body.lineas:[];
+          var lotesV=ventaLineas.map(function(l){
+            var sku=l.sku||l.desc||l.nombre||"";
+            var cant=parseFloat(l.cant||l.cantidad||0);
+            if(!sku||!cant)return Promise.resolve();
+            return sPostLote({sku:sku,tipo:"venta",movimiento:"salida",ref_id:autoT,fecha:body.fecha||hoy(),cantidad:cant,costo_unit:parseFloat(l.costo_unit||l.cu||0),concepto:"Venta ticket #"+autoT,num_ref:"V-"+autoT});
+          });
+          Promise.all(lotesV).then(function(){_vGuardando=false;load();goMod("ventas");toast("Venta registrada");});
+        } else {
+          _vGuardando=false;load();goMod("ventas");toast("Venta actualizada");
+        }
       });
     };
     renderForm();
@@ -1570,24 +1654,31 @@ function rCompras(el){
         lineas:validLines
       };
       var save=cid?sPATCH("compras","id=eq."+cid,body):sPOST("compras",body);
-      save.then(function(){
+      save.then(function(saveRes){
         if(!cid){
-          // Create/update inventory for each line
-          var promises=validLines.map(function(l){
-            var pu=parseFloat(l.pu)||0;
+          // Crear lotes ENTRADA por cada línea
+          var compraId=Array.isArray(saveRes)&&saveRes[0]?saveRes[0].id:null;
+          var fecha=body.fecha||hoy();
+          var lotesPromises=validLines.map(function(l){
+            var sku=l.nombre||l.sku||"";
             var cant=parseFloat(l.cantidad)||0;
-            return sGET("inventario","order=id").then(function(inv2){
-              inv2=Array.isArray(inv2)?inv2:[];
-              var lote=inv2.find(function(x){return x.nombre===l.nombre&&x.tipo===l.tipo_inv&&x.costo_unit===pu});
-              if(lote){
-                var nc=lote.cantidad+cant;
-                return sPATCH("inventario","id=eq."+lote.id,{cantidad:nc,costo_total:parseFloat((nc*pu).toFixed(2)),categoria:l.categoria||lote.categoria});
-              } else {
-                return sPOST("inventario",{producto_id:0,nombre:l.nombre,tipo:l.tipo_inv,categoria:l.categoria||"",cantidad:cant,costo_unit:pu,costo_total:parseFloat((cant*pu).toFixed(2)),fecha:($("cfecha")||{}).value||hoy()});
-              }
-            }).then(function(){return upsertProducto(l.nombre,l.tipo_inv,l.categoria)});
+            var pu=parseFloat(l.pu)||0;
+            if(!sku||!cant)return Promise.resolve();
+            var ci=CATALOGO_SKU.find(function(s){return s.sku===sku||s.desc===sku;});
+            return sPostLote({
+              sku:sku,
+              tipo:"compra",
+              movimiento:"entrada",
+              ref_id:compraId||0,
+              fecha:fecha,
+              cantidad:cant,
+              costo_unit:pu,
+              concepto:"Compra #"+autoNC+" — "+(l.descripcion||sku),num_ref:"C-"+autoNC
+            });
           });
-          Promise.all(promises).then(function(){load();goMod("compras");toast("Compra #"+autoNC+" registrada — "+validLines.length+" producto(s)")});
+          Promise.all(lotesPromises).then(function(){
+            load();goMod("compras");toast("Compra #"+autoNC+" registrada — "+validLines.length+" producto(s)");
+          });
         } else {load();goMod("compras");toast("Compra actualizada")}
       });
     };
@@ -1969,7 +2060,29 @@ function rProduccion(el){
             insumos:[{sku:florSKU,nombre:invStock[florSKU]?invStock[florSKU].desc:florSKU,cant:grLinea,costo_unit:cu}].concat(l.envase?[{sku:l.envase,nombre:l.envase,cant:parseFloat(l.cantidad)||0,costo_unit:0}]:[])
           });
         });
-        Promise.all(saves).then(function(){load();goMod("produccion");toast("Lote #"+autoL+" — "+validas.length+" salidas");});
+        Promise.all(saves).then(function(savedRows){
+          var lotesP=[];
+          // SALIDA: insumo flor usado
+          var grUsadoTotal=calcGrTotal();
+          if(florSKU&&grUsadoTotal>0){
+            lotesP.push(sPostLote({sku:florSKU,tipo:"produccion",movimiento:"salida",ref_id:autoL,fecha:fecha,cantidad:grUsadoTotal,costo_unit:cu,concepto:"Produccion lote #"+autoL,num_ref:"P-"+autoL}));
+          }
+          // SALIDA: envases usados
+          validas.forEach(function(l){
+            if(l.envase&&parseFloat(l.cantidad)>0){
+              var envCU=invStock[l.envase]?invStock[l.envase].cu:0;
+              lotesP.push(sPostLote({sku:l.envase,tipo:"produccion",movimiento:"salida",ref_id:autoL,fecha:fecha,cantidad:parseFloat(l.cantidad),costo_unit:envCU,concepto:"Envase prod lote #"+autoL,num_ref:"P-"+autoL}));
+            }
+          });
+          // ENTRADA: terminados producidos
+          validas.forEach(function(l){
+            var gr=isHGP(l.sku)?1:grPorSKU(l.sku);
+            var grLinea=(parseFloat(l.cantidad)||0)*gr;
+            var cuLinea=grTotal>0?(costoTotal*(grLinea/grTotal)/(parseFloat(l.cantidad)||1)):0;
+            lotesP.push(sPostLote({sku:l.sku,tipo:"produccion",movimiento:"entrada",ref_id:autoL,fecha:fecha,cantidad:parseFloat(l.cantidad),costo_unit:parseFloat(cuLinea.toFixed(4)),concepto:"Produccion lote #"+autoL,num_ref:"P-"+autoL}));
+          });
+          Promise.all(lotesP).then(function(){load();goMod("produccion");toast("Lote #"+autoL+" — "+validas.length+" salidas");});
+        });
 
       } else if(modo==="otro"){
         var sku2=($("potro")||{}).value||otroSKU;
@@ -1984,7 +2097,17 @@ function rProduccion(el){
           mano_obra_unit:0,costo_unitario:parseFloat(cuUnit.toFixed(4)),costo_total:parseFloat(costoIns.toFixed(2)),
           tipo_inv:"terminado",modo_prod:"otro",
           insumos:insValidas.map(function(x){return{sku:x.sku,nombre:invStock[x.sku]?invStock[x.sku].desc:x.sku,cant:x.cantidad,costo_unit:invStock[x.sku]?invStock[x.sku].cu:0};})
-        }).then(function(){load();goMod("produccion");toast("Lote #"+autoL+" registrado");});
+        }).then(function(savedOtro){
+          var lotesO=[];
+          // SALIDA: insumos usados
+          insValidas.forEach(function(x){
+            var cuX=invStock[x.sku]?invStock[x.sku].cu:0;
+            lotesO.push(sPostLote({sku:x.sku,tipo:"produccion",movimiento:"salida",ref_id:autoL,fecha:fecha,cantidad:parseFloat(x.cantidad),costo_unit:cuX,concepto:"Insumo prod lote #"+autoL,num_ref:"P-"+autoL}));
+          });
+          // ENTRADA: terminado producido
+          lotesO.push(sPostLote({sku:sku2,tipo:"produccion",movimiento:"entrada",ref_id:autoL,fecha:fecha,cantidad:cant2,costo_unit:parseFloat(cuUnit.toFixed(4)),concepto:"Produccion lote #"+autoL,num_ref:"P-"+autoL}));
+          Promise.all(lotesO).then(function(){load();goMod("produccion");toast("Lote #"+autoL+" registrado");});
+        });
       }
     };
 
@@ -2155,65 +2278,43 @@ function rInventario(el){
 
   function loadInv(){
     el.innerHTML='<div class="mod"><h1 style="font-size:18px;font-weight:700;margin-bottom:12px">Inventario</h1><div class="spin">Calculando...</div></div>';
-    Promise.all([sGET("compras","order=id"),sGET("produccion","order=id"),sGET("ventas","order=id")]).then(function(res){
-      var compras=Array.isArray(res[0])?res[0]:[];
-      var prodLotes=Array.isArray(res[1])?res[1]:[];
-      var ventas=Array.isArray(res[2])?res[2]:[];
+    sGET("lotes","order=fecha,id").then(function(lotes){
+      lotes=Array.isArray(lotes)?lotes:[];
       var stock={};
-      function ensure(nom,tipo,cat,cu){if(!stock[nom])stock[nom]={tipo:tipo||"insumo",categoria:cat||"",cantidad:0,costoUnit:cu||0,entradas:0,salidas:0};}
-      // Seed ALL catalog SKUs first so they always appear
+      function ensure(sku,tipo,cat){
+        if(!stock[sku])stock[sku]={tipo:tipo||"insumo",categoria:cat||"",cantidad:0,entradas:0,salidas:0,costoUnit:0,lotesDetalle:[]};
+      }
       syncCatalogo(function(){
-      CATALOGO_SKU.forEach(function(s){ensure(s.sku,s.tipo,s.cat,0);});
-      compras.forEach(function(co){
-        if(co.tipo_inv==="servicio")return;
-        var lineas=co.lineas&&co.lineas.length?co.lineas:[{nombre:co.producto_nombre,tipo_inv:co.tipo_inv,categoria:co.categoria||"",cantidad:parseFloat(co.cantidad)||0,pu:parseFloat(co.pu)||0}];
-        lineas.forEach(function(l){
-          if(!l.nombre)return;
-          // Get tipo from CATALOGO_SKU if available
-          var catItem=CATALOGO_SKU.find(function(s){return s.sku===l.nombre||s.desc===l.nombre;});
-          var tipoReal=catItem?catItem.tipo:(l.tipo_inv||"insumo");
-          ensure(l.nombre,tipoReal,catItem?catItem.cat:l.categoria||"",parseFloat(l.pu)||0);
-          var cant=parseFloat(l.cantidad)||0;
-          stock[l.nombre].cantidad+=cant;stock[l.nombre].entradas+=cant;
-          if(parseFloat(l.pu)>0)stock[l.nombre].costoUnit=parseFloat(l.pu);
+        CATALOGO_SKU.forEach(function(s){ensure(s.sku,s.tipo,s.cat);});
+        lotes.forEach(function(lt){
+          if(!lt.sku)return;
+          var ci=CATALOGO_SKU.find(function(s){return s.sku===lt.sku;});
+          ensure(lt.sku,ci?ci.tipo:"insumo",ci?ci.cat:"");
+          var cant=parseFloat(lt.cantidad)||0;
+          var cu=parseFloat(lt.costo_unit)||0;
+          if(lt.movimiento==="entrada"){
+            stock[lt.sku].cantidad+=cant;
+            stock[lt.sku].entradas+=cant;
+            if(cu>0)stock[lt.sku].costoUnit=cu;
+            stock[lt.sku].lotesDetalle.push({id:lt.id,num_ref:lt.num_ref||"",fecha:lt.fecha,tipo:lt.tipo,movimiento:"entrada",cantidad:cant,cu:cu,concepto:lt.concepto||""});
+          } else {
+            stock[lt.sku].cantidad-=cant;
+            stock[lt.sku].salidas+=cant;
+            stock[lt.sku].lotesDetalle.push({id:lt.id,num_ref:lt.num_ref||"",fecha:lt.fecha,tipo:lt.tipo,movimiento:"salida",cantidad:cant,cu:cu,concepto:lt.concepto||""});
+          }
         });
-      });
-      prodLotes.forEach(function(p){
-        if(p.producto_nombre&&p.piezas){
-          var catItem=CATALOGO_SKU.find(function(s){return s.sku===p.producto_nombre||s.desc===p.producto_nombre;});
-          ensure(p.producto_nombre,catItem?catItem.tipo:"terminado",catItem?catItem.cat:"",parseFloat(p.costo_unitario)||0);
-          var pz=parseFloat(p.piezas)||0;stock[p.producto_nombre].cantidad+=pz;stock[p.producto_nombre].entradas+=pz;
-          if(parseFloat(p.costo_unitario)>0)stock[p.producto_nombre].costoUnit=parseFloat(p.costo_unitario);
-        }
-        (Array.isArray(p.insumos)?p.insumos:[]).forEach(function(ins){
-          var nom=ins.nombre;if(!nom)return;
-          ensure(nom,"insumo","",0);
-          var u=parseFloat(ins.cant||ins.cantidad_usada||ins.cantidad||0);
-          stock[nom].cantidad-=u;stock[nom].salidas+=u;
+        var terminados=[],insumos=[],fijos=[],todos=[];
+        Object.keys(stock).sort().forEach(function(nom){
+          var s=stock[nom];
+          s.costoTotal=Math.max(0,s.cantidad)*s.costoUnit;
+          var obj=Object.assign({nombre:nom},s);
+          todos.push(obj);
+          if(s.tipo==="terminado")terminados.push(obj);
+          else if(s.tipo==="otro")fijos.push(obj);
+          else insumos.push(obj);
         });
+        renderInvUI(terminados,insumos,fijos,todos);
       });
-      ventas.forEach(function(v){
-        (Array.isArray(v.lineas)?v.lineas:[]).forEach(function(l){
-          var nom=l.sku||l.desc||l.nombre;if(!nom)return;
-          var catItem=CATALOGO_SKU.find(function(s){return s.sku===nom||s.desc===nom;});
-          ensure(nom,catItem?catItem.tipo:"terminado",catItem?catItem.cat:"",0);
-          var cant=parseFloat(l.cant||l.cantidad||0);
-          stock[nom].cantidad-=cant;stock[nom].salidas+=cant;
-        });
-      });
-      // Build arrays by category
-      var terminados=[],insumos=[],fijos=[],todos=[];
-      Object.keys(stock).sort().forEach(function(nom){
-        var s=stock[nom];
-        s.costoTotal=Math.max(0,s.cantidad)*s.costoUnit;
-        var obj=Object.assign({nombre:nom},s);
-        todos.push(obj);
-        if(s.tipo==="terminado")terminados.push(obj);
-        else if(s.tipo==="otro")fijos.push(obj);
-        else insumos.push(obj); // insumo + mixto
-      });
-      renderInvUI(terminados,insumos,fijos,todos);
-      }); // end syncCatalogo
     });
   }
 
@@ -2276,20 +2377,46 @@ function rInventario(el){
       var col=item.cantidad<=0?"#F85149":item.cantidad<=5?"#E3B341":"#E6EDF3";
       var tipoColor={insumo:"#4A9EFF",terminado:"#00C896",mixto:"#E3B341",otro:"#C084FC"}[item.tipo]||"#8B949E";
       var catEntry=CATALOGO_SKU.find(function(s){return s.sku===item.nombre;});
-      html+='<tr>';
-      html+='<td><div style="font-weight:700;color:#E6EDF3">'+item.nombre+'</div>'+(catEntry&&catEntry.desc?'<div style="font-size:10px;color:#8B949E">'+catEntry.desc+'</div>':'')+'</td>';
+      // Check if multiple lotes with different prices
+      var detalle=item.lotesDetalle||[];
+      var tieneMovs=detalle.length>0;
+      html+='<tr style="cursor:'+(tieneMovs?"pointer":"default")+'" onclick="'+(tieneMovs?"toggleLotes('"+item.nombre+"')":"")+'">';
+      html+='<td><div style="font-weight:700;color:#E6EDF3">'+item.nombre+(tieneMovs?' <span style="font-size:9px;color:#4A9EFF;background:rgba(74,158,255,.1);padding:1px 5px;border-radius:2px">'+detalle.length+' movs ▾</span>':'')+'</div>'+(catEntry&&catEntry.desc?'<div style="font-size:10px;color:#8B949E">'+catEntry.desc+'</div>':'')+'</td>';
       html+='<td style="font-size:11px;color:#C084FC">'+(item.categoria||"—")+'</td>';
       html+='<td>'+bdg(item.tipo,tipoColor)+'</td>';
-      html+='<td style="text-align:right;color:#00C896">+'+item.entradas+'</td>';
-      html+='<td style="text-align:right;color:#F85149">-'+item.salidas+'</td>';
+      html+='<td style="text-align:right;color:#00C896">+'+item.entradas.toFixed(1)+'</td>';
+      html+='<td style="text-align:right;color:#F85149">-'+(item.salidas||0).toFixed(1)+'</td>';
       html+='<td style="text-align:right;font-weight:700;color:'+col+'">'+Math.round(Math.max(0,item.cantidad))+'</td>';
       html+='<td style="text-align:right;color:#FB923C">'+fmt(item.costoUnit)+'</td>';
       html+='<td style="text-align:right;color:#00C896;font-weight:700">'+fmt(item.cantidad>0?item.costoTotal:0)+'</td>';
       html+='</tr>';
+      if(tieneMovs){
+        html+='<tr id="lotes_'+item.nombre+'" style="display:none"><td colspan="8" style="padding:4px 0 10px 24px">';
+        html+='<table style="width:100%"><thead><tr style="font-size:10px;color:#8B949E">';
+        html+='<th style="padding:3px 8px">#Mov</th><th>Fecha</th><th>Tipo</th><th>Ref</th><th>Entrada/Salida</th><th style="text-align:right">Cantidad</th><th style="text-align:right">$/u</th></tr></thead><tbody>';
+        detalle.forEach(function(mv){
+          var mvColor=mv.movimiento==="entrada"?"#00C896":"#F85149";
+          var mvSign=mv.movimiento==="entrada"?"+":"-";
+          html+='<tr style="font-size:11px">';
+          html+='<td style="padding:3px 8px;color:#E3B341;font-weight:700">#'+mv.id+'</td>';
+          html+='<td style="color:#8B949E">'+mv.fecha+'</td>';
+          html+='<td style="color:#4A9EFF">'+mv.tipo+'</td>';
+          html+='<td style="color:#C084FC;font-weight:700">'+(mv.num_ref||'—')+'</td>';
+          html+='<td><span style="color:'+mvColor+';font-weight:700">'+mv.movimiento+'</span></td>';
+          html+='<td style="text-align:right;color:'+mvColor+';font-weight:700">'+mvSign+mv.cantidad+'</td>';
+          html+='<td style="text-align:right;color:#FB923C">'+fmt(mv.cu)+'</td>';
+          html+='</tr>';
+        });
+        html+='</tbody></table></td></tr>';
+      }
     });
     html+='</tbody></table>';
     itbl.innerHTML=html;
   }
+  window.toggleLotes=function(sku){
+    var row=document.getElementById("lotes_"+sku);
+    if(row)row.style.display=row.style.display==="none"?"table-row":"none";
+  };
   loadInv();
 }
 
