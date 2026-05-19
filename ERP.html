@@ -472,18 +472,39 @@ var CU=null,modActual="pedidos";
 
 function doLogin(){
   var u=$("lu").value.trim().toLowerCase(),pw=$("lp").value;
-  var found=null;
-  for(var i=0;i<USUARIOS.length;i++){if(USUARIOS[i].u===u&&USUARIOS[i].pw===pw){found=USUARIOS[i];break}}
-  if(!found){$("lerr").textContent=USUARIOS.find(function(x){return x.u===u})?"Contraseña incorrecta":"Usuario no encontrado";$("lerr").style.display="block";return}
-  CU=found;
-  $("login-page").style.display="none";
-  $("app").style.display="flex";$("app").style.flexDirection="row";
-  $("uname").textContent=found.nombre;
-  $("ubadge").innerHTML=bdg(found.rol,found.c);
-  buildNav();
-  var first=MODS.find(function(m){return CU.p[m.k]});
-  if(first)goMod(first.k);
-
+  $("lerr").style.display="none";
+  // First try Supabase erp_usuarios
+  sGET("erp_usuarios","usuario=eq."+encodeURIComponent(u)+"&activo=eq.true").then(function(rows){
+    var dbUser=rows&&rows[0];
+    if(dbUser){
+      if(dbUser.password!==pw){$("lerr").textContent="Contraseña incorrecta";$("lerr").style.display="block";return;}
+      var mods=Array.isArray(dbUser.modulos)?dbUser.modulos:[];
+      var perms={};mods.forEach(function(m){perms[m]=1;});
+      var RCOLORS={admin:"#00C896",socio:"#4A9EFF",vendedor:"#FB923C",almacen:"#C084FC"};
+      var found={id:dbUser.id,nombre:dbUser.nombre,u:dbUser.usuario,pw:dbUser.password,rol:dbUser.rol,c:RCOLORS[dbUser.rol]||"#8B949E",p:perms};
+      CU=found;
+      $("login-page").style.display="none";
+      $("app").style.display="flex";$("app").style.flexDirection="row";
+      $("uname").textContent=found.nombre;
+      $("ubadge").innerHTML=bdg(found.rol,found.c);
+      buildNav();
+      var first=MODS.find(function(m){return CU.p[m.k]});
+      if(first)goMod(first.k);
+      return;
+    }
+    // Fallback: USUARIOS hardcoded
+    var found2=null;
+    for(var i=0;i<USUARIOS.length;i++){if(USUARIOS[i].u===u&&USUARIOS[i].pw===pw){found2=USUARIOS[i];break}}
+    if(!found2){$("lerr").textContent=USUARIOS.find(function(x){return x.u===u})?"Contraseña incorrecta":"Usuario no encontrado";$("lerr").style.display="block";return;}
+    CU=found2;
+    $("login-page").style.display="none";
+    $("app").style.display="flex";$("app").style.flexDirection="row";
+    $("uname").textContent=found2.nombre;
+    $("ubadge").innerHTML=bdg(found2.rol,found2.c);
+    buildNav();
+    var first2=MODS.find(function(m){return CU.p[m.k]});
+    if(first2)goMod(first2.k);
+  });
 }
 function doLogout(){CU=null;$("login-page").style.display="flex";$("app").style.display="none";$("lp").value="";$("lerr").style.display="none"}
 
@@ -3123,9 +3144,22 @@ function rReportes(el){
 
 /* ── USUARIOS ────────────────────────────────────────────────────────── */
 function rUsuarios(el){
-  var usuarios=JSON.parse(JSON.stringify(USUARIOS));
+  var usuarios=[];
+  var RCOLORS={admin:"#00C896",socio:"#4A9EFF",vendedor:"#FB923C",almacen:"#C084FC"};
+  function dbToLocal(u){
+    var mods=Array.isArray(u.modulos)?u.modulos:[];
+    var perms={};mods.forEach(function(m){perms[m]=1;});
+    return{id:u.id,nombre:u.nombre,u:u.usuario,pw:u.password,rol:u.rol,c:RCOLORS[u.rol]||"#8B949E",p:perms,_db:u};
+  }
+  function load(){
+    sGET("erp_usuarios","order=id").then(function(rows){
+      usuarios=(Array.isArray(rows)?rows:[]).map(dbToLocal);
+      renderList();
+    });
+  }
   function renderList(){
     var html='<div class="mod"><div style="display:flex;justify-content:space-between;margin-bottom:20px"><h1 style="font-size:18px;font-weight:700">Usuarios</h1><button class="btn btn-p" onclick="usNuevo()">+ Nuevo</button></div>';
+    if(!usuarios.length){html+='<div class="empty">Sin usuarios en Supabase. Se usan los predeterminados.</div></div>';el.innerHTML=html;return;}
     html+='<table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Módulos</th><th></th></tr></thead><tbody>';
     usuarios.forEach(function(u){
       var activos=MODS.filter(function(m){return u.p[m.k]});
@@ -3172,17 +3206,21 @@ function rUsuarios(el){
       var nom=($("usnom")||{}).value||"";
       var usu=($("ususu")||{}).value||"";
       var pw=($("uspw")||{}).value||"";
-      if(!nom||!usu){alert("Completa nombre y usuario");return}
+      if(!nom||!usu){alert("Completa nombre y usuario");return;}
       var rol=($("usrol")||{}).value||"vendedor";
-      var maxId=Math.max.apply(null,usuarios.map(function(u){return u.id}));
-      var nuevo={id:uid||maxId+1,nombre:nom,u:usu.toLowerCase(),pw:pw||(esEd?ue.pw:"1234"),rol:rol,c:RCOLORS[rol]||"#8B949E",p:perms};
-      if(uid){for(var i=0;i<usuarios.length;i++){if(usuarios[i].id===uid){usuarios[i]=nuevo;break}}for(var j=0;j<USUARIOS.length;j++){if(USUARIOS[j].id===uid){USUARIOS[j]=nuevo;break}}}
-      else{usuarios.push(nuevo);USUARIOS.push(nuevo)}
-      renderList();goMod("usuarios");toast(uid?"Usuario actualizado":"Usuario creado");
+      var mods=Object.keys(perms).filter(function(k){return perms[k]===1;});
+      var body={nombre:nom,usuario:usu.toLowerCase(),rol:rol,modulos:mods,activo:true};
+      if(pw)body.password=pw;
+      else if(!uid)body.password="1234";
+      if(uid){
+        sPATCH("erp_usuarios","id=eq."+uid,body).then(function(){load();goMod("usuarios");toast("Usuario actualizado");});
+      } else {
+        sPOST("erp_usuarios",body).then(function(){load();goMod("usuarios");toast("Usuario creado");});
+      }
     };
     renderPerms();
   }
-  renderList();
+  load();
 }
 
 
