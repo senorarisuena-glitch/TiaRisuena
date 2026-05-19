@@ -2781,22 +2781,30 @@ function rReportes(el){
 
     // ── ESTADO DE RESULTADOS ──────────────────────────────────────────
     var vTot=vF.reduce(function(a,v){return a+parseFloat(v.monto_venta||0);},0);
-    // Costo de ventas: suma de (cant × costo_unit del inventario) por línea vendida
+    // Costo de ventas: usar costo_productos si existe, sino calcular desde inv (costo por SKU)
     var cVen=vF.reduce(function(a,v){
-      // Use costo_productos if available, else calculate from lineas
       if(parseFloat(v.costo_productos||0)>0) return a+parseFloat(v.costo_productos);
+      // Calcular desde lineas usando costo del inventario por SKU
       return a+(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
         var nom=l.sku||l.desc||l.nombre||"";
-        var invItem=inv.find(function(x){return x.nombre===nom||x.sku===nom;});
-        var cu=parseFloat(l.costo_unit||l.cu||0)||(invItem?parseFloat(invItem.costoUnit||invItem.costo_unit||0):0);
-        return b+(parseFloat(l.cant||l.cantidad||0)*cu);
+        if(!nom)return b;
+        var invItem=inv.find(function(x){return x.nombre===nom;});
+        var cu=parseFloat(l.costo_unit||0)||(invItem?parseFloat(invItem.costo_unit||0):0);
+        var cant=parseFloat(l.cant||l.cantidad||l.qty||0);
+        return b+(cant*cu);
       },0);
     },0);
     var uBruta=vTot-cVen;
-    var gastosMovs=mF.filter(function(m){return m.egreso&&(m.movimiento==="Gasto"||m.movimiento==="Pago Repartidores"||m.movimiento==="Inversion");});
-    var gastosSoloGastos=mF.filter(function(m){return m.egreso&&(m.movimiento==="Gasto"||m.movimiento==="Pago Repartidores");});
+    // Gastos = TODOS los egresos excepto Pago Proveedores (ese es pasivo, no gasto operativo)
+    var gastosSoloGastos=mF.filter(function(m){
+      return m.egreso&&m.movimiento!=="Pago Proveedores"&&m.movimiento!=="Inversion";
+    });
     var gastos=gastosSoloGastos.reduce(function(a,m){return a+parseFloat(m.monto||0);},0);
-    var gastosMap={};gastosSoloGastos.forEach(function(m){var k=(m.concepto&&m.concepto!==m.movimiento)?m.concepto:m.movimiento;gastosMap[k]=(gastosMap[k]||0)+parseFloat(m.monto||0);});
+    var gastosMap={};
+    gastosSoloGastos.forEach(function(m){
+      var k=(m.concepto&&m.concepto.trim()&&m.concepto!==m.movimiento)?m.concepto.trim():m.movimiento;
+      gastosMap[k]=(gastosMap[k]||0)+parseFloat(m.monto||0);
+    });
     // Agregar envios del periodo como gasto devengado (aunque no se haya pagado)
     var enviosDelPeriodo=enviosRep.filter(function(e){
       var a=parseInt((e.fecha||"").slice(0,4)),m2=parseInt((e.fecha||"").slice(5,7)),d2=parseInt((e.fecha||"").slice(8,10));
