@@ -2728,7 +2728,7 @@ function rReportes(el){
   var tabActual=0;
   var hoyDate=new Date(),anio=String(hoyDate.getFullYear()),mes=String(hoyDate.getMonth()+1),dia="";
   var comprasRep=[], movsRep=[];
-  var enviosRep=[], prodRepLotes=[];
+  var enviosRep=[], prodRepLotes=[], lotesRep=[];
   function load(){
     Promise.all([
       sGET("ventas","order=ticket"),
@@ -2743,7 +2743,7 @@ function rReportes(el){
       comprasRep=Array.isArray(res[2])?res[2]:[];
       enviosRep=Array.isArray(res[3])?res[3]:[];
       prodRepLotes=Array.isArray(res[4])?res[4]:[];
-      var lotesRep=Array.isArray(res[5])?res[5]:[];
+      lotesRep=Array.isArray(res[5])?res[5]:[];
       // Calcular inventario real
       var stock={};
       function ensR(n,t,cu){if(!stock[n])stock[n]={tipo:t||"insumo",cantidad:0,cu:cu||0};}
