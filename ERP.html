@@ -474,7 +474,7 @@ function doLogin(){
   var u=$("lu").value.trim().toLowerCase(),pw=$("lp").value;
   $("lerr").style.display="none";
   // First try Supabase erp_usuarios
-  sGET("erp_usuarios","usuario=eq."+encodeURIComponent(u)+"&activo=eq.true").then(function(rows){
+  sGET("erp_usuarios","usuario=eq."+encodeURIComponent(u)+"&activo=eq.true").then(function(rows){console.log("erp_usuarios rows:",rows,"for user:",u);
     var dbUser=rows&&rows[0];
     if(dbUser){
       if(dbUser.password!==pw){$("lerr").textContent="Contraseña incorrecta";$("lerr").style.display="block";return;}
