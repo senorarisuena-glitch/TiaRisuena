@@ -818,20 +818,21 @@ function rPedidos(el){
             var price=parseFloat(l.price||l.unit_price||l.precio||0);
             return Object.assign({},l,{sku:l.sku||l.nombre||l.name||"",cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
           });
-          var adeudo=monto>=totalMonto?0:totalMonto-monto;
+          var adeudo=sinPago?0:(monto>=totalMonto?0:totalMonto-monto);
+          var cobrado=sinPago?totalMonto:monto||0;
           sPOST("ventas",{
             ticket:ticket,fecha:hoy(),
             cliente_id:cliId||0,
             cliente_nombre:ped.cliente||ped.nb||"",
             monto_venta:totalMonto,
             adeudo:adeudo,
-            cobrado:monto||0,
+            cobrado:cobrado,
             costo_productos:0,utilidad:totalMonto,pct_util:0,
             origen:"tienda",
             pedido_id:String(ped.id),
             folio_tienda:ped.folio||"",
             dir_entrega:ped.dir||"",
-            metodo_pago:tipo,
+            metodo_pago:sinPago?"coins":tipo,
             lineas:lineasEnriq
           }).then(function(){
             // Crear movimiento en tesorería si hay monto
@@ -842,9 +843,23 @@ function rPedidos(el){
               gasto_ticket:"Ticket #"+ticket+": "+fmt(monto)
             }):Promise.resolve();
             movProm.then(function(){
-              var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy()}]);
-              sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
-                toast("✓ Ticket #"+ticket+" creado");load();
+              // Si es pago con coins, actualizar referencia en tesorería al ticket
+              var coinsLinkProm=sinPago?
+                sGET("coins_transacciones","cliente_id=eq."+(cliId||0)+"&estado=eq.aprobado&order=created_at.desc&limit=1").then(function(rows){
+                  var ct=rows&&rows[0];
+                  if(ct&&ct.movimiento_id){
+                    return sPATCH("movimientos","id=eq."+ct.movimiento_id,{
+                      gasto_ticket:"Ticket #"+ticket+": "+fmt(totalMonto),
+                      concepto:"Venta Ticket #"+ticket+" — "+(ped.cliente||ped.nb||"")+" (Coins)"
+                    });
+                  }
+                  return Promise.resolve();
+                }):Promise.resolve();
+              coinsLinkProm.then(function(){
+                var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy()}]);
+                sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
+                  toast("✓ Ticket #"+ticket+" creado");load();
+                });
               });
             });
           });
@@ -901,7 +916,7 @@ function rPedidos(el){
       concepto:"Compra de Tía Coins",
       egreso:false,
       monto:monto,
-      gasto_ticket:"Coins #"+crId
+      gasto_ticket:"Coins cliente #"+(cr.cliente_id||crId)
     }).then(function(movRes){
       var movId=Array.isArray(movRes)&&movRes[0]?movRes[0].id:null;
 
