@@ -1112,7 +1112,7 @@ async function registrarUsuario(){
     gastado:0,pedidos_count:0
   }).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -1153,7 +1153,7 @@ function cerrarSesion(){
 }
 
 function guardarSesionLocal(user){
-  try{ sessionStorage.setItem('tia_uid', user.id); }catch(e){}
+  try{ sessionStorage.setItem('tia_cid', String(user.id)); }catch(e){}
 }
 
 async function cargarSesion(){
@@ -1190,7 +1190,7 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -1237,13 +1237,13 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
   var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
   var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
   el.innerHTML=data.map(function(p){
-    var est=p.status||'pendiente';
+    var est=p.estado||p.status||'pendiente';
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
       '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
       '<div><div style="font-family:Cinzel,serif;font-size:.68rem;color:var(--gold)">'+p.folio+'</div>'+
@@ -1286,7 +1286,7 @@ function cerrarMP(){var el=document.getElementById('mp-overlay');if(el)el.style.
 async function generarTicket(pedidoId){
   var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
   if(!jsPDF){notif('Cargando PDF...','var(--muted)');return;}
-  var res=await sb.from('pedidos').select('*').eq('id',pedidoId).single();
+  var res=await sb.from('seguimientos').select('*').eq('id',pedidoId).single();
   var p=res.data;if(!p){notif('Pedido no encontrado','var(--red)');return;}
   var doc=new jsPDF({unit:'mm',format:[58,200],orientation:'portrait'});
   var x=4,y=6,w=50;
@@ -1327,7 +1327,7 @@ function buyCustom(){
   mostrarPagoCoins(amt,0,amt);
 }
 
-function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
+function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimientos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
 async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
@@ -1505,7 +1505,7 @@ async function registrarUsuario(){
 
   // Registrar transacción de bienvenida
   await sb.from('coins_transacciones').insert({
-    usuario_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
+    cliente_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
   });
 
   S.user = data;
@@ -1559,7 +1559,7 @@ function cerrarSesion(){
 }
 
 function guardarSesionLocal(user){
-  try{ sessionStorage.setItem('tia_uid', user.id); }catch(e){}
+  try{ sessionStorage.setItem('tia_cid', String(user.id)); }catch(e){}
 }
 
 async function cargarSesion(){
@@ -1641,7 +1641,7 @@ async function cargarLogros(){
 
 function toggleDetalle(btn){var pid=btn.dataset.xid||btn.dataset.pid;var el=document.querySelector('.det-'+pid);if(!el)return;var s=el.style.display!=='none';el.style.display=s?'none':'block';btn.textContent=s?'📋 Ver detalle':'▲ Ocultar';}
 async function cargarPedidosUsuario(){
-  var res = await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res = await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
   var data = res.data;
   var el = document.getElementById('pPedidos');
   if(!el) return;
@@ -1755,13 +1755,13 @@ function pagarEnvioEfectivo(pedidoId){
   // Give cashback
   if(S.user){
     var pedido = null;
-    sb.from('pedidos').select('costo_viaje').eq('id',pedidoId).single().then(function(r){
+    sb.from('seguimientos').select('costo_viaje').eq('id',pedidoId).single().then(function(r){
       if(r.data&&r.data.costo_viaje){
         var cashback = Math.floor(r.data.costo_viaje*0.2);
         var newCoins = (S.user.coins||0)+cashback;
         sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id).then(function(){
           S.user.coins=newCoins;updUI();
-          sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'credito',cantidad:cashback,descripcion:'Cashback 20% envio efectivo'});
+          sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'credito',cantidad:cashback,descripcion:'Cashback 20% envio efectivo'});
           notif('🪙 +'+cashback+' coins cashback!');
         });
       }
@@ -1778,7 +1778,7 @@ function pagarEnvioDigital(pedidoId,costo){
 function initPedidosRealtime(){
   if(!sb||!S.user||window._pedidosChannel)return;
   window._pedidosChannel = sb.channel('pedidos-user-'+S.user.id)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
     function(payload){
       var p=payload.new;
       var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'Tu pedido se esta empacando',en_camino:'Tu pedido esta en camino!',entregado:'Tu pedido fue entregado!'};
@@ -1892,9 +1892,10 @@ async function cargarSeguimientoPerfil(){
   var el=document.getElementById('perfil-orders-panel');
   if(!el)return;
   if(!S.user||!sb){el.innerHTML='';return;}
-  var res=await sb.from('pedidos').select('*')
-    .eq('usuario_id',S.user.id)
-    .not('status','eq','entregado')
+  var res=await sb.from('seguimientos').select('*')
+    .eq('cliente_id',S.user.id)
+    .eq('origen','tienda')
+    .not('estado','eq','entregado')
     .order('created_at',{ascending:false}).limit(3);
   var pedidos=res.data||[];
   if(!pedidos.length){
@@ -1911,7 +1912,7 @@ async function cargarSeguimientoPerfil(){
     if(s==='entregado')return 3;if(s==='en_camino')return 2;if(s==='en_preparacion')return 1;return 0;
   }
   el.innerHTML=pedidos.map(function(p){
-    var est=p.status||'pendiente';var ei=eIdx(est);
+    var est=p.estado||p.status||'pendiente';var ei=eIdx(est);
     var steps='<div style="display:flex;align-items:flex-start;margin:10px 0 6px">';
     PASOS.forEach(function(paso,i){
       var done=i<=ei,curr=i===ei;
@@ -1939,10 +1940,10 @@ async function cargarSeguimientoPerfil(){
   if(!window._perfilRealtimeInit&&S.user){
     window._perfilRealtimeInit=true;
     sb.channel('perfil-seg-'+S.user.id)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
       function(payload){
-        var labels={pendiente:'📋 Pedido recibido',en_preparacion:'✅ ¡Aceptado y empacando!',en_camino:'🚚 ¡En camino!',entregado:'🏆 ¡Entregado!'};
-        notif(labels[payload.new.status]||'Pedido actualizado');
+        var labels={pendiente:'📋 Pedido recibido',preparando:'✅ ¡Aceptado y empacando!',en_camino:'🚚 ¡En camino!',entregado:'🏆 ¡Entregado!'};
+        notif(labels[payload.new.estado]||'Pedido actualizado');
         cargarSeguimientoPerfil();
       }).subscribe();
   }
@@ -1952,9 +1953,10 @@ async function cargarPedidosActivos(){
   var el=document.getElementById('active-orders-panel');
   if(!el||!S.user||!sb)return;
 
-  var res=await sb.from('pedidos').select('*')
-    .eq('usuario_id',S.user.id)
-    .not('status','eq','entregado')
+  var res=await sb.from('seguimientos').select('*')
+    .eq('cliente_id',S.user.id)
+    .eq('origen','tienda')
+    .not('estado','eq','entregado')
     .order('created_at',{ascending:false})
     .limit(5);
   var pedidos=res.data||[];
@@ -2030,7 +2032,7 @@ async function cargarPedidosActivos(){
   if(!window._cartRealtimeInit&&S.user){
     window._cartRealtimeInit=true;
     sb.channel('cart-orders-'+S.user.id)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
       function(payload){
         var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
         notif(labels[payload.new.status]||'Pedido actualizado');
@@ -2090,7 +2092,7 @@ async function confirmarYEnviar(metodo){
   const prods=S.cart.filter(x=>!x.isGift);
   const gifts=S.cart.filter(x=>x.isGift);
   const total=prods.reduce((s,x)=>s+x.price,0);
-  const folio='TIA-'+Date.now().toString().slice(-6);
+  const folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
   const pagado = metodo==='coins';
 
   // Verificar coins si paga con coins
@@ -2101,14 +2103,18 @@ async function confirmarYEnviar(metodo){
     }
   }
 
-  // Guardar pedido en Supabase
-  const {data:pedido, error} = await sb.from('pedidos').insert({
-    usuario_id: S.user.id,
-    folio, nb:nombre, tel, dir,
+  // Guardar pedido en seguimientos
+  const {data:pedido, error} = await sb.from('seguimientos').insert({
+    id: 'tid_'+Date.now(),
+    cliente_id: S.user.id,
+    cliente: nombre,
+    folio, tel, dir,
     items: prods, regalos: gifts, total,
     pago: metodo, pagado,
     pagado_at: pagado ? new Date().toISOString() : null,
-    status: 'pendiente', origen: 'tienda'
+    estado: 'pendiente', origen: 'tienda',
+    fecha_creado: new Date().toISOString().slice(0,10),
+    historial: [{estado:'pendiente',fecha:new Date().toLocaleDateString('es-MX')}]
   }).select().single();
 
   if(error){notif('❌ Error al guardar pedido','var(--red)');return;}
@@ -2118,7 +2124,7 @@ async function confirmarYEnviar(metodo){
     const newCoins = (S.user.coins||0) - total;
     await sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id);
     await sb.from('coins_transacciones').insert({
-      usuario_id:S.user.id, tipo:'debito', cantidad:total,
+      cliente_id:S.user.id, tipo:'debito', cantidad:total,
       descripcion:'Pago pedido '+folio
     });
     S.user.coins = newCoins;
@@ -2236,12 +2242,6 @@ function mostrarDetallePago(tipo,coins,bonus,precio,clienteInfo){
   if(!cnt)return;
 
   var totalDesc=coins+(bonus?' + '+bonus+' gratis':'');
-  var waMsg='Quiero comprar '+totalDesc+' Tia Coins por $'+precio+' MXN\n';
-  if(tipo==='oxxo') waMsg+='Metodo: Deposito OXXO\n';
-  else waMsg+='Metodo: Transferencia bancaria\n';
-  waMsg+=clienteInfo?'Cliente: '+clienteInfo+'\n':'';
-  waMsg+='Adjunto mi comprobante de pago.';
-
   var detalleHtml='';
   if(tipo==='oxxo'){
     var qrImg=document.querySelector('[src^="data:image/jpeg"]');
@@ -2253,9 +2253,9 @@ function mostrarDetallePago(tipo,coins,bonus,precio,clienteInfo){
       '<div style="font-size:.6rem;color:var(--coin);margin-top:4px">Deposita $'+precio+' en efectivo</div></div>';
   } else {
     detalleHtml='<div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:12px;font-size:.72rem">'+
-      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Banco: </span><b>Por confirmar</b></div>'+
-      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">CLABE: </span><b>Por confirmar</b></div>'+
-      '<div style="padding:5px 0"><span style="color:var(--muted)">Titular: </span><b>Por confirmar</b></div></div>';
+      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Banco: </span><b>BBVA / SPIN</b></div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">CLABE: </span><b>2242 1767 2860 4506</b></div>'+
+      '<div style="padding:5px 0"><span style="color:var(--muted)">Monto: </span><b>$'+precio+' MXN</b></div></div>';
   }
 
   cnt.innerHTML=
@@ -2264,8 +2264,62 @@ function mostrarDetallePago(tipo,coins,bonus,precio,clienteInfo){
     '<div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold)">'+totalDesc+' Tía Coins</div>'+
     '<div style="font-family:Cinzel,serif;font-size:1.3rem;color:var(--text)">$'+precio+' MXN</div></div>'+
     detalleHtml+
-    '<a href="https://wa.me/523322740209?text='+encodeURIComponent(waMsg)+'" target="_blank" style="display:block;width:100%;background:#25d366;border-radius:10px;padding:12px;font-family:Cinzel,serif;font-size:.8rem;color:white;text-decoration:none;text-align:center;box-sizing:border-box">'+
-    '💬 Confirmar por WhatsApp</a>';
+    '<div style="margin-bottom:12px">'+
+    '<div style="font-size:.62rem;color:var(--muted);margin-bottom:6px">COMPROBANTE DE PAGO</div>'+
+    '<label style="display:block;background:var(--bg3);border:1px dashed var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer">'+
+    '<input type="file" id="coinsComprobanteFile" accept="image/*" style="display:none" onchange="previewCoinsComprobante(this)">'+
+    '<div id="coinsComprobantePreview" style="font-size:.7rem;color:var(--muted)">📎 Toca para subir foto del comprobante</div>'+
+    '</label></div>'+
+    '<button onclick="enviarSolicitudCoins('+coins+','+bonus+','+precio+',\''+tipo+'\')" style="width:100%;background:linear-gradient(135deg,#b45309,var(--coin));border:none;border-radius:10px;padding:13px;font-family:Cinzel,serif;font-size:.8rem;color:#1a0a00;cursor:pointer;font-weight:700">✦ Enviar solicitud</button>';
+}
+
+function previewCoinsComprobante(input){
+  var prev=document.getElementById('coinsComprobantePreview');
+  if(!prev)return;
+  if(input.files&&input.files[0]){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      prev.innerHTML='<img src="'+e.target.result+'" style="max-height:80px;border-radius:6px;margin-bottom:4px"><div style="font-size:.6rem;color:var(--green)">✓ Comprobante listo</div>';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+async function enviarSolicitudCoins(coins,bonus,precio,metodo){
+  if(!S.user){notif('Debes iniciar sesión','var(--red)');return;}
+  var fi=document.getElementById('coinsComprobanteFile');
+  var btn=document.querySelector('[onclick^="enviarSolicitudCoins"]');
+  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
+
+  var compBase64=null;
+  if(fi&&fi.files&&fi.files[0]){
+    compBase64=await new Promise(function(resolve){
+      var reader=new FileReader();
+      reader.onload=function(e){resolve(e.target.result);};
+      reader.readAsDataURL(fi.files[0]);
+    });
+  }
+
+  var {error}=await sb.from('coins_transacciones').insert({
+    cliente_id:S.user.id,
+    tipo:'credito',
+    cantidad:coins+bonus,
+    bonus:bonus||0,
+    precio_mxn:precio,
+    metodo_pago:metodo,
+    descripcion:'Compra '+( coins+bonus)+' coins — $'+precio+' MXN',
+    comprobante_url:compBase64||null,
+    estado:'pendiente'
+  });
+
+  if(error){
+    notif('Error al enviar solicitud','var(--red)');
+    if(btn){btn.disabled=false;btn.textContent='✦ Enviar solicitud';}
+    return;
+  }
+
+  cerrarCoinsPago();
+  notif('🪙 Solicitud enviada — tu vendedor la aprobará pronto','var(--coin)');
 }
 
 
@@ -2634,23 +2688,27 @@ async function confirmarPedido(){
   }
   var btn=document.getElementById('btn-confirmar');
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
-  var folio='TIA-'+Date.now().toString().slice(-6);
+  var folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
   var pagado=_ckMetodo==='coins';
-  var res=await sb.from('pedidos').insert({
-    usuario_id:S.user.id,folio:folio,
-    nb:nombre.trim(),tel:tel.replace(/\D/g,''),dir:dir.trim(),
+  var res=await sb.from('seguimientos').insert({
+    id:'tid_'+Date.now(),
+    cliente_id:S.user.id,
+    cliente:nombre.trim(),tel:tel.replace(/\D/g,''),dir:dir.trim(),
+    folio:folio,
     items:prods,regalos:gifts,total:total,
     pago:_ckMetodo,
     comprobante_url:compBase64||null,
     pagado:pagado,pagado_at:pagado?new Date().toISOString():null,
-    status:'pendiente',origen:'tienda'
+    estado:'pendiente',origen:'tienda',
+    fecha_creado:new Date().toISOString().slice(0,10),
+    historial:[{estado:'pendiente',fecha:new Date().toLocaleDateString('es-MX')}]
   }).select().single();
   if(res.error){mostrarError('Error: '+res.error.message);if(btn){btn.disabled=false;btn.textContent='⚔️ Confirmar pedido';}return;}
   if(pagado){
     var nc=(S.user.coins||0)-total;
     var ur=await sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single();
     if(ur.data)S.user=ur.data;
-    await sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
+    await sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
   }
   var ng=(S.user.gastado||0)+total;var nc2=(S.user.pedidos_count||0)+1;
   var uu=await sb.from('clientes').update({gastado:ng,pedidos_count:nc2}).eq('id',S.user.id).select().single();
@@ -3169,7 +3227,7 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -3216,13 +3274,13 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('pedidos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
   var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
   var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
   el.innerHTML=data.map(function(p){
-    var est=p.status||'pendiente';
+    var est=p.estado||p.status||'pendiente';
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
       '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
       '<div><div style="font-family:Cinzel,serif;font-size:.68rem;color:var(--gold)">'+p.folio+'</div>'+
@@ -3265,7 +3323,7 @@ function cerrarMP(){var el=document.getElementById('mp-overlay');if(el)el.style.
 async function generarTicket(pedidoId){
   var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
   if(!jsPDF){notif('Cargando PDF...','var(--muted)');return;}
-  var res=await sb.from('pedidos').select('*').eq('id',pedidoId).single();
+  var res=await sb.from('seguimientos').select('*').eq('id',pedidoId).single();
   var p=res.data;if(!p){notif('Pedido no encontrado','var(--red)');return;}
   var doc=new jsPDF({unit:'mm',format:[58,200],orientation:'portrait'});
   var x=4,y=6,w=50;
@@ -3306,7 +3364,7 @@ function buyCustom(){
   mostrarPagoCoins(amt,0,amt);
 }
 
-function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
+function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimientos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
 async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
