@@ -1658,9 +1658,10 @@ async function cargarPedidosUsuario(){
   ];
 
   function estadoIdx(est){
+    est=est||'pendiente';
     if(est==='entregado') return 3;
     if(est==='en_camino') return 2;
-    if(est==='en_preparacion') return 1;
+    if(est==='en_preparacion'||est==='preparando') return 1;
     return 0;
   }
 
