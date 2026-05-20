@@ -640,17 +640,38 @@ function rPedidos(el){
 
   function load(){
     Promise.all([
-      sGET("pedidos","order=created_at.desc"),
       sGET("seguimientos","order=fecha_creado.desc"),
       sGET("envios","order=num_envio.desc"),
       sGET("ventas","order=ticket.desc")
     ]).then(function(res){
-      var pedidos=Array.isArray(res[0])?res[0]:[];
-      var allSegs=Array.isArray(res[1])?res[1]:[];
-      var envios=Array.isArray(res[2])?res[2]:[];
-      var allVentas=Array.isArray(res[3])?res[3]:[];
+      var allSegs=Array.isArray(res[0])?res[0]:[];
+      var envios=Array.isArray(res[1])?res[1]:[];
+      var allVentas=Array.isArray(res[2])?res[2]:[];
+      // Pedidos tienda = seguimientos con origen="tienda", mapeados al formato de pedCard
+      var pedidos=allSegs.filter(function(s){return s.origen==="tienda";}).map(function(s){
+        var st=s.pedido_ticket?"concretado":(s.estado==="cancelado"?"cancelado":"pendiente");
+        return{
+          id:s.id,
+          nb:s.cliente||s.nb||"",
+          tel:s.tel||"—",
+          dir:s.dir||"—",
+          items:Array.isArray(s.items)?s.items:[],
+          total:s.total||0,
+          pago:s.pago||s.metodo_pago||"",
+          pagado:s.pagado||false,
+          folio:s.folio||"",
+          fecha:s.fecha_creado||hoy(),
+          status:st,
+          estado_envio:s.estado||"preparando",
+          num_envio:s.num_envio||null,
+          ticket:s.pedido_ticket||null,
+          captura:s.comprobante_url||null,
+          usuario_id:s.usuario_id||null,
+          origen:"tienda"
+        };
+      });
       var ventaTickets=new Set(allVentas.map(function(v){return String(v.ticket);}));
-      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&(ventaTickets.has(String(s.pedido_ticket)));});
+      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&s.pedido_ticket&&ventaTickets.has(String(s.pedido_ticket));});
       var erpPeds=erpSegs.map(function(s){
         var envio=envios.find(function(e){
           return (e.pedidos||[]).some(function(p){return String(p.ticket)===String(s.pedido_ticket);});
@@ -673,7 +694,7 @@ function rPedidos(el){
           ticket:s.pedido_ticket
         };
       });
-      render(pedidos.concat(erpPeds),envios);
+      render(pedidos.concat(erpPeds),envios);  // pedidos = tienda sin concretar
     });
   }
   window.pedFiltro=function(f){filtro=f;load();};
@@ -696,15 +717,15 @@ function rPedidos(el){
         }
       });
     } else {
-      // Tienda: update pedido + seguimiento
-      proms.push(sPATCH("pedidos","id=eq."+id,{status:"entregado"}));
-      sGET("seguimientos","pedido_id=eq."+String(id)).then(function(segs){
+      // Tienda: solo actualizar seguimiento (ya no hay tabla pedidos)
+      sGET("seguimientos","id=eq."+String(id)).then(function(segs){
         var seg=segs&&segs[0];
         if(seg){
           var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha,nota:"Entrega en oficina"}]);
-          proms.push(sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}));
+          sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}).then(function(){
+            toast("✅ Entregado en oficina");load();
+          });
         }
-        Promise.all(proms).then(function(){toast("✅ Entregado en oficina");load();});
       });
     }
   };
@@ -712,12 +733,11 @@ function rPedidos(el){
     sGET("ventas","select=ticket&order=ticket.desc&limit=1").then(function(rows){
       var maxT=rows&&rows[0]?rows[0].ticket:0;
       var ticket=maxT+1;
-      sGET("pedidos","id=eq."+id).then(function(pr){
+      // Leer el seguimiento directamente (ya no hay tabla pedidos)
+      sGET("seguimientos","id=eq."+id).then(function(pr){
         var ped=pr&&pr[0];if(!ped)return;
-        // Buscar cliente_id por telefono
         var buscarCli=ped.usuario_id?Promise.resolve(ped.usuario_id):sGET("clientes","telefono=eq."+(ped.tel||"")+"&select=id&limit=1").then(function(r){return r&&r[0]?r[0].id:0;});
         buscarCli.then(function(cliId){
-        // Enriquecer lineas con precio_venta unitario
         var items=Array.isArray(ped.items)?ped.items:[];
         var totalMonto=parseFloat(ped.total)||0;
         var lineasEnriq=items.map(function(l){
@@ -734,7 +754,7 @@ function rPedidos(el){
         sPOST("ventas",{
           ticket:ticket,fecha:hoy(),
           cliente_id:cliId||0,
-          cliente_nombre:ped.nb||ped.nombre_cliente||"",
+          cliente_nombre:ped.cliente||ped.nb||"",
           monto_venta:totalMonto,
           adeudo:ped.pagado?0:totalMonto,
           cobrado:ped.pagado?totalMonto:0,
@@ -746,15 +766,19 @@ function rPedidos(el){
           metodo_pago:ped.pago||ped.metodo_pago||"efectivo",
           lineas:lineasEnriq
         }).then(function(){
-          sPOST("seguimientos",{id:String(Date.now()),pedido_id:String(ped.id),pedido_ticket:ticket,cliente:ped.nb,tel:ped.tel,dir:ped.dir,total:ped.total||0,estado:"preparando",fecha_creado:hoy(),historial:[{estado:"preparando",fecha:hoy()}]}).then(function(){
-            sPATCH("pedidos","id=eq."+id,{status:"concretado"}).then(function(){toast("✓ Ticket #"+ticket+" creado");load()});
-          });
+          // Actualizar el seguimiento existente con el ticket (en vez de crear uno nuevo)
+          var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy()}]);
+          sPATCH("seguimientos","id=eq."+id,{
+            pedido_ticket:ticket,
+            estado:"preparando",
+            historial:hist
+          }).then(function(){toast("✓ Ticket #"+ticket+" creado");load();});
         });
         }); // end buscarCli
       });
     });
   };
-  window.pedCanc=function(id){if(confirm("¿Cancelar?"))sPATCH("pedidos","id=eq."+id,{status:"cancelado"}).then(function(){toast("Cancelado","err");load()})};
+  window.pedCanc=function(id){if(confirm("¿Cancelar?"))sPATCH("seguimientos","id=eq."+id,{estado:"cancelado"}).then(function(){toast("Cancelado","err");load()})};
   window.pedEntreg=function(id){
     var fecha=new Date().toLocaleDateString("es-MX");
     function marcarSeg(seg){
@@ -2358,18 +2382,21 @@ function rEnvios(el){
           var repNom=($("erep")||{}).value||"";
           var costoEnvio=parseFloat(($("ecosto")||{}).value)||0;
           if(repNom&&costoEnvio>0){
-            sPOST("compras",{
-              num_compra:Date.now(),
-              fecha:($("efecha")||{}).value||hoy(),
-              proveedor:repNom,
-              proveedor_id:0,
-              producto_nombre:"Servicio de envío",
-              descripcion:"Ruta #"+autoE+" · "+pedsMapped.length+" pedido(s)",
-              tipo_inv:"servicio",
-              cantidad:1,
-              pu:costoEnvio,
-              total:costoEnvio,
-              responsable:repNom
+            sGET("compras","order=num_compra.desc&limit=1").then(function(rows){
+              var maxNC=rows&&rows[0]&&rows[0].num_compra?rows[0].num_compra:0;
+              sPOST("compras",{
+                num_compra:maxNC+1,
+                fecha:($("efecha")||{}).value||hoy(),
+                proveedor:repNom,
+                proveedor_id:0,
+                producto_nombre:"Servicio de envío",
+                descripcion:"Ruta #"+autoE+" · "+pedsMapped.length+" pedido(s)",
+                tipo_inv:"servicio",
+                cantidad:1,
+                pu:costoEnvio,
+                total:costoEnvio,
+                responsable:repNom
+              });
             });
           }
           var pedIds=pedsMapped.filter(function(p){return p.pedido_id}).map(function(p){return p.pedido_id});
