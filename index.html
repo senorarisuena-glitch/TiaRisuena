@@ -1240,8 +1240,8 @@ async function cargarPedidosUsuario(){
   var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
-  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
-  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
+  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','preparando':'⚙️ En preparacion','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
+  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','preparando':'#f59e0b','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
   el.innerHTML=data.map(function(p){
     var est=p.estado||p.status||'pendiente';
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
@@ -1781,7 +1781,7 @@ function initPedidosRealtime(){
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
     function(payload){
       var p=payload.new;
-      var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'Tu pedido se esta empacando',en_camino:'Tu pedido esta en camino!',entregado:'Tu pedido fue entregado!'};
+      var labels={pendiente:'Tu pedido fue recibido',preparando:'Tu pedido se está empacando',en_preparacion:'Tu pedido se está empacando',en_camino:'Tu pedido está en camino!',entregado:'Tu pedido fue entregado!'};
       notif(labels[p.estado]||'Tu pedido fue actualizado');
       cargarPedidosUsuario();
     }).subscribe();
@@ -1909,7 +1909,7 @@ async function cargarSeguimientoPerfil(){
     {key:'entregado',      label:'Entregado', icon:'🏆', color:'#16a34a'},
   ];
   function eIdx(s){
-    if(s==='entregado')return 3;if(s==='en_camino')return 2;if(s==='en_preparacion')return 1;return 0;
+    if(s==='entregado')return 3;if(s==='en_camino')return 2;if(s==='en_preparacion'||s==='preparando')return 1;return 0;
   }
   el.innerHTML=pedidos.map(function(p){
     var est=p.estado||p.status||'pendiente';var ei=eIdx(est);
@@ -1942,7 +1942,7 @@ async function cargarSeguimientoPerfil(){
     sb.channel('perfil-seg-'+S.user.id)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
       function(payload){
-        var labels={pendiente:'📋 Pedido recibido',preparando:'✅ ¡Aceptado y empacando!',en_camino:'🚚 ¡En camino!',entregado:'🏆 ¡Entregado!'};
+        var labels={pendiente:'📋 Pedido recibido',preparando:'✅ ¡Aceptado y empacando!',en_preparacion:'✅ ¡Aceptado y empacando!',en_camino:'🚚 ¡En camino!',entregado:'🏆 ¡Entregado!'};
         notif(labels[payload.new.estado]||'Pedido actualizado');
         cargarSeguimientoPerfil();
       }).subscribe();
@@ -1976,7 +1976,7 @@ async function cargarPedidosActivos(){
   function eIdx(est){
     if(est==='entregado')return 3;
     if(est==='en_camino')return 2;
-    if(est==='en_preparacion')return 1;
+    if(est==='en_preparacion'||est==='preparando')return 1;
     return 0;
   }
 
@@ -2034,7 +2034,7 @@ async function cargarPedidosActivos(){
     sb.channel('cart-orders-'+S.user.id)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
       function(payload){
-        var labels={pendiente:'Tu pedido fue recibido',en_preparacion:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
+        var labels={pendiente:'Tu pedido fue recibido',preparando:'¡Tu pedido se está empacando!',en_preparacion:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
         notif(labels[payload.new.status]||'Pedido actualizado');
         cargarPedidosActivos();
       }).subscribe();
@@ -2307,7 +2307,7 @@ async function enviarSolicitudCoins(coins,bonus,precio,metodo){
     bonus:bonus||0,
     precio_mxn:precio,
     metodo_pago:metodo,
-    descripcion:'Compra '+( coins+bonus)+' coins — $'+precio+' MXN',
+    descripcion:'Compra '+(coins+bonus)+' coins — $'+precio+' MXN',
     comprobante_url:compBase64||null,
     estado:'pendiente'
   });
@@ -2318,8 +2318,19 @@ async function enviarSolicitudCoins(coins,bonus,precio,metodo){
     return;
   }
 
+  // Armar y enviar WhatsApp
+  var ml={oxxo:'Depósito OXXO',transferencia:'Transferencia bancaria'};
+  var waMsg='🪙 Solicitud de Tía Coins\n';
+  waMsg+=(coins+bonus)+' coins — $'+precio+' MXN\n';
+  waMsg+='Método: '+(ml[metodo]||metodo)+'\n';
+  waMsg+='Cliente: '+(S.user.nombre||'')+(S.user.telefono?' — '+S.user.telefono:'')+'\n';
+  if(compBase64)waMsg+='[Comprobante adjunto en la app]';
+
   cerrarCoinsPago();
   notif('🪙 Solicitud enviada — tu vendedor la aprobará pronto','var(--coin)');
+  setTimeout(function(){
+    window.open('https://wa.me/523322740209?text='+encodeURIComponent(waMsg),'_blank');
+  },800);
 }
 
 
@@ -2332,8 +2343,21 @@ function toggleCoinsPago(btn,tipo){
 }
 
 async function pagarConTarjeta(precio,coins,bonus){
-  // Create MP payment link via API
+  if(!S.user){notif('Debes iniciar sesión','var(--red)');return;}
   notif('Generando link de pago...');
+
+  // Guardar solicitud en DB primero
+  await sb.from('coins_transacciones').insert({
+    cliente_id:S.user.id,
+    tipo:'credito',
+    cantidad:coins+bonus,
+    bonus:bonus||0,
+    precio_mxn:precio,
+    metodo_pago:'tarjeta',
+    descripcion:'Compra '+(coins+bonus)+' coins — $'+precio+' MXN (tarjeta)',
+    estado:'pendiente'
+  });
+
   try{
     var res=await fetch('https://api.mercadopago.com/checkout/preferences',{
       method:'POST',
@@ -2342,21 +2366,21 @@ async function pagarConTarjeta(precio,coins,bonus){
         items:[{title:'Tia Coins '+coins+(bonus?' + '+bonus+' gratis':''),unit_price:precio,quantity:1,currency_id:'MXN'}],
         back_urls:{success:window.location.href,failure:window.location.href},
         auto_return:'approved',
-        external_reference:(S.user?S.user.id:'')+'_'+coins+'_'+Date.now()
+        external_reference:String(S.user.id)+'_'+coins+'_'+Date.now()
       })
     });
     var data=await res.json();
     if(data.init_point){
+      cerrarCoinsPago();
       window.open(data.init_point,'_blank');
     } else {
       throw new Error('No se pudo generar el link');
     }
   }catch(e){
-    // Fallback: WhatsApp
-    var msg='Quiero comprar '+coins+' Tia Coins'+( bonus?' + '+bonus+' gratis':'')+' por $'+precio+' MXN con tarjeta.\nCliente: '+(S.user?S.user.nombre:'')+' — '+(S.user?S.user.telefono:'');
+    var msg='🪙 Compra de Tía Coins con tarjeta\n'+(coins+bonus)+' coins — $'+precio+' MXN\nCliente: '+(S.user.nombre||'')+' — '+(S.user.telefono||'');
+    cerrarCoinsPago();
     window.open('https://wa.me/523322740209?text='+encodeURIComponent(msg),'_blank');
   }
-  cerrarCoinsPago();
 }
 
 async function confirmarPagoCoins(coins,bonus,precio,metodo){
@@ -3277,8 +3301,8 @@ async function cargarPedidosUsuario(){
   var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
-  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
-  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
+  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','preparando':'⚙️ En preparacion','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
+  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','preparando':'#f59e0b','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
   el.innerHTML=data.map(function(p){
     var est=p.estado||p.status||'pendiente';
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
