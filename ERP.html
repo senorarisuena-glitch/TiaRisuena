@@ -542,7 +542,7 @@ function rPedidos(el){
     h+='<div style="font-size:11px;color:#8B949E">📍 '+(p.dir||'—')+'</div></div>';
     h+='<div style="background:'+col+'20;border:1px solid '+col+'50;border-radius:2px;padding:3px 10px;font-size:10px;color:'+col+';font-weight:700;align-self:flex-start">'+(p.status||"").toUpperCase()+'</div></div>';
     h+='<div style="background:#21262D;border-radius:2px;padding:8px 12px;margin-bottom:8px">'+items+'</div>';
-    if(p.captura)h+='<div style="margin-bottom:8px;text-align:center"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px"></div>';
+    if(p.captura)h+='<div style="margin-bottom:8px;text-align:center"><a href="'+p.captura+'" target="_blank" title="Ver comprobante completo"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px;cursor:pointer;border:1px solid #30363D"></a><div style="font-size:10px;color:#4A9EFF;margin-top:3px">🖼 Toca para ver comprobante</div></div>';
     h+='<div style="display:flex;justify-content:space-between;align-items:center">';
     h+='<div style="font-size:14px;font-weight:700;color:#00C896">'+fmt(p.total||0)+'<span style="font-size:11px;color:#8B949E;font-weight:400;margin-left:6px">'+(p.pago||"")+'</span></div>';
     h+='<div style="display:flex;gap:8px">';
