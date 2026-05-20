@@ -926,6 +926,7 @@ function rVentas(el){
     var lineas=esEd&&ve.lineas&&ve.lineas.length?JSON.parse(JSON.stringify(ve.lineas)):[{inv_id:"",desc:"",cant:1,pu:0,cu:0}];
     var cliId=esEd?String(ve.cliente_id||""):"";
     var cliNom=esEd?ve.cliente_nombre||"":"";
+    var cliCodigo="";var cliTel="";var cliDir="";
 
     function calcTotals(){
       var tv=lineas.reduce(function(a,l){return a+(parseFloat(l.cant)||0)*(parseFloat(l.pu)||0)},0);
@@ -1055,7 +1056,7 @@ function rVentas(el){
           row.innerHTML='<span style="color:#C084FC;font-weight:700">'+cl.codigo+'</span> · <span style="color:#E6EDF3">'+cl.nombre+'</span>';
           row.onmousedown=function(e){
             e.preventDefault();
-            cliId=String(cl.id);cliNom=cl.nombre;cliCodigo=cl.codigo;
+            cliId=String(cl.id);cliNom=cl.nombre;cliCodigo=cl.codigo;cliTel=cl.telefono||"";cliDir=cl.direccion||"";
             var inp=document.getElementById("vcliinput");
             if(inp)inp.value=cl.codigo+' · '+cl.nombre;
             drop.style.display="none";
@@ -1223,6 +1224,8 @@ function rVentas(el){
             cliente:cliNom,
             cliente_codigo:cliCodigo||"",
             cliente_id:parseInt(cliId)||0,
+            tel:cliTel||"",
+            dir:cliDir||"",
             total:monto,
             estado:"preparando",
             origen:"erp",
