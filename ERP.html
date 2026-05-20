@@ -1074,15 +1074,17 @@ function rVentas(el){
     rows.forEach(function(r){r.style.display=r.textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none"});
   };
   window.vNueva=function(){
-    if(!clientes.length){
-      sGET("clientes","order=codigo").then(function(d){
-        clientes=Array.isArray(d)?d:[];
-        vForm(null);
-      });
-    } else {vForm(null);}
+    sGET("clientes","order=codigo").then(function(d){
+      clientes=Array.isArray(d)?d:[];
+      vForm(null);
+    });
   };
-  window.vEdit=function(id){vForm(ventas.find(function(v){return v.id===id}))};
-  window.vDel=function(id){
+  window.vEdit=function(id){
+    sGET("clientes","order=codigo").then(function(d){
+      clientes=Array.isArray(d)?d:[];
+      vForm(ventas.find(function(v){return v.id===id}));
+    });
+  };  window.vDel=function(id){
     if(!confirm("¿Eliminar venta? Esto revertirá el inventario."))return;
     sGET("ventas","id=eq."+id).then(function(rows){
       var v=rows&&rows[0];
@@ -1210,7 +1212,7 @@ function rVentas(el){
     document.body.appendChild(vcliDropEl);
 
     window.vCliInput=function(val){
-      cliId="";cliNom="";
+      cliId="";cliNom=val;
       var dropE=document.getElementById("vclidrop_float");
       var sel=document.getElementById("vclisel");
       if(sel)sel.textContent="";
@@ -1361,7 +1363,7 @@ function rVentas(el){
       _vGuardando=true;
       var t=calcTotals();
       var monto=parseFloat(($("vmonto")||{}).value)||t.tv;
-      if(!cliId||!cliNom.trim()){alert("Debes seleccionar un cliente de la lista");return}
+      if(!cliNom.trim()){alert("Escribe el nombre del cliente");return}
       var util=monto-t.tc;
       // Enriquecer lineas con precio_venta, costo_unit y utilidad_unit proporcional
       var totalCosto=t.tc||0;
