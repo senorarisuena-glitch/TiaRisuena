@@ -551,20 +551,30 @@ function rPedidos(el){
     h+='<div style="font-size:14px;font-weight:700;color:#00C896">'+fmt(p.total||0)+'<span style="font-size:11px;color:#8B949E;font-weight:400;margin-left:6px">'+(p.pago||"")+'</span></div>';
     h+='<div style="display:flex;gap:8px">';
     if(p.status==="pendiente"){
-      // Formulario de pago inline
       h+='</div></div>';
-      h+='<div style="background:#21262D;border-radius:3px;padding:10px;margin-top:8px">';
-      h+='<div style="font-size:10px;color:#8B949E;letter-spacing:.05em;margin-bottom:8px;font-weight:700">REGISTRAR PAGO</div>';
-      h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">';
-      h+='<select id="pp_cuenta_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Caja Chica">Caja Chica</option><option value="Mercado Pago">Mercado Pago</option><option value="Kiyoshi">Kiyoshi</option></select>';
-      h+='<select id="pp_tipo_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Transferencia">Transferencia</option><option value="Deposito">Depósito</option><option value="Efectivo">Efectivo</option></select>';
-      h+='<input id="pp_monto_'+p.id+'" type="number" placeholder="Monto" value="'+( p.total||0)+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3;text-align:right">';
-      h+='</div>';
-      h+='<div style="display:flex;gap:6px">';
-      h+='<button class="btn btn-p btn-s" style="flex:1" onclick="pedConc(&apos;'+p.id+'&apos;)">✓ Concretar</button>';
-      h+='<button class="btn btn-s" style="border-color:#8B949E;color:#8B949E;font-size:10px" onclick="pedConcCredito(&apos;'+p.id+'&apos;)">📋 A crédito</button>';
-      h+='<button class="btn btn-s btn-o" style="border-color:#F85149;color:#F85149" onclick="pedCanc(&apos;'+p.id+'&apos;)">✕</button>';
-      h+='</div></div>';
+      if(p.pago==="coins"){
+        // Pagado con coins — solo concretar, sin registrar en tesorería
+        h+='<div style="background:#21262D;border-radius:3px;padding:10px;margin-top:8px;display:flex;align-items:center;justify-content:space-between">';
+        h+='<div style="font-size:11px;color:#F59E0B;font-weight:700">🪙 Pagado con Tía Coins</div>';
+        h+='<div style="display:flex;gap:6px">';
+        h+='<button class="btn btn-p btn-s" onclick="pedConc(&apos;'+p.id+'&apos;,true)">✓ Concretar</button>';
+        h+='<button class="btn btn-s btn-o" style="border-color:#F85149;color:#F85149" onclick="pedCanc(&apos;'+p.id+'&apos;)">✕</button>';
+        h+='</div></div>';
+      } else {
+        // Pago normal — mostrar formulario
+        h+='<div style="background:#21262D;border-radius:3px;padding:10px;margin-top:8px">';
+        h+='<div style="font-size:10px;color:#8B949E;letter-spacing:.05em;margin-bottom:8px;font-weight:700">REGISTRAR PAGO</div>';
+        h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">';
+        h+='<select id="pp_cuenta_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Caja Chica">Caja Chica</option><option value="Mercado Pago">Mercado Pago</option><option value="Kiyoshi">Kiyoshi</option></select>';
+        h+='<select id="pp_tipo_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Transferencia">Transferencia</option><option value="Deposito">Depósito</option><option value="Efectivo">Efectivo</option></select>';
+        h+='<input id="pp_monto_'+p.id+'" type="number" placeholder="Monto" value="'+(p.total||0)+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3;text-align:right">';
+        h+='</div>';
+        h+='<div style="display:flex;gap:6px">';
+        h+='<button class="btn btn-p btn-s" style="flex:1" onclick="pedConc(&apos;'+p.id+'&apos;)">✓ Concretar</button>';
+        h+='<button class="btn btn-s" style="border-color:#8B949E;color:#8B949E;font-size:10px" onclick="pedConcCredito(&apos;'+p.id+'&apos;)">📋 A crédito</button>';
+        h+='<button class="btn btn-s btn-o" style="border-color:#F85149;color:#F85149" onclick="pedCanc(&apos;'+p.id+'&apos;)">✕</button>';
+        h+='</div></div>';
+      }
       h+='</div>';
       return h;
     }
@@ -788,11 +798,11 @@ function rPedidos(el){
       });
     }
   };
-  window.pedConc=function(id){
-    // Leer formulario de pago
-    var cuenta=($("pp_cuenta_"+id)||{}).value||"Caja Chica";
-    var tipo=($("pp_tipo_"+id)||{}).value||"Transferencia";
-    var monto=parseFloat(($("pp_monto_"+id)||{}).value)||0;
+  window.pedConc=function(id,sinPago){
+    // Leer formulario de pago (solo si no es coins)
+    var cuenta=sinPago?null:($("pp_cuenta_"+id)||{}).value||"Caja Chica";
+    var tipo=sinPago?null:($("pp_tipo_"+id)||{}).value||"Transferencia";
+    var monto=sinPago?0:parseFloat(($("pp_monto_"+id)||{}).value)||0;
 
     sGET("ventas","select=ticket&order=ticket.desc&limit=1").then(function(rows){
       var maxT=rows&&rows[0]?rows[0].ticket:0;
