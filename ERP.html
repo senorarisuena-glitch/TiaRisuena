@@ -76,7 +76,7 @@ var SU="https://hnyzfpblagnhntvgabej.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhueXpmcGJsYWduaG50dmdhYmVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNjg2ODUsImV4cCI6MjA5Mzk0NDY4NX0.isLWBDYfMyfvyNV84DU2aty90ztbbfP_2GTcU12mxHU";
 var CATALOGO_SKU=[
   {sku:"CAJA102LT",desc:"Caja 102 LT",cat:"Organizador",tipo:"otro"},
-  {sku:"ORGANIZADO102LT",desc:"Organizador 10 Cajas 102 LT",cat:"Organizador",tipo:"otro"},
+  {sku:"ORGANIZADOR102LT",desc:"Organizador 10 Cajas 102 LT",cat:"Organizador",tipo:"otro"},
   {sku:"R1",desc:"Flor Regular 1",cat:"Flor Granel Regular",tipo:"mixto"},
   {sku:"RP1",desc:"Flor Regular Plus 1",cat:"Flor Granel Regular Plus",tipo:"mixto"},
   {sku:"P1",desc:"Flor Premium 1",cat:"Flor Granel Premium",tipo:"mixto"},
@@ -1787,6 +1787,16 @@ function rCompras(el){
           // Crear lotes ENTRADA por cada línea
           var compraId=Array.isArray(saveRes)&&saveRes[0]?saveRes[0].id:null;
           var fecha=body.fecha||hoy();
+          // Validar que todos los SKUs existan en el catálogo
+          var skusInvalidos=validLines.filter(function(l){
+            var sku=(l.nombre||l.sku||"").trim();
+            return sku&&!CATALOGO_SKU.find(function(s){return s.sku===sku||s.desc===sku;});
+          });
+          if(skusInvalidos.length){
+            var nombres=skusInvalidos.map(function(l){return l.nombre||l.sku}).join(", ");
+            alert("SKU(s) no encontrado(s) en el catálogo:\n"+nombres+"\n\nVerifica que el código sea correcto.");
+            _cGuardando=false;return;
+          }
           var lotesPromises=validLines.map(function(l){
             var sku=l.nombre||l.sku||"";
             var cant=parseFloat(l.cantidad)||0;
