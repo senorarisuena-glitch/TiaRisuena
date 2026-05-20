@@ -818,16 +818,26 @@ function rPedidos(el){
             var price=parseFloat(l.price||l.unit_price||l.precio||0);
             return Object.assign({},l,{sku:l.sku||l.nombre||l.name||"",cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
           });
-          var adeudo=sinPago?0:(monto>=totalMonto?0:totalMonto-monto);
-          var cobrado=sinPago?totalMonto:monto||0;
+
+          // Si es coins, buscar el precio_mxn real de la transacción de coins
+          var montoRealProm=sinPago?
+            sGET("coins_transacciones","cliente_id=eq."+(cliId||0)+"&estado=eq.aprobado&order=created_at.desc&limit=1").then(function(rows){
+              var ct=rows&&rows[0];
+              return ct?parseFloat(ct.precio_mxn||totalMonto):totalMonto;
+            }):Promise.resolve(totalMonto);
+
+          montoRealProm.then(function(montoReal){
+            var montoVenta=sinPago?montoReal:totalMonto;
+            var adeudo=sinPago?0:(monto>=totalMonto?0:totalMonto-monto);
+            var cobrado=sinPago?montoReal:monto||0;
           sPOST("ventas",{
             ticket:ticket,fecha:hoy(),
             cliente_id:cliId||0,
             cliente_nombre:ped.cliente||ped.nb||"",
-            monto_venta:totalMonto,
+            monto_venta:montoVenta,
             adeudo:adeudo,
             cobrado:cobrado,
-            costo_productos:0,utilidad:totalMonto,pct_util:0,
+            costo_productos:0,utilidad:montoVenta,pct_util:0,
             origen:"tienda",
             pedido_id:String(ped.id),
             folio_tienda:ped.folio||"",
@@ -849,7 +859,7 @@ function rPedidos(el){
                   var ct=rows&&rows[0];
                   if(ct&&ct.movimiento_id){
                     return sPATCH("movimientos","id=eq."+ct.movimiento_id,{
-                      gasto_ticket:"Ticket #"+ticket+": "+fmt(totalMonto),
+                      gasto_ticket:"Ticket #"+ticket+": "+fmt(montoReal),
                       concepto:"Venta Ticket #"+ticket+" — "+(ped.cliente||ped.nb||"")+" (Coins)"
                     });
                   }
@@ -861,9 +871,10 @@ function rPedidos(el){
                   toast("✓ Ticket #"+ticket+" creado");load();
                 });
               });
-            });
-          });
-        });
+            }); // end movProm
+          }); // end sPOST ventas
+          }); // end montoRealProm
+        }); // end buscarCli
       });
     });
   };
