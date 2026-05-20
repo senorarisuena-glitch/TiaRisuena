@@ -1101,9 +1101,8 @@ async function registrarUsuario(){
   var ex=await sb.from('clientes').select('id').eq('telefono',tel).single();
   if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   var coins=fb?200:100;
-  var codigo='CLI'+Date.now().toString().slice(-6);
   var res=await sb.from('clientes').insert({
-    codigo:codigo,
+    codigo:'CLI000',
     nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,
     direccion:dir1.trim()||null,
     facebook:fb||null,email:email||null,
@@ -1112,6 +1111,9 @@ async function registrarUsuario(){
     gastado:0,pedidos_count:0
   }).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  var codigoReal='CLI'+String(res.data.id).padStart(3,'0');
+  await sb.from('clientes').update({codigo:codigoReal}).eq('id',res.data.id);
+  res.data.codigo=codigoReal;
   await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
@@ -1190,6 +1192,9 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  var codigoNuevo='CLI'+String(res.data.id).padStart(3,'0');
+  await sb.from('clientes').update({codigo:codigoNuevo}).eq('id',res.data.id);
+  res.data.codigo=codigoNuevo;
   await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
@@ -1503,9 +1508,14 @@ async function registrarUsuario(){
     return;
   }
 
+  // Asignar codigo basado en ID real
+  var codigoR='CLI'+String(data.id).padStart(3,'0');
+  await sb.from('clientes').update({codigo:codigoR}).eq('id',data.id);
+  data.codigo=codigoR;
+
   // Registrar transacción de bienvenida
   await sb.from('coins_transacciones').insert({
-    cliente_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
+    cliente_id:data.id, tipo:'credito', cantidad:fb?200:100, descripcion:'Coins de bienvenida'
   });
 
   S.user = data;
@@ -3252,6 +3262,9 @@ async function registrarUsuario(){
   var coins=fb?200:100;
   var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  var codigoNuevo='CLI'+String(res.data.id).padStart(3,'0');
+  await sb.from('clientes').update({codigo:codigoNuevo}).eq('id',res.data.id);
+  res.data.codigo=codigoNuevo;
   await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');

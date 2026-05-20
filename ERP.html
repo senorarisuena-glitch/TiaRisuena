@@ -1218,7 +1218,11 @@ function rVentas(el){
       if(sel)sel.textContent="";
       if(!val||val.length<1){if(dropE)dropE.style.display="none";return;}
       var q=val.toLowerCase();
-      var matches=clientes.filter(function(x){return x.nombre.toLowerCase().indexOf(q)>=0||x.codigo.toLowerCase().indexOf(q)>=0}).slice(0,10);
+      var matches=clientes.filter(function(x){
+        var nom=(x.nombre||"").toLowerCase();
+        var cod=(x.codigo||"").toLowerCase();
+        return nom.indexOf(q)>=0||cod.indexOf(q)>=0;
+      }).slice(0,10);
       var drop=document.getElementById("vclidrop_float");
       if(!matches.length){if(drop)drop.style.display="none";return;}
       var drop=document.getElementById("vclidrop_float");
