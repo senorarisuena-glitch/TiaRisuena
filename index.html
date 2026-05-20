@@ -653,7 +653,7 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
 
         <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
           <div class="user-field"><label>TU TELEFONO</label><input class="user-inp" id="lTel" type="tel" placeholder="10 digitos" oninput="checkPassField()"></div>
-          <div class="user-field" id="lPassWrap" style="display:none"><label>CONTRASEÑA</label><input class="user-inp" id="lPass" type="password" placeholder="Tu contraseña"></div>
+          <div class="user-field" id="lPassWrap"><label>CONTRASEÑA <span style="font-size:.55rem;color:var(--muted)">(si tienes una)</span></label><input class="user-inp" id="lPass" type="password" placeholder="Deja vacío si no tienes"></div>
           <button class="btn-gold" onclick="loginUsuario()" id="btnLogin">✦ Entrar</button>
           <div id="loginMsg" style="font-size:.65rem;text-align:center;color:var(--muted);min-height:20px"></div>
           <div style="text-align:center;font-size:.65rem;color:var(--muted)">
@@ -711,13 +711,10 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
       <div class="stitle" style="margin-top:0">🏆 LOGROS</div>
       <div id="pLogros" style="padding:0 12px 12px;display:flex;flex-direction:column;gap:7px"></div>
       <div class="stitle">📦 SEGUIMIENTO DE PEDIDO</div>
-      <div id="perfil-seguimiento" style="padding:0 12px 4px">
-        <div id="perfil-orders-panel"></div>
-      </div>
+      <div style="padding:0 12px 4px"><div id="perfil-orders-panel"></div></div>
       <div class="stitle">📋 MIS PEDIDOS</div>
       <div id="pPedidos" style="padding:0 12px 12px"></div>
       <div class="stitle">✏️ MIS DATOS</div>
-      <!-- Banner perfil incompleto -->
       <div id="banner-perfil-incompleto" style="display:none;margin:0 12px 10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);border-radius:10px;padding:10px 14px">
         <div style="font-family:'Cinzel',serif;font-size:.65rem;color:var(--red);margin-bottom:4px">⚠️ PERFIL INCOMPLETO</div>
         <div id="banner-perfil-msg" style="font-size:.6rem;color:var(--muted);line-height:1.5"></div>
@@ -1123,6 +1120,29 @@ async function registrarUsuario(){
 }
 
 
+async function loginUsuario(){
+  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
+  var pass=(document.getElementById('lPass')||{}).value||'';
+  var msg=document.getElementById('loginMsg');
+  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
+  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
+  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
+  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
+  if(!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
+  // Check password if user has one
+  if(res.data.password&&res.data.password!==''){
+    if(!pass){if(msg){msg.textContent='Ingresa tu contraseña';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
+    if(pass!==res.data.password){if(msg){msg.textContent='Contraseña incorrecta';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
+  }
+  S.user=res.data;guardarSesionLocal(res.data);
+  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
+  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
+  // Clear fields
+  var lp=document.getElementById('lPass');if(lp)lp.value='';
+  var wrap=document.getElementById('lPassWrap');if(wrap)wrap.style.display='none';
+}
+
+
 function cerrarSesion(){
   S.user = null;
   S.cart = [];
@@ -1192,15 +1212,15 @@ async function llenarPerfil(){
   if(sigNiv){set('pNivelSig',sigNiv.nombre);var prog=(((u.gastado||0)-niv.lvl.min)/(sigNiv.min-niv.lvl.min)*100).toFixed(0);var pb=document.getElementById('pProgBar');if(pb)pb.style.width=Math.min(prog,100)+'%';set('pProgTexto','$'+(u.gastado||0).toLocaleString()+' / $'+sigNiv.min.toLocaleString());}
   else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
   val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
-  await cargarSeguimientoInicio();await cargarLogros();await cargarPedidosUsuario();
-  // Verificar perfil incompleto
+  await cargarSeguimientoPerfil();await cargarLogros();await cargarPedidosUsuario();
+  // Banner perfil incompleto
   var banner=document.getElementById('banner-perfil-incompleto');
   var bannerMsg=document.getElementById('banner-perfil-msg');
   if(banner&&bannerMsg){
     var faltantes=[];
     if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
     if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
-    if(faltantes.length>0){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
+    if(faltantes.length){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
     else{banner.style.display='none';}
   }
 }
@@ -1864,89 +1884,66 @@ function renderCart(){
   setTimeout(function(){if(S.user)llenarCkDatos();},50);
 }
 
+
 // ══════════════════════════════════════════
-// SEGUIMIENTO EN INICIO
+// SEGUIMIENTO EN PERFIL
 // ══════════════════════════════════════════
-async function cargarSeguimientoInicio(){
+async function cargarSeguimientoPerfil(){
   var el=document.getElementById('perfil-orders-panel');
   if(!el)return;
   if(!S.user||!sb){el.innerHTML='';return;}
-
   var res=await sb.from('pedidos').select('*')
     .eq('usuario_id',S.user.id)
     .not('status','eq','entregado')
-    .order('created_at',{ascending:false})
-    .limit(3);
+    .order('created_at',{ascending:false}).limit(3);
   var pedidos=res.data||[];
-
-  if(!pedidos.length){el.innerHTML='<div style="font-size:.6rem;color:var(--muted);padding:8px 0">Sin pedidos activos</div>';return;}
-
+  if(!pedidos.length){
+    el.innerHTML='<div style="font-size:.6rem;color:var(--muted);padding:8px 12px">Sin pedidos activos</div>';
+    return;
+  }
   var PASOS=[
     {key:'pendiente',      label:'Creado',    icon:'📋', color:'#6b7280'},
     {key:'en_preparacion', label:'Aceptado',  icon:'✅', color:'#f59e0b'},
     {key:'en_camino',      label:'En ruta',   icon:'🚚', color:'#7c3aed'},
     {key:'entregado',      label:'Entregado', icon:'🏆', color:'#16a34a'},
   ];
-
   function eIdx(s){
-    if(s==='entregado')return 3;
-    if(s==='en_camino')return 2;
-    if(s==='en_preparacion')return 1;
-    return 0;
+    if(s==='entregado')return 3;if(s==='en_camino')return 2;if(s==='en_preparacion')return 1;return 0;
   }
-
   el.innerHTML=pedidos.map(function(p){
-    var est=p.status||'pendiente';
-    var ei=eIdx(est);
-
+    var est=p.status||'pendiente';var ei=eIdx(est);
     var steps='<div style="display:flex;align-items:flex-start;margin:10px 0 6px">';
     PASOS.forEach(function(paso,i){
-      var done=i<=ei, curr=i===ei;
-      steps+=
-        '<div style="display:flex;flex-direction:column;align-items:center;flex:1">'+
-          '<div style="width:32px;height:32px;border-radius:50%;'+
-            'background:'+(done?paso.color:'var(--bg3)')+';'+
-            'border:2px solid '+(curr?paso.color:'transparent')+
-            (curr?';box-shadow:0 0 8px '+paso.color:'')+''+
-            ';display:flex;align-items:center;justify-content:center;font-size:.8rem;transition:all .3s">'+
-            (done?paso.icon:(i+1))+
-          '</div>'+
-          '<div style="font-size:.45rem;margin-top:3px;text-align:center;color:'+(curr?'var(--gold)':done?'var(--text)':'var(--muted)')+
-            ';font-weight:'+(curr?'700':'400')+'">'+paso.label+'</div>'+
-        '</div>';
-      if(i<3){
-        steps+='<div style="flex:0 0 16px;height:2px;background:'+(i<ei?'#16a34a':'var(--border)')+';margin-top:16px;border-radius:2px"></div>';
-      }
+      var done=i<=ei,curr=i===ei;
+      steps+='<div style="display:flex;flex-direction:column;align-items:center;flex:1">'+
+        '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?paso.color:'var(--bg3)')+
+        ';border:2px solid '+(curr?paso.color:'transparent')+
+        (curr?';box-shadow:0 0 8px '+paso.color:'')+
+        ';display:flex;align-items:center;justify-content:center;font-size:.8rem">'+
+        (done?paso.icon:(i+1))+'</div>'+
+        '<div style="font-size:.45rem;margin-top:3px;text-align:center;color:'+
+        (curr?'var(--gold)':done?'var(--text)':'var(--muted)')+
+        ';font-weight:'+(curr?'700':'400')+'">'+paso.label+'</div></div>';
+      if(i<3)steps+='<div style="flex:0 0 16px;height:2px;background:'+(i<ei?'#16a34a':'var(--border)')+';margin-top:16px;border-radius:2px"></div>';
     });
     steps+='</div>';
-
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'+
-        '<span style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold)">'+p.folio+'</span>'+
-        '<b style="font-size:.75rem">$'+p.total+'</b>'+
-      '</div>'+
+      '<span style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold)">'+p.folio+'</span>'+
+      '<b style="font-size:.75rem">$'+p.total+'</b></div>'+
       '<div style="font-size:.52rem;color:var(--muted);margin-bottom:4px">'+
-        new Date(p.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+
-      '</div>'+
-      steps+
-      '<div style="font-size:.55rem;color:var(--muted)">📍 '+(p.dir||'—')+'</div>'+
-    '</div>';
+      new Date(p.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</div>'+
+      steps+'<div style="font-size:.55rem;color:var(--muted)">📍 '+(p.dir||'—')+'</div></div>';
   }).join('');
-
-  // Realtime para inicio
+  // Realtime
   if(!window._perfilRealtimeInit&&S.user){
     window._perfilRealtimeInit=true;
-    sb.channel('perfil-seguimiento-'+S.user.id)
+    sb.channel('perfil-seg-'+S.user.id)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'pedidos',filter:'usuario_id=eq.'+S.user.id},
       function(payload){
-        var labels={
-          pendiente:'📋 Pedido recibido',
-          en_preparacion:'✅ ¡Tu pedido fue aceptado y se está empacando!',
-          en_camino:'🚚 ¡Tu pedido está en ruta!',
-          entregado:'🏆 ¡Pedido entregado!'
-        };
+        var labels={pendiente:'📋 Pedido recibido',en_preparacion:'✅ ¡Aceptado y empacando!',en_camino:'🚚 ¡En camino!',entregado:'🏆 ¡Entregado!'};
         notif(labels[payload.new.status]||'Pedido actualizado');
-        cargarSeguimientoInicio();
+        cargarSeguimientoPerfil();
       }).subscribe();
   }
 }
@@ -2615,16 +2612,6 @@ function llenarCkDatos(){
 async function confirmarPedido(){
   var errEl=document.getElementById('ck-error');if(errEl)errEl.style.display='none';
   if(!S.user){notif('Regístrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}
-  // Verificar perfil completo antes de hacer pedido
-  var u=S.user;
-  var perfilIncompleto=[];
-  if(!u.direccion||!u.direccion.trim())perfilIncompleto.push('dirección');
-  if(!u.password||!u.password.trim())perfilIncompleto.push('contraseña');
-  if(perfilIncompleto.length>0){
-    notif('⚠️ Completa tu perfil antes de hacer un pedido','var(--red)');
-    setTimeout(function(){goPage('usuario');},1200);
-    return;
-  }
   var nombre=(document.getElementById('ck-nombre')||{}).value||'';
   var tel=(document.getElementById('ck-tel')||{}).value||'';
   var dir=(document.getElementById('ck-dir')||{}).value||'';
@@ -3204,15 +3191,15 @@ async function llenarPerfil(){
   if(sigNiv){set('pNivelSig',sigNiv.nombre);var prog=((u.gastado-niv.lvl.min)/(sigNiv.min-niv.lvl.min)*100).toFixed(0);var pb=document.getElementById('pProgBar');if(pb)pb.style.width=Math.min(prog,100)+'%';set('pProgTexto','$'+(u.gastado||0).toLocaleString()+' / $'+sigNiv.min.toLocaleString());}
   else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
   val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
-  await cargarSeguimientoInicio();await cargarLogros();await cargarPedidosUsuario();
-  // Verificar perfil incompleto
+  await cargarSeguimientoPerfil();await cargarLogros();await cargarPedidosUsuario();
+  // Banner perfil incompleto
   var banner=document.getElementById('banner-perfil-incompleto');
   var bannerMsg=document.getElementById('banner-perfil-msg');
   if(banner&&bannerMsg){
     var faltantes=[];
     if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
     if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
-    if(faltantes.length>0){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
+    if(faltantes.length){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
     else{banner.style.display='none';}
   }
 }
@@ -3327,15 +3314,6 @@ async function init(){
   if(S.user)initRealtime();
 }
 window.addEventListener('load',init);
-
-// ── FUNCIONES LOGIN (movidas aquí para evitar renderizado como texto) ──
-async function checkPassField(){
-  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
-  if(tel.length<10)return;
-  var res=await sb.from('clientes').select('password').eq('telefono',tel).single();
-  var wrap=document.getElementById('lPassWrap');
-  if(wrap)wrap.style.display=(res.data&&res.data.password)?'block':'none';
-}
 
 </script>
 
