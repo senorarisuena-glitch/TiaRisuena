@@ -432,6 +432,14 @@ function sDEL(t,q){
 /* Utils */
 function $(id){return document.getElementById(id)}
 function fmt(n){return"$"+Number(parseFloat(n)||0).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function descargarComprobante(src){
+  var a=document.createElement('a');
+  a.href=src;
+  a.download='comprobante_'+Date.now()+'.jpg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 function hoy(){return new Date().toISOString().slice(0,10)}
 function toast(msg,tipo){var t=$("toast");t.textContent=msg;t.style.border="1px solid "+(tipo==="err"?"#F85149":"#00C896");t.style.color=tipo==="err"?"#F85149":"#00C896";t.style.display="block";setTimeout(function(){t.style.display="none"},3000)}
 function fi(label,inputHtml){return '<div class="fi"><label>'+label+'</label>'+inputHtml+'</div>'}
@@ -534,7 +542,7 @@ function rPedidos(el){
   function pedCard(p){
     var SC={pendiente:"#E3B341",concretado:"#00C896",cancelado:"#F85149"};
     var col=SC[p.status]||"#30363D";
-    var items=(p.items||[]).map(function(x){var nom=x.nb||x.nombre||x.desc||"Producto";var qty=x.q||x.cant||1;var precio=x.p||x.precio||x.pu||0;return'<div style="font-size:11px;padding:2px 0">'+qty+'x '+nom+' — '+fmt(precio*qty)+'</div>';}).join("");
+    var items=(p.items||[]).map(function(x){var sku=x.sku||x.inv_id||'';var nom=x.nb||x.nombre||x.desc||x.name||"Producto";var qty=x.q||x.cant||x.qty||1;var precio=x.p||x.precio||x.price||x.unit_price||x.pu||0;return'<div style="font-size:11px;padding:2px 0">'+(sku?'<span style="color:#C084FC;font-weight:700">'+sku+'</span> · ':'')+qty+'x '+nom+' — '+fmt(precio)+'</div>';}).join("");
     var h='<div style="background:#161B22;border:2px solid '+col+'40;border-radius:3px;padding:16px;margin-bottom:10px">';
     h+='<div style="display:flex;justify-content:space-between;margin-bottom:8px">';
     h+='<div><div style="font-size:13px;font-weight:700">'+p.nb+(p.ticket?' <span style="font-size:11px;font-weight:400;color:#4A9EFF">· #'+p.ticket+'</span>':'')+'</div>';
@@ -543,7 +551,7 @@ function rPedidos(el){
     h+='<div style="background:'+col+'20;border:1px solid '+col+'50;border-radius:2px;padding:3px 10px;font-size:10px;color:'+col+';font-weight:700;align-self:flex-start">'+(p.status||"").toUpperCase()+'</div></div>';
     h+='<div style="background:#21262D;border-radius:2px;padding:8px 12px;margin-bottom:8px">'+items+'</div>';
     if(p.captura){
-      h+='<div style="margin-bottom:8px;text-align:center"><a href="'+p.captura+'" target="_blank" title="Ver comprobante completo"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px;cursor:pointer;border:1px solid #30363D"></a><div style="font-size:10px;color:#4A9EFF;margin-top:3px">🖼 Toca para ver comprobante</div></div>';
+      h+='<div style="margin-bottom:8px;text-align:center"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px;cursor:pointer;border:1px solid #30363D" onclick="descargarComprobante(''+p.captura+'')"><div style="font-size:10px;color:#4A9EFF;margin-top:3px;cursor:pointer" onclick="descargarComprobante(''+p.captura+'')">🖼 Toca para descargar comprobante</div></div>';
     } else {
       h+='<div style="margin-bottom:8px;padding:6px 10px;background:#21262D;border:1px dashed #30363D;border-radius:3px;font-size:11px;color:#8B949E;text-align:center">Sin comprobante de pago</div>';
     }
@@ -678,7 +686,7 @@ function rPedidos(el){
           html+='<div style="background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:2px;padding:3px 10px;font-size:10px;color:#F59E0B;font-weight:700">PENDIENTE</div>';
           html+='</div>';
           if(cr.comprobante_url){
-            html+='<div style="margin-bottom:10px"><a href="'+cr.comprobante_url+'" target="_blank"><img src="'+cr.comprobante_url+'" style="max-height:70px;border-radius:4px;border:1px solid #30363D;cursor:pointer"></a></div>';
+            html+='<div style="margin-bottom:10px"><img src="'+cr.comprobante_url+'" style="max-height:70px;border-radius:4px;border:1px solid #30363D;cursor:pointer" onclick="descargarComprobante(''+cr.comprobante_url+'')"></div>';
           }
           // Formulario de aprobación
           html+='<div style="background:#21262D;border-radius:3px;padding:12px;margin-bottom:8px">';
@@ -815,8 +823,10 @@ function rPedidos(el){
           var totalMonto=parseFloat(ped.total)||0;
           var lineasEnriq=items.map(function(l){
             var qty=parseFloat(l.qty||l.quantity||l.cant||1);
-            var price=parseFloat(l.price||l.unit_price||l.precio||0);
-            return Object.assign({},l,{sku:l.sku||l.nombre||l.name||"",cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
+            var price=parseFloat(l.price||l.unit_price||l.precio||l.precio_venta||0);
+            var skuVal=l.sku||l.inv_id||"";
+            var nomVal=l.nombre||l.name||l.desc||l.nb||skuVal||"";
+            return Object.assign({},l,{sku:skuVal,nombre:nomVal,cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
           });
 
           // Si es coins, buscar el precio_mxn real de la transacción de coins
@@ -889,8 +899,10 @@ function rPedidos(el){
         var totalMonto=parseFloat(ped.total)||0;
         var lineasEnriq=(Array.isArray(ped.items)?ped.items:[]).map(function(l){
           var qty=parseFloat(l.qty||l.quantity||l.cant||1);
-          var price=parseFloat(l.price||l.unit_price||l.precio||0);
-          return Object.assign({},l,{sku:l.sku||l.nombre||l.name||"",cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
+          var price=parseFloat(l.price||l.unit_price||l.precio||l.precio_venta||0);
+          var skuVal=l.sku||l.inv_id||"";
+          var nomVal=l.nombre||l.name||l.desc||l.nb||skuVal||"";
+          return Object.assign({},l,{sku:skuVal,nombre:nomVal,cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
         });
         sPOST("ventas",{
           ticket:ticket,fecha:hoy(),

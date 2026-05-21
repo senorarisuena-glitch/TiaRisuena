@@ -2086,10 +2086,13 @@ async function confirmarYEnviar(metodo){
   });
 
   // Guardar pedido en seguimientos
+  var tidId='tid_'+Date.now();
   const {data:pedido, error} = await sb.from('seguimientos').insert({
-    id: 'tid_'+Date.now(),
+    id: tidId,
+    pedido_id: tidId,
     cliente_id: S.user.id,
     cliente: nombre,
+    cliente_codigo: S.user.codigo||'',
     folio, tel, dir,
     items: itemsMapped, regalos: gifts, total,
     pago: metodo, pagado,
@@ -2879,9 +2882,12 @@ async function confirmarPedido(){
   var folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
   var pagado=_ckMetodo==='coins';
   var itemsMapped2=prods.map(function(x){return{sku:x.sku||x.name||'',nombre:x.name||'',desc:x.name+(x.qty?' — '+x.qty:''),cant:1,qty:1,price:x.price||0,unit_price:x.price||0,precio:x.price||0,qty_label:x.qty||'1x',emoji:x.emoji||''};});
+  var tidId2='tid_'+Date.now();
   var res=await sb.from('seguimientos').insert({
-    id:'tid_'+Date.now(),
+    id:tidId2,
+    pedido_id:tidId2,
     cliente_id:S.user.id,
+    cliente_codigo:S.user.codigo||'',
     cliente:nombre.trim(),tel:tel.replace(/\D/g,''),dir:dir.trim(),
     folio:folio,
     items:itemsMapped2,regalos:gifts,total:total,
