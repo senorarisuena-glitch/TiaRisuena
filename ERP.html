@@ -2858,12 +2858,15 @@ function rProductos(el){
         var tipoLabel=TIPOS.find(function(t){return t.v===p.tipo;});
         var tipoColor={insumo:"#4A9EFF",terminado:"#00C896",mixto:"#E3B341",otro:"#C084FC"}[p.tipo]||"#8B949E";
         var idx=prods.indexOf(p);
+        var visLabel=p.visible_tienda?'<span style="color:#00C896;font-weight:700">SI</span>':'<span style="color:#F85149">NO</span>';
         return '<tr>'+
           '<td style="font-weight:700;color:#E6EDF3">'+(p.sku||p.nombre)+'</td>'+
           '<td style="color:#8B949E;font-size:11px">'+(p.descripcion||"—")+'</td>'+
           '<td style="font-size:11px;color:#C084FC">'+(p.categoria||"—")+'</td>'+
           '<td>'+bdg(tipoLabel?tipoLabel.l:p.tipo,tipoColor)+'</td>'+
-          '<td style="text-align:right;color:#E3B341">'+((p.precio_menu&&(p.tipo==="terminado"||p.tipo==="mixto"))?fmt(p.precio_menu):"—")+'</td>'+
+          '<td style="text-align:right;color:#E3B341">'+((p.precio_menu)?fmt(p.precio_menu):"—")+'</td>'+
+          '<td style="font-size:11px;color:#E6EDF3">'+(p.nombre_tienda&&p.nombre_tienda!=="NA"?p.nombre_tienda:'<span style="color:#8B949E">—</span>')+'</td>'+
+          '<td style="text-align:center">'+visLabel+'</td>'+
           '<td><div style="display:flex;gap:6px">'+
           '<button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="prEditIdx('+idx+')">editar</button>'+
           '<button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="prDelId('+p.id+')">✕</button>'+
@@ -2884,7 +2887,7 @@ function rProductos(el){
     html+='<select id="cat_fcat" onchange="catFiltCat(this.value)" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:8px 10px;font-size:12px;color:#E6EDF3"><option value="">Todas las categorías</option>';
     allCats.forEach(function(cat){html+='<option value="'+cat+'">'+cat+'</option>';});
     html+='</select></div>';
-    html+='<div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>Descripción</th><th>Categoría</th><th>Tipo</th><th style="text-align:right">Precio Menú</th><th></th></tr></thead><tbody id="cat_tbody"></tbody></table></div></div>';
+    html+='<div style="overflow-x:auto"><table><thead><tr><th>SKU</th><th>Descripción</th><th>Categoría</th><th>Tipo</th><th style="text-align:right">Precio Menú</th><th>Nombre Tienda</th><th style="text-align:center">Tienda</th><th></th></tr></thead><tbody id="cat_tbody"></tbody></table></div></div>';
     el.innerHTML=html;
 
     window.catFiltQ=function(v){filtroQ=v;render();};
@@ -2921,7 +2924,9 @@ function rProductos(el){
     html+='<div class="fi"><label>CATEGORÍA</label>';
     html+='<input id="prcat" list="prcat_list" value="'+(esEd?pe.categoria||"":"")+'" placeholder="Selecciona o escribe una categoría" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3">';
     html+='<datalist id="prcat_list">'+allCats2.map(function(c){return'<option value="'+c+'">';}).join("")+'</datalist></div>';
-    html+='<div class="fi" id="pr_pm_wrap" style="display:none"><label>PRECIO MENÚ ($) <span style="color:#8B949E;font-size:10px">(solo Mixto / Terminado)</span></label><input id="prprecio_menu" type="number" min="0" step="0.01" value="'+(esEd&&pe.precio_menu?pe.precio_menu:"")+'"\ placeholder="Precio en carta/menú"></div>';
+    html+='<div class="fi"><label>PRECIO MENÚ ($)</label><input id="prprecio_menu" type="number" min="0" step="0.01" value="'+(esEd&&pe.precio_menu?pe.precio_menu:"0")+'" placeholder="0.00"></div>';
+    html+='<div class="fi"><label>NOMBRE EN TIENDA</label><input id="prnombre_tienda" type="text" value="'+(esEd&&pe.nombre_tienda&&pe.nombre_tienda!=="NA"?pe.nombre_tienda:"")+'" placeholder="Nombre que verá el cliente (dejar vacío si no aplica)"></div>';
+    html+='<div class="fi"><label>VISIBLE EN TIENDA</label><select id="prvisible_tienda" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="false"'+(esEd&&pe.visible_tienda?'':' selected')+'>NO</option><option value="true"'+(esEd&&pe.visible_tienda?' selected':'')+'>SI</option></select></div>';
     html+='<div class="fi"><label>TIPO</label><select id="prtipo" onchange="prTipoChange()" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3">';
     TIPOS.forEach(function(t){html+='<option value="'+t.v+'"'+(esEd&&pe.tipo===t.v?' selected':(!esEd&&t.v==='insumo'?' selected':''))+'>'+t.l+'</option>';});
     html+='</select></div>';
@@ -2936,7 +2941,7 @@ function rProductos(el){
   window.prTipoChange=function(){
     var tipo=($("prtipo")||{}).value||"";
     var wrap=document.getElementById("pr_pm_wrap");
-    if(wrap)wrap.style.display=(tipo==="terminado"||tipo==="mixto")?"block":"none";
+    // precio_menu siempre visible
   };
   // Trigger on load
   setTimeout(function(){window.prTipoChange&&window.prTipoChange();},100);
