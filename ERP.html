@@ -76,7 +76,7 @@ var SU="https://hnyzfpblagnhntvgabej.supabase.co";
 var SK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhueXpmcGJsYWduaG50dmdhYmVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzNjg2ODUsImV4cCI6MjA5Mzk0NDY4NX0.isLWBDYfMyfvyNV84DU2aty90ztbbfP_2GTcU12mxHU";
 var CATALOGO_SKU=[
   {sku:"CAJA102LT",desc:"Caja 102 LT",cat:"Organizador",tipo:"otro"},
-  {sku:"ORGANIZADO102LT",desc:"Organizador 10 Cajas 102 LT",cat:"Organizador",tipo:"otro"},
+  {sku:"ORGANIZADOR102LT",desc:"Organizador 10 Cajas 102 LT",cat:"Organizador",tipo:"otro"},
   {sku:"R1",desc:"Flor Regular 1",cat:"Flor Granel Regular",tipo:"mixto"},
   {sku:"RP1",desc:"Flor Regular Plus 1",cat:"Flor Granel Regular Plus",tipo:"mixto"},
   {sku:"P1",desc:"Flor Premium 1",cat:"Flor Granel Premium",tipo:"mixto"},
@@ -542,13 +542,41 @@ function rPedidos(el){
     h+='<div style="font-size:11px;color:#8B949E">📍 '+(p.dir||'—')+'</div></div>';
     h+='<div style="background:'+col+'20;border:1px solid '+col+'50;border-radius:2px;padding:3px 10px;font-size:10px;color:'+col+';font-weight:700;align-self:flex-start">'+(p.status||"").toUpperCase()+'</div></div>';
     h+='<div style="background:#21262D;border-radius:2px;padding:8px 12px;margin-bottom:8px">'+items+'</div>';
-    if(p.captura)h+='<div style="margin-bottom:8px;text-align:center"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px"></div>';
+    if(p.captura){
+      h+='<div style="margin-bottom:8px;text-align:center"><a href="'+p.captura+'" target="_blank" title="Ver comprobante completo"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px;cursor:pointer;border:1px solid #30363D"></a><div style="font-size:10px;color:#4A9EFF;margin-top:3px">🖼 Toca para ver comprobante</div></div>';
+    } else {
+      h+='<div style="margin-bottom:8px;padding:6px 10px;background:#21262D;border:1px dashed #30363D;border-radius:3px;font-size:11px;color:#8B949E;text-align:center">Sin comprobante de pago</div>';
+    }
     h+='<div style="display:flex;justify-content:space-between;align-items:center">';
     h+='<div style="font-size:14px;font-weight:700;color:#00C896">'+fmt(p.total||0)+'<span style="font-size:11px;color:#8B949E;font-weight:400;margin-left:6px">'+(p.pago||"")+'</span></div>';
     h+='<div style="display:flex;gap:8px">';
     if(p.status==="pendiente"){
-      h+='<button class="btn btn-p btn-s" onclick="pedConc(&apos;'+p.id+'&apos;)">✓ Concretar</button>';
-      h+='<button class="btn btn-s btn-o" style="border-color:#F85149;color:#F85149" onclick="pedCanc(&apos;'+p.id+'&apos;)">✕</button>';
+      h+='</div></div>';
+      if(p.pago==="coins"){
+        // Pagado con coins — solo concretar, sin registrar en tesorería
+        h+='<div style="background:#21262D;border-radius:3px;padding:10px;margin-top:8px;display:flex;align-items:center;justify-content:space-between">';
+        h+='<div style="font-size:11px;color:#F59E0B;font-weight:700">🪙 Pagado con Tía Coins</div>';
+        h+='<div style="display:flex;gap:6px">';
+        h+='<button class="btn btn-p btn-s" onclick="pedConc(&apos;'+p.id+'&apos;,true)">✓ Concretar</button>';
+        h+='<button class="btn btn-s btn-o" style="border-color:#F85149;color:#F85149" onclick="pedCanc(&apos;'+p.id+'&apos;)">✕</button>';
+        h+='</div></div>';
+      } else {
+        // Pago normal — mostrar formulario
+        h+='<div style="background:#21262D;border-radius:3px;padding:10px;margin-top:8px">';
+        h+='<div style="font-size:10px;color:#8B949E;letter-spacing:.05em;margin-bottom:8px;font-weight:700">REGISTRAR PAGO</div>';
+        h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">';
+        h+='<select id="pp_cuenta_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Caja Chica">Caja Chica</option><option value="Mercado Pago">Mercado Pago</option><option value="Kiyoshi">Kiyoshi</option></select>';
+        h+='<select id="pp_tipo_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Transferencia">Transferencia</option><option value="Deposito">Depósito</option><option value="Efectivo">Efectivo</option></select>';
+        h+='<input id="pp_monto_'+p.id+'" type="number" placeholder="Monto" value="'+(p.total||0)+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3;text-align:right">';
+        h+='</div>';
+        h+='<div style="display:flex;gap:6px">';
+        h+='<button class="btn btn-p btn-s" style="flex:1" onclick="pedConc(&apos;'+p.id+'&apos;)">✓ Concretar</button>';
+        h+='<button class="btn btn-s" style="border-color:#8B949E;color:#8B949E;font-size:10px" onclick="pedConcCredito(&apos;'+p.id+'&apos;)">📋 A crédito</button>';
+        h+='<button class="btn btn-s btn-o" style="border-color:#F85149;color:#F85149" onclick="pedCanc(&apos;'+p.id+'&apos;)">✕</button>';
+        h+='</div></div>';
+      }
+      h+='</div>';
+      return h;
     }
     if(p.status==="concretado"){
       var estadoEnvio=p.estado_envio||"preparando";
@@ -562,14 +590,18 @@ function rPedidos(el){
     return h;
   }
 
-  function render(peds,envios){
+  function render(peds,envios,coinsReqs){
     envios=envios||[];
     var f=peds.filter(function(p){return p.status===filtro;});
     var pend=peds.filter(function(p){return p.status==="pendiente";}).length;
     var html='<div class="mod">';
     html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">';
     html+='<div><h1 style="font-size:18px;font-weight:700">📦 Pedidos Tienda</h1><p style="font-size:11px;color:#8B949E;margin-top:3px">Actualiza cada 5s</p></div>';
-    if(pend>0)html+='<div style="background:rgba(227,179,65,.15);border:1px solid rgba(227,179,65,.4);border-radius:2px;padding:6px 14px;font-size:11px;color:#E3B341;font-weight:700">'+pend+' pendiente(s)</div>';
+    var coinsPend=Array.isArray(coinsReqs)?coinsReqs.length:0;
+    var badges='';
+    if(pend>0)badges+='<div style="background:rgba(227,179,65,.15);border:1px solid rgba(227,179,65,.4);border-radius:2px;padding:6px 14px;font-size:11px;color:#E3B341;font-weight:700">'+pend+' pedido(s)</div>';
+    if(coinsPend>0)badges+='<div style="background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);border-radius:2px;padding:6px 14px;font-size:11px;color:#F59E0B;font-weight:700">🪙 '+coinsPend+' coin(s)</div>';
+    if(badges)html+='<div style="display:flex;gap:6px">'+badges+'</div>';
     html+='</div>';
     html+='<div style="display:flex;gap:6px;margin-bottom:16px">';
     [{k:"pendiente",l:"Pendientes"},{k:"concretado",l:"Por Entregar"},{k:"entregado",l:"Entregados"}].forEach(function(x){
@@ -631,6 +663,40 @@ function rPedidos(el){
         });
       }
     } else {
+      // Solicitudes de coins pendientes (solo en tab Pendientes)
+      if(filtro==="pendiente"&&Array.isArray(coinsReqs)&&coinsReqs.length){
+        html+='<div style="font-size:10px;color:#F59E0B;letter-spacing:.1em;margin-bottom:10px;font-weight:700">🪙 SOLICITUDES COINS ('+coinsReqs.length+')</div>';
+        coinsReqs.forEach(function(cr){
+          var metLabel={oxxo:"Depósito OXXO",transferencia:"Transferencia bancaria"}[cr.metodo_pago]||cr.metodo_pago||"—";
+          html+='<div style="background:#161B22;border:2px solid rgba(245,158,11,.4);border-radius:3px;padding:16px;margin-bottom:10px">';
+          html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">';
+          html+='<div>';
+          html+='<div style="font-size:13px;font-weight:700;color:#F59E0B">🪙 '+cr.cantidad+' Tía Coins</div>';
+          html+='<div style="font-size:11px;color:#8B949E;margin-top:2px">Cliente ID: '+(cr.cliente_id||"—")+' · '+metLabel+'</div>';
+          html+='<div style="font-size:11px;color:#8B949E">$'+parseFloat(cr.precio_mxn||0).toFixed(2)+' MXN · '+(cr.created_at?cr.created_at.slice(0,10):"—")+"</div>";
+          html+='</div>';
+          html+='<div style="background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:2px;padding:3px 10px;font-size:10px;color:#F59E0B;font-weight:700">PENDIENTE</div>';
+          html+='</div>';
+          if(cr.comprobante_url){
+            html+='<div style="margin-bottom:10px"><a href="'+cr.comprobante_url+'" target="_blank"><img src="'+cr.comprobante_url+'" style="max-height:70px;border-radius:4px;border:1px solid #30363D;cursor:pointer"></a></div>';
+          }
+          // Formulario de aprobación
+          html+='<div style="background:#21262D;border-radius:3px;padding:12px;margin-bottom:8px">';
+          html+='<div style="font-size:10px;color:#8B949E;letter-spacing:.05em;margin-bottom:8px;font-weight:700">REGISTRAR INGRESO EN TESORERÍA</div>';
+          html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">';
+          html+='<select id="cr_cuenta_'+cr.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Caja Chica">Caja Chica</option><option value="Mercado Pago">Mercado Pago</option><option value="Kiyoshi">Kiyoshi</option></select>';
+          html+='<select id="cr_tipo_'+cr.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Transferencia">Transferencia</option><option value="Deposito">Depósito</option><option value="Efectivo">Efectivo</option></select>';
+          html+='<input id="cr_monto_'+cr.id+'" type="number" value="'+parseFloat(cr.precio_mxn||0).toFixed(2)+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3;text-align:right">';
+          html+='</div>';
+          html+='</div>';
+          html+='<div style="display:flex;gap:8px">';
+          html+='<button onclick="aprobarCoins(&apos;'+cr.id+'&apos;)" class="btn btn-p btn-s" style="flex:1">✓ Aprobar coins</button>';
+          html+='<button onclick="rechazarCoins(&apos;'+cr.id+'&apos;)" class="btn btn-s" style="border-color:#F85149;color:#F85149">✕ Rechazar</button>';
+          html+='</div>';
+          html+='</div>';
+        });
+        html+='<div style="height:1px;background:#30363D;margin:16px 0"></div>';
+      }
       if(!f.length)html+='<div class="empty">Sin pedidos.</div>';
       else f.forEach(function(p){html+=pedCard(p);});
     }
@@ -640,17 +706,39 @@ function rPedidos(el){
 
   function load(){
     Promise.all([
-      sGET("pedidos","order=created_at.desc"),
       sGET("seguimientos","order=fecha_creado.desc"),
       sGET("envios","order=num_envio.desc"),
-      sGET("ventas","order=ticket.desc")
+      sGET("ventas","order=ticket.desc"),
+      sGET("coins_transacciones","estado=eq.pendiente&order=created_at.desc")
     ]).then(function(res){
-      var pedidos=Array.isArray(res[0])?res[0]:[];
-      var allSegs=Array.isArray(res[1])?res[1]:[];
-      var envios=Array.isArray(res[2])?res[2]:[];
-      var allVentas=Array.isArray(res[3])?res[3]:[];
+      var allSegs=Array.isArray(res[0])?res[0]:[];
+      var envios=Array.isArray(res[1])?res[1]:[];
+      var allVentas=Array.isArray(res[2])?res[2]:[];
+      var coinsReqs=Array.isArray(res[3])?res[3]:[];
+      // Pedidos tienda = seguimientos con origen="tienda", mapeados al formato de pedCard
+      var pedidos=allSegs.filter(function(s){return s.origen==="tienda";}).map(function(s){
+        var st=s.pedido_ticket?"concretado":(s.estado==="cancelado"?"cancelado":"pendiente");
+        return{
+          id:s.id,
+          nb:s.cliente||s.nb||"",
+          tel:s.tel||"—",
+          dir:s.dir||"—",
+          items:Array.isArray(s.items)?s.items:[],
+          total:s.total||0,
+          pago:s.pago||s.metodo_pago||"",
+          pagado:s.pagado||false,
+          folio:s.folio||"",
+          fecha:s.fecha_creado||hoy(),
+          status:st,
+          estado_envio:s.estado||"preparando",
+          num_envio:s.num_envio||null,
+          ticket:s.pedido_ticket||null,
+          captura:s.comprobante_url||null,
+          origen:"tienda"
+        };
+      });
       var ventaTickets=new Set(allVentas.map(function(v){return String(v.ticket);}));
-      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&(ventaTickets.has(String(s.pedido_ticket)));});
+      var erpSegs=allSegs.filter(function(s){return s.origen==="erp"&&s.pedido_ticket&&ventaTickets.has(String(s.pedido_ticket));});
       var erpPeds=erpSegs.map(function(s){
         var envio=envios.find(function(e){
           return (e.pedidos||[]).some(function(p){return String(p.ticket)===String(s.pedido_ticket);});
@@ -661,10 +749,12 @@ function rPedidos(el){
         return{
           id:"seg_"+s.id,
           nb:(s.cliente_codigo?s.cliente_codigo+" · ":"")+s.cliente,
-          tel:"—",dir:"—",
+          tel:s.tel||"—",
+          dir:s.dir||"—",
           items:ventaData&&Array.isArray(ventaData.lineas)?ventaData.lineas.map(function(l){return{nb:l.desc||l.nombre,q:parseFloat(l.cant||1),p:parseFloat(l.pu||0)};}):[],
           total:s.total||ventaData&&ventaData.monto_venta||0,
-          pago:"ERP",
+          pago:s.pago||"ERP",
+          captura:s.comprobante_url||null,
           fecha:s.fecha_creado||hoy(),
           status:estadoReal==="entregado"?"entregado":"concretado",
           estado_envio:estadoReal,
@@ -673,7 +763,7 @@ function rPedidos(el){
           ticket:s.pedido_ticket
         };
       });
-      render(pedidos.concat(erpPeds),envios);
+      render(pedidos.concat(erpPeds),envios,coinsReqs);  // pedidos = tienda sin concretar
     });
   }
   window.pedFiltro=function(f){filtro=f;load();};
@@ -696,65 +786,192 @@ function rPedidos(el){
         }
       });
     } else {
-      // Tienda: update pedido + seguimiento
-      proms.push(sPATCH("pedidos","id=eq."+id,{status:"entregado"}));
-      sGET("seguimientos","pedido_id=eq."+String(id)).then(function(segs){
+      // Tienda: solo actualizar seguimiento (ya no hay tabla pedidos)
+      sGET("seguimientos","id=eq."+String(id)).then(function(segs){
         var seg=segs&&segs[0];
         if(seg){
           var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha,nota:"Entrega en oficina"}]);
-          proms.push(sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}));
+          sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}).then(function(){
+            toast("✅ Entregado en oficina");load();
+          });
         }
-        Promise.all(proms).then(function(){toast("✅ Entregado en oficina");load();});
       });
     }
   };
-  window.pedConc=function(id){
+  window.pedConc=function(id,sinPago){
+    // Leer formulario de pago (solo si no es coins)
+    var cuenta=sinPago?null:($("pp_cuenta_"+id)||{}).value||"Caja Chica";
+    var tipo=sinPago?null:($("pp_tipo_"+id)||{}).value||"Transferencia";
+    var monto=sinPago?0:parseFloat(($("pp_monto_"+id)||{}).value)||0;
+
     sGET("ventas","select=ticket&order=ticket.desc&limit=1").then(function(rows){
       var maxT=rows&&rows[0]?rows[0].ticket:0;
       var ticket=maxT+1;
-      sGET("pedidos","id=eq."+id).then(function(pr){
+      sGET("seguimientos","id=eq."+id).then(function(pr){
         var ped=pr&&pr[0];if(!ped)return;
-        // Buscar cliente_id por telefono
-        var buscarCli=ped.usuario_id?Promise.resolve(ped.usuario_id):sGET("clientes","telefono=eq."+(ped.tel||"")+"&select=id&limit=1").then(function(r){return r&&r[0]?r[0].id:0;});
+        var buscarCli=ped.cliente_id?Promise.resolve(ped.cliente_id):sGET("clientes","telefono=eq."+(ped.tel||"")+"&select=id&limit=1").then(function(r){return r&&r[0]?r[0].id:0;});
         buscarCli.then(function(cliId){
-        // Enriquecer lineas con precio_venta unitario
-        var items=Array.isArray(ped.items)?ped.items:[];
-        var totalMonto=parseFloat(ped.total)||0;
-        var lineasEnriq=items.map(function(l){
-          var qty=parseFloat(l.qty||l.quantity||l.cant||1);
-          var price=parseFloat(l.price||l.unit_price||l.precio||0);
-          return Object.assign({},l,{
-            sku:l.sku||l.nombre||l.name||"",
-            cant:qty,
-            precio_venta:price,
-            costo_unit:0,
-            utilidad_unit:price
+          var items=Array.isArray(ped.items)?ped.items:[];
+          var totalMonto=parseFloat(ped.total)||0;
+          var lineasEnriq=items.map(function(l){
+            var qty=parseFloat(l.qty||l.quantity||l.cant||1);
+            var price=parseFloat(l.price||l.unit_price||l.precio||0);
+            return Object.assign({},l,{sku:l.sku||l.nombre||l.name||"",cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
           });
-        });
-        sPOST("ventas",{
-          ticket:ticket,fecha:hoy(),
-          cliente_id:cliId||0,
-          cliente_nombre:ped.nb||ped.nombre_cliente||"",
-          monto_venta:totalMonto,
-          adeudo:ped.pagado?0:totalMonto,
-          cobrado:ped.pagado?totalMonto:0,
-          costo_productos:0,utilidad:totalMonto,pct_util:0,
-          origen:"tienda",
-          pedido_id:String(ped.id),
-          folio_tienda:ped.folio||"",
-          dir_entrega:ped.dir||"",
-          metodo_pago:ped.pago||ped.metodo_pago||"efectivo",
-          lineas:lineasEnriq
-        }).then(function(){
-          sPOST("seguimientos",{id:String(Date.now()),pedido_id:String(ped.id),pedido_ticket:ticket,cliente:ped.nb,tel:ped.tel,dir:ped.dir,total:ped.total||0,estado:"preparando",fecha_creado:hoy(),historial:[{estado:"preparando",fecha:hoy()}]}).then(function(){
-            sPATCH("pedidos","id=eq."+id,{status:"concretado"}).then(function(){toast("✓ Ticket #"+ticket+" creado");load()});
-          });
-        });
+
+          // Si es coins, buscar el precio_mxn real de la transacción de coins
+          var montoRealProm=sinPago?
+            sGET("coins_transacciones","cliente_id=eq."+(cliId||0)+"&estado=eq.aprobado&order=created_at.desc&limit=1").then(function(rows){
+              var ct=rows&&rows[0];
+              return ct?parseFloat(ct.precio_mxn||totalMonto):totalMonto;
+            }):Promise.resolve(totalMonto);
+
+          montoRealProm.then(function(montoReal){
+            var montoVenta=sinPago?montoReal:totalMonto;
+            var adeudo=sinPago?0:(monto>=totalMonto?0:totalMonto-monto);
+            var cobrado=sinPago?montoReal:monto||0;
+          sPOST("ventas",{
+            ticket:ticket,fecha:hoy(),
+            cliente_id:cliId||0,
+            cliente_nombre:ped.cliente||ped.nb||"",
+            monto_venta:montoVenta,
+            adeudo:adeudo,
+            cobrado:cobrado,
+            costo_productos:0,utilidad:montoVenta,pct_util:0,
+            origen:"tienda",
+            pedido_id:String(ped.id),
+            folio_tienda:ped.folio||"",
+            dir_entrega:ped.dir||"",
+            metodo_pago:sinPago?"coins":tipo,
+            lineas:lineasEnriq
+          }).then(function(){
+            // Crear movimiento en tesorería si hay monto
+            var movProm=monto>0?sPOST("movimientos",{
+              fecha:hoy(),cuenta:cuenta,tipo_pago:tipo,
+              movimiento:"Venta",egreso:false,monto:monto,
+              concepto:"Venta Ticket #"+ticket+" — "+(ped.cliente||ped.nb||""),
+              gasto_ticket:"Ticket #"+ticket+": "+fmt(monto)
+            }):Promise.resolve();
+            movProm.then(function(){
+              // Si es pago con coins, actualizar referencia en tesorería al ticket
+              var coinsLinkProm=sinPago?
+                sGET("coins_transacciones","cliente_id=eq."+(cliId||0)+"&estado=eq.aprobado&order=created_at.desc&limit=1").then(function(rows){
+                  var ct=rows&&rows[0];
+                  if(ct&&ct.movimiento_id){
+                    return sPATCH("movimientos","id=eq."+ct.movimiento_id,{
+                      gasto_ticket:"Ticket #"+ticket+": "+fmt(montoReal),
+                      concepto:"Venta Ticket #"+ticket+" — "+(ped.cliente||ped.nb||"")+" (Coins)"
+                    });
+                  }
+                  return Promise.resolve();
+                }):Promise.resolve();
+              coinsLinkProm.then(function(){
+                var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy()}]);
+                sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
+                  toast("✓ Ticket #"+ticket+" creado");load();
+                });
+              });
+            }); // end movProm
+          }); // end sPOST ventas
+          }); // end montoRealProm
         }); // end buscarCli
       });
     });
   };
-  window.pedCanc=function(id){if(confirm("¿Cancelar?"))sPATCH("pedidos","id=eq."+id,{status:"cancelado"}).then(function(){toast("Cancelado","err");load()})};
+
+  window.pedConcCredito=function(id){
+    if(!confirm("¿Concretar a crédito? No se registrará ningún movimiento en tesorería."))return;
+    sGET("ventas","select=ticket&order=ticket.desc&limit=1").then(function(rows){
+      var maxT=rows&&rows[0]?rows[0].ticket:0;
+      var ticket=maxT+1;
+      sGET("seguimientos","id=eq."+id).then(function(pr){
+        var ped=pr&&pr[0];if(!ped)return;
+        var totalMonto=parseFloat(ped.total)||0;
+        var lineasEnriq=(Array.isArray(ped.items)?ped.items:[]).map(function(l){
+          var qty=parseFloat(l.qty||l.quantity||l.cant||1);
+          var price=parseFloat(l.price||l.unit_price||l.precio||0);
+          return Object.assign({},l,{sku:l.sku||l.nombre||l.name||"",cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
+        });
+        sPOST("ventas",{
+          ticket:ticket,fecha:hoy(),
+          cliente_id:ped.cliente_id||0,
+          cliente_nombre:ped.cliente||ped.nb||"",
+          monto_venta:totalMonto,adeudo:totalMonto,cobrado:0,
+          costo_productos:0,utilidad:totalMonto,pct_util:0,
+          origen:"tienda",pedido_id:String(ped.id),folio_tienda:ped.folio||"",
+          dir_entrega:ped.dir||"",metodo_pago:"credito",lineas:lineasEnriq
+        }).then(function(){
+          var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy(),nota:"A crédito"}]);
+          sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
+            toast("✓ Ticket #"+ticket+" — a crédito");load();
+          });
+        });
+      });
+    });
+  };
+  window.pedCanc=function(id){if(confirm("¿Cancelar?"))sPATCH("seguimientos","id=eq."+id,{estado:"cancelado"}).then(function(){toast("Cancelado","err");load()})};
+
+  window.aprobarCoins=function(crId){
+    var cuenta=($("cr_cuenta_"+crId)||{}).value||"Caja Chica";
+    var tipo=($("cr_tipo_"+crId)||{}).value||"Transferencia";
+    var monto=parseFloat(($("cr_monto_"+crId)||{}).value)||0;
+    if(!monto){alert("Ingresa el monto recibido");return;}
+    if(!confirm("¿Aprobar coins y registrar $"+monto.toFixed(2)+" en "+cuenta+"?"))return;
+
+    // 1. Obtener datos de la solicitud primero
+    sGET("coins_transacciones","id=eq."+crId).then(function(rows){
+      var cr=rows&&rows[0];if(!cr)return;
+      var clienteId=cr.cliente_id;
+      var totalCoins=cr.cantidad;
+
+      // 2. Crear movimiento en tesorería
+      sPOST("movimientos",{
+        fecha:hoy(),
+        cuenta:cuenta,
+        tipo_pago:tipo,
+        movimiento:"Compra Coins",
+        concepto:"Compra de Tía Coins — cliente #"+(clienteId||""),
+        egreso:false,
+        monto:monto,
+        gasto_ticket:"Coins cliente #"+(clienteId||crId)
+      }).then(function(movRes){
+        var movId=Array.isArray(movRes)&&movRes[0]?movRes[0].id:null;
+
+        // 3. Actualizar coins del cliente con fetch directo
+        var updateCoins=clienteId?
+          sGET("clientes","id=eq."+clienteId).then(function(cli){
+            var actual=cli&&cli[0]?parseFloat(cli[0].coins||0):0;
+            var nuevos=actual+totalCoins;
+            return fetch(SU+"/rest/v1/clientes?id=eq."+clienteId,{
+              method:"PATCH",
+              headers:{"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"},
+              body:JSON.stringify({coins:nuevos})
+            }).then(function(r){
+              if(!r.ok)r.json().then(function(e){console.error("coins PATCH error:",e);toast("Error actualizando coins","err");});
+              return r.ok;
+            });
+          }):Promise.resolve();
+
+        updateCoins.then(function(){
+          // 4. Marcar solicitud como aprobada y guardar movimiento_id
+          sPATCH("coins_transacciones","id=eq."+crId,{
+            estado:"aprobado",
+            movimiento_id:movId||null
+          }).then(function(){
+            toast("🪙 Coins aprobados — +"+totalCoins+" coins al cliente");
+            load();
+          });
+        });
+      });
+    });
+  };
+
+  window.rechazarCoins=function(crId){
+    if(!confirm("¿Rechazar esta solicitud de coins?"))return;
+    sPATCH("coins_transacciones","id=eq."+crId,{estado:"rechazado"}).then(function(){
+      toast("Solicitud rechazada","err");load();
+    });
+  };
   window.pedEntreg=function(id){
     var fecha=new Date().toLocaleDateString("es-MX");
     function marcarSeg(seg){
@@ -863,15 +1080,17 @@ function rVentas(el){
     rows.forEach(function(r){r.style.display=r.textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none"});
   };
   window.vNueva=function(){
-    if(!clientes.length){
-      sGET("clientes","order=codigo").then(function(d){
-        clientes=Array.isArray(d)?d:[];
-        vForm(null);
-      });
-    } else {vForm(null);}
+    sGET("clientes","order=codigo").then(function(d){
+      clientes=Array.isArray(d)?d:[];
+      vForm(null);
+    });
   };
-  window.vEdit=function(id){vForm(ventas.find(function(v){return v.id===id}))};
-  window.vDel=function(id){
+  window.vEdit=function(id){
+    sGET("clientes","order=codigo").then(function(d){
+      clientes=Array.isArray(d)?d:[];
+      vForm(ventas.find(function(v){return v.id===id}));
+    });
+  };  window.vDel=function(id){
     if(!confirm("¿Eliminar venta? Esto revertirá el inventario."))return;
     sGET("ventas","id=eq."+id).then(function(rows){
       var v=rows&&rows[0];
@@ -896,6 +1115,7 @@ function rVentas(el){
     var lineas=esEd&&ve.lineas&&ve.lineas.length?JSON.parse(JSON.stringify(ve.lineas)):[{inv_id:"",desc:"",cant:1,pu:0,cu:0}];
     var cliId=esEd?String(ve.cliente_id||""):"";
     var cliNom=esEd?ve.cliente_nombre||"":"";
+    var cliCodigo="";var cliTel="";var cliDir="";
 
     function calcTotals(){
       var tv=lineas.reduce(function(a,l){return a+(parseFloat(l.cant)||0)*(parseFloat(l.pu)||0)},0);
@@ -998,13 +1218,17 @@ function rVentas(el){
     document.body.appendChild(vcliDropEl);
 
     window.vCliInput=function(val){
-      cliId="";cliNom="";
+      cliId="";cliNom=val;
       var dropE=document.getElementById("vclidrop_float");
       var sel=document.getElementById("vclisel");
       if(sel)sel.textContent="";
       if(!val||val.length<1){if(dropE)dropE.style.display="none";return;}
       var q=val.toLowerCase();
-      var matches=clientes.filter(function(x){return x.nombre.toLowerCase().indexOf(q)>=0||x.codigo.toLowerCase().indexOf(q)>=0}).slice(0,10);
+      var matches=clientes.filter(function(x){
+        var nom=(x.nombre||"").toLowerCase();
+        var cod=(x.codigo||"").toLowerCase();
+        return nom.indexOf(q)>=0||cod.indexOf(q)>=0;
+      }).slice(0,10);
       var drop=document.getElementById("vclidrop_float");
       if(!matches.length){if(drop)drop.style.display="none";return;}
       var drop=document.getElementById("vclidrop_float");
@@ -1025,7 +1249,7 @@ function rVentas(el){
           row.innerHTML='<span style="color:#C084FC;font-weight:700">'+cl.codigo+'</span> · <span style="color:#E6EDF3">'+cl.nombre+'</span>';
           row.onmousedown=function(e){
             e.preventDefault();
-            cliId=String(cl.id);cliNom=cl.nombre;cliCodigo=cl.codigo;
+            cliId=String(cl.id);cliNom=cl.nombre;cliCodigo=cl.codigo;cliTel=cl.telefono||"";cliDir=cl.direccion||"";
             var inp=document.getElementById("vcliinput");
             if(inp)inp.value=cl.codigo+' · '+cl.nombre;
             drop.style.display="none";
@@ -1149,7 +1373,7 @@ function rVentas(el){
       _vGuardando=true;
       var t=calcTotals();
       var monto=parseFloat(($("vmonto")||{}).value)||t.tv;
-      if(!cliId||!cliNom.trim()){alert("Debes seleccionar un cliente de la lista");return}
+      if(!cliNom.trim()){alert("Escribe el nombre del cliente");return}
       var util=monto-t.tc;
       // Enriquecer lineas con precio_venta, costo_unit y utilidad_unit proporcional
       var totalCosto=t.tc||0;
@@ -1193,6 +1417,8 @@ function rVentas(el){
             cliente:cliNom,
             cliente_codigo:cliCodigo||"",
             cliente_id:parseInt(cliId)||0,
+            tel:cliTel||"",
+            dir:cliDir||"",
             total:monto,
             estado:"preparando",
             origen:"erp",
@@ -1211,7 +1437,17 @@ function rVentas(el){
           });
           Promise.all(lotesV).then(function(){_vGuardando=false;load();goMod("ventas");toast("Venta registrada");});
         } else {
-          _vGuardando=false;load();goMod("ventas");toast("Venta actualizada");
+          // Al editar: borrar lotes viejos de esta venta y recrear
+          sDEL("lotes","tipo=eq.venta&ref_id=eq."+String(body.ticket||ve.ticket)).then(function(){
+            var ventaLineas=Array.isArray(body.lineas)?body.lineas:[];
+            var lotesV=ventaLineas.map(function(l){
+              var sku=l.sku||l.desc||l.nombre||"";
+              var cant=parseFloat(l.cant||l.cantidad||0);
+              if(!sku||!cant)return Promise.resolve();
+              return sPostLote({sku:sku,tipo:"venta",movimiento:"salida",ref_id:body.ticket||ve.ticket,fecha:body.fecha||hoy(),cantidad:cant,costo_unit:parseFloat(l.costo_unit||l.cu||0),concepto:"Venta ticket #"+(body.ticket||ve.ticket),num_ref:"V-"+(body.ticket||ve.ticket)});
+            });
+            Promise.all(lotesV).then(function(){_vGuardando=false;load();goMod("ventas");toast("Venta actualizada");});
+          });
         }
       });
     };
@@ -1763,6 +1999,16 @@ function rCompras(el){
           // Crear lotes ENTRADA por cada línea
           var compraId=Array.isArray(saveRes)&&saveRes[0]?saveRes[0].id:null;
           var fecha=body.fecha||hoy();
+          // Validar que todos los SKUs existan en el catálogo
+          var skusInvalidos=validLines.filter(function(l){
+            var sku=(l.nombre||l.sku||"").trim();
+            return sku&&!CATALOGO_SKU.find(function(s){return s.sku===sku||s.desc===sku;});
+          });
+          if(skusInvalidos.length){
+            var nombres=skusInvalidos.map(function(l){return l.nombre||l.sku}).join(", ");
+            alert("SKU(s) no encontrado(s) en el catálogo:\n"+nombres+"\n\nVerifica que el código sea correcto.");
+            _cGuardando=false;return;
+          }
           var lotesPromises=validLines.map(function(l){
             var sku=l.nombre||l.sku||"";
             var cant=parseFloat(l.cantidad)||0;
@@ -1783,7 +2029,20 @@ function rCompras(el){
           Promise.all(lotesPromises).then(function(){
             load();goMod("compras");toast("Compra #"+autoNC+" registrada — "+validLines.length+" producto(s)");
           });
-        } else {load();goMod("compras");toast("Compra actualizada")}
+        } else {
+          // Al editar: borrar lotes viejos de esta compra y recrear
+          sDEL("lotes","tipo=eq.compra&ref_id=eq."+cid).then(function(){
+            var fecha=body.fecha||hoy();
+            var lotesUpd=validLines.map(function(l){
+              var sku=l.nombre||l.sku||"";
+              var cant=parseFloat(l.cantidad)||0;
+              var pu=parseFloat(l.pu)||0;
+              if(!sku||!cant)return Promise.resolve();
+              return sPostLote({sku:sku,tipo:"compra",movimiento:"entrada",ref_id:cid,fecha:fecha,cantidad:cant,costo_unit:pu,concepto:"Compra #"+autoNC+" — "+(l.descripcion||sku),num_ref:"C-"+autoNC});
+            });
+            Promise.all(lotesUpd).then(function(){load();goMod("compras");toast("Compra actualizada");});
+          });
+        }
       });
     };
     renderLineas();
@@ -2358,18 +2617,21 @@ function rEnvios(el){
           var repNom=($("erep")||{}).value||"";
           var costoEnvio=parseFloat(($("ecosto")||{}).value)||0;
           if(repNom&&costoEnvio>0){
-            sPOST("compras",{
-              num_compra:Date.now(),
-              fecha:($("efecha")||{}).value||hoy(),
-              proveedor:repNom,
-              proveedor_id:0,
-              producto_nombre:"Servicio de envío",
-              descripcion:"Ruta #"+autoE+" · "+pedsMapped.length+" pedido(s)",
-              tipo_inv:"servicio",
-              cantidad:1,
-              pu:costoEnvio,
-              total:costoEnvio,
-              responsable:repNom
+            sGET("compras","order=num_compra.desc&limit=1").then(function(rows){
+              var maxNC=rows&&rows[0]&&rows[0].num_compra?rows[0].num_compra:0;
+              sPOST("compras",{
+                num_compra:maxNC+1,
+                fecha:($("efecha")||{}).value||hoy(),
+                proveedor:repNom,
+                proveedor_id:0,
+                producto_nombre:"Servicio de envío",
+                descripcion:"Ruta #"+autoE+" · "+pedsMapped.length+" pedido(s)",
+                tipo_inv:"servicio",
+                cantidad:1,
+                pu:costoEnvio,
+                total:costoEnvio,
+                responsable:repNom
+              });
             });
           }
           var pedIds=pedsMapped.filter(function(p){return p.pedido_id}).map(function(p){return p.pedido_id});
