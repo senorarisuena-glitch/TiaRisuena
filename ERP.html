@@ -1056,12 +1056,12 @@ function rVentas(el){
     if(!ventas.length){html+='<div class="empty">Sin ventas.</div></div></div>';el.innerHTML=html;return}
     html+='<table><thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th style="text-align:right">Monto</th><th style="text-align:right">Cobrado</th><th style="text-align:right">Adeudo</th><th>Origen</th><th></th></tr></thead><tbody>';
     ventas.forEach(function(v){
-      html+='<tr>';
+      var lineas=Array.isArray(v.lineas)?v.lineas:[];
+      html+='<tr style="cursor:pointer" onclick="toggleVRow(\'vd_'+v.id+'\')">';
       html+='<td style="color:#4A9EFF;font-weight:700">#'+v.ticket+'</td>';
       html+='<td style="color:#8B949E">'+v.fecha+'</td>';
       var ccod=v.cliente_codigo||'';
       var cnom=v.cliente_nombre||'';
-      // Also try to find codigo from clientes list
       if(!ccod&&v.cliente_id){
         var cMatch=clientes.find(function(x){return String(x.id)===String(v.cliente_id)});
         if(cMatch)ccod=cMatch.codigo;
@@ -1070,14 +1070,51 @@ function rVentas(el){
       html+='<td style="text-align:right;font-weight:700">'+fmt(v.monto_venta)+'</td>';
       html+='<td style="text-align:right;color:#00C896">'+fmt(v.cobrado||0)+'</td>';
       html+='<td style="text-align:right;color:'+(parseFloat(v.adeudo||0)>0?"#FB923C":"#8B949E")+';font-weight:700">'+fmt(v.adeudo||0)+'</td>';
-      html+='<td>'+(v.origen==="tienda"?bdg("🛍 Tienda","#C084FC"):"")+'</td>';
-      html+='<td><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="vEdit('+v.id+')">editar</button><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="vDel('+v.id+')">✕</button></div></td>';
+      html+='<td>'+(v.origen==="tienda"?bdg("🛍 Tienda","#C084FC"):"")+(lineas.length?'<span style="font-size:10px;color:#8B949E;margin-left:4px">'+lineas.length+' items ▾</span>':'')+'</td>';
+      html+='<td><div style="display:flex;gap:6px" onclick="event.stopPropagation()"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="vEdit('+v.id+')">editar</button><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="vDel('+v.id+')">✕</button></div></td>';
       html+='</tr>';
+      // Fila expandible
+      if(lineas.length){
+        html+='<tr id="vd_'+v.id+'" style="display:none"><td colspan="8" style="padding:0">';
+        html+='<table style="width:100%;background:#0D1117;border-top:1px solid #21262D"><thead><tr>';
+        html+='<th style="padding:6px 12px;font-size:10px;color:#8B949E;text-align:left">SKU</th>';
+        html+='<th style="padding:6px 12px;font-size:10px;color:#8B949E;text-align:left">Producto</th>';
+        html+='<th style="padding:6px 12px;font-size:10px;color:#8B949E;text-align:right">Cant</th>';
+        html+='<th style="padding:6px 12px;font-size:10px;color:#8B949E;text-align:right">P.Unit</th>';
+        html+='<th style="padding:6px 12px;font-size:10px;color:#8B949E;text-align:right">Total</th>';
+        html+='</tr></thead><tbody>';
+        lineas.forEach(function(l){
+          var sku=l.sku||l.inv_id||'—';
+          var nom=l.desc||l.nombre||l.name||sku;
+          var cant=parseFloat(l.cant||l.cantidad||l.qty||1);
+          var pu=parseFloat(l.precio_venta||l.pu||l.price||l.unit_price||0);
+          var tot=cant*pu;
+          html+='<tr>';
+          html+='<td style="padding:5px 12px;font-size:11px;color:#C084FC;font-weight:700">'+sku+'</td>';
+          html+='<td style="padding:5px 12px;font-size:11px;color:#E6EDF3">'+nom+'</td>';
+          html+='<td style="padding:5px 12px;font-size:11px;text-align:right">'+cant+'</td>';
+          html+='<td style="padding:5px 12px;font-size:11px;text-align:right">'+fmt(pu)+'</td>';
+          html+='<td style="padding:5px 12px;font-size:11px;text-align:right;font-weight:700;color:#00C896">'+fmt(tot)+'</td>';
+          html+='</tr>';
+        });
+        html+='</tbody></table></td></tr>';
+      }
     });
     html+='</tbody></table></div></div>';
     el.innerHTML=html;
   }
   window.vFiltrar=function(q){
+    if(!q){renderList();return;}
+    var r=ventas.filter(function(v){return(v.cliente_nombre||"").toLowerCase().includes(q.toLowerCase())||(v.cliente_codigo||"").toLowerCase().includes(q.toLowerCase())||String(v.ticket).includes(q);});
+    // re-render filtered
+    var t=document.getElementById("vtabla");if(!t)return;
+    if(!r.length){t.innerHTML='<div class="empty">Sin resultados.</div>';return;}
+  };
+
+  window.toggleVRow=function(id){
+    var row=document.getElementById(id);
+    if(row)row.style.display=row.style.display==='none'?'table-row':'none';
+  };
     var rows=el.querySelectorAll("tbody tr");
     rows.forEach(function(r){r.style.display=r.textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none"});
   };
@@ -1940,8 +1977,15 @@ function rCompras(el){
     var autoNC=esEd?ce.num_compra:maxNC+1;
     var histProvs=compras.reduce(function(a,x){if(x.proveedor&&a.indexOf(x.proveedor)<0)a.push(x.proveedor);return a},[]);
     var CATS=["Gallos","Accesorios","Comestibles","Extractos","Flor Green House","Flor Otro","Insumo General","Otro"];
-    // Lines: array of {nombre, desc, categoria, tipo_inv, cantidad, pu}
-    var lineas=esEd&&ce.lineas&&ce.lineas.length?JSON.parse(JSON.stringify(ce.lineas)):[{nombre:"",desc:"",categoria:"",tipo_inv:"insumo",cantidad:1,pu:0}];
+    // Lines: al editar, construir desde campos del registro individual
+    var lineas=esEd?[{
+      nombre:ce.producto_nombre||"",
+      desc:ce.descripcion||"",
+      categoria:(CATALOGO_SKU.find(function(s){return s.sku===ce.producto_nombre;})||{}).cat||"",
+      tipo_inv:ce.tipo_inv||"insumo",
+      cantidad:ce.cantidad||1,
+      pu:ce.pu||0
+    }]:[{nombre:"",desc:"",categoria:"",tipo_inv:"insumo",cantidad:1,pu:0}];
 
     function calcTotal(){return lineas.reduce(function(a,l){return a+(parseFloat(l.cantidad)||0)*(parseFloat(l.pu)||0)},0)}
 
@@ -2003,17 +2047,7 @@ function rCompras(el){
       var item=CATALOGO_SKU.find(function(s){return s.sku===sku;})||null;
       lineas[i].desc=item?item.desc:'';
       lineas[i].tipo_inv=item?(item.tipo==='terminado'?'terminado':'insumo'):'insumo';
-      var lbl=document.getElementById("cdesc_lbl"+i);
-      if(lbl)lbl.textContent=item?item.desc:'—';
-    };
-    window.cSetLCalc=function(i,v){lineas[i].cantidad=v;var t=document.getElementById("ctot"+i);if(t)t.textContent=fmt((parseFloat(v)||0)*(parseFloat(lineas[i].pu)||0));var tot=document.getElementById("ctotalval");if(tot)tot.textContent=fmt(calcTotal());};
-    window.cSetPU=function(i,v){lineas[i].pu=v;var t=document.getElementById("ctot"+i);if(t)t.textContent=fmt((parseFloat(lineas[i].cantidad)||0)*(parseFloat(v)||0));var tot=document.getElementById("ctotalval");if(tot)tot.textContent=fmt(calcTotal());};
-    window.cSelCat=function(i,cat){lineas[i].categoria=cat;lineas[i].nombre='';lineas[i].desc='';renderLineas();};
-    window.cSelSku=function(i,sku){
-      lineas[i].nombre=sku;
-      var item=CATALOGO_SKU.find(function(s){return s.sku===sku;})||null;
-      lineas[i].desc=item?item.desc:'';
-      lineas[i].tipo_inv=item?(item.tipo==='terminado'?'terminado':'insumo'):'insumo';
+      if(item&&item.cat){lineas[i].categoria=item.cat;renderLineas();return;}
       var lbl=document.getElementById("cdesc_lbl"+i);
       if(lbl)lbl.textContent=item?item.desc:'—';
     };
