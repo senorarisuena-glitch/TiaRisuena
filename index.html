@@ -1211,13 +1211,14 @@ async function cargarLogros(){
           '<div style="font-size:1.2rem">'+r.emoji+'</div>'+
           '<div><div style="font-size:.68rem;font-family:Cinzel,serif;color:var(--green)">'+r.nombre+'</div>'+
           '<div style="font-size:.55rem;color:var(--muted)">'+r.fuente+'</div></div></div>'+
-          '<button onclick="canjearRegalo(''+r.id+'',''+r.nombre+'',''+r.emoji+'')" style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:5px 10px;font-size:.6rem;color:var(--green);cursor:pointer">Canjear →</button>'+
+          '<button onclick="canjearRegalo(this)" data-rid="'+r.id+'" data-nom="'+r.nombre+'" data-emo="'+r.emoji+'" style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:5px 10px;font-size:.6rem;color:var(--green);cursor:pointer">Canjear →</button>'+
           '</div>';
       }).join('');
   }
 }
 
-async function canjearRegalo(rId,nombre,emoji){
+async function canjearRegalo(btn){
+  var rId=btn.dataset.rid,nombre=btn.dataset.nom,emoji=btn.dataset.emo||"🎁";
   S.cart.push({name:nombre,sku:'',emoji:emoji,qty:'1x',price:0,isGift:true,source:'regalo_'+rId});
   await sb.from('usuario_regalos').update({usado:true}).eq('id',rId);
   notif('🎁 '+nombre+' agregado al carrito');
@@ -3542,13 +3543,14 @@ async function cargarLogros(){
           '<div style="font-size:1.2rem">'+r.emoji+'</div>'+
           '<div><div style="font-size:.68rem;font-family:Cinzel,serif;color:var(--green)">'+r.nombre+'</div>'+
           '<div style="font-size:.55rem;color:var(--muted)">'+r.fuente+'</div></div></div>'+
-          '<button onclick="canjearRegalo(''+r.id+'',''+r.nombre+'',''+r.emoji+'')" style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:5px 10px;font-size:.6rem;color:var(--green);cursor:pointer">Canjear →</button>'+
+          '<button onclick="canjearRegalo(this)" data-rid="'+r.id+'" data-nom="'+r.nombre+'" data-emo="'+r.emoji+'" style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:5px 10px;font-size:.6rem;color:var(--green);cursor:pointer">Canjear →</button>'+
           '</div>';
       }).join('');
   }
 }
 
-async function canjearRegalo(rId,nombre,emoji){
+async function canjearRegalo(btn){
+  var rId=btn.dataset.rid,nombre=btn.dataset.nom,emoji=btn.dataset.emo||"🎁";
   S.cart.push({name:nombre,sku:'',emoji:emoji,qty:'1x',price:0,isGift:true,source:'regalo_'+rId});
   await sb.from('usuario_regalos').update({usado:true}).eq('id',rId);
   notif('🎁 '+nombre+' agregado al carrito');
