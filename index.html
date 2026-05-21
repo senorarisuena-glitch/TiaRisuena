@@ -331,6 +331,7 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
 <div id="app">
   <div id="topbar">
     <div><div class="logo-text">⚔️ La Tía Risueña</div><div class="logo-sub">TEMPORADA HEROICA</div></div>
+    <button onclick="abrirLoginERP()" style="background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);color:var(--gold);border-radius:8px;padding:4px 10px;font-size:.55rem;font-family:Cinzel,serif;margin-left:auto;cursor:pointer">ERP</button>
     <div class="chips">
       <div class="chip">💰<span id="hBal">850</span></div>
       <div class="chip">🪙<span id="hCoins">500</span></div>
@@ -371,38 +372,87 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
   <!-- PAGE: MENU -->
   <div id="pg-menu" class="page">
     <div id="sub-heroes" class="subtab-panel on">
-      <div id="heroes-container"><div class="info-box" style="text-align:center">⚔️ Cargando héroes...</div></div>
+      <div class="stitle">🌿 ORÁCULO <span class="badge b-green">GREEN HOUSE</span></div>
+      <div id="heroOraculo"></div>
+      <div class="stitle">⚡ LEGIÓN <span class="badge b-purple">EXÓTICA</span></div>
+      <div id="heroLegion"></div>
+      <div class="stitle">🛡️ GUARDIA <span class="badge b-gold">PREMIUM</span></div>
+      <div id="heroGuardia"></div>
     </div>
     <div id="sub-cofre" class="subtab-panel">
-      <div class="stitle">🎁 BOTÍN DE HÉROE <span class="badge b-red">MISTERY BOX</span></div>
-      <div class="info-box"><strong>⚔️ ¡El Botín del Héroe!</strong><br>Cada cofre incluye flores, porros, extractos, accesorios y edibles. El valor supera al precio pagado entre un <strong>40% y 80%</strong>.</div>
-      <div id="cofre-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+      <div class="stitle">🎁 BOTÍN DE HÉROE (Mistery Box) <span class="badge b-red">MISTERY BOX</span></div>
+      <div class="info-box"><strong>⚔️ ¡El Botín del Héroe!</strong><br>Cada cofre incluye flores, porros, extractos, accesorios y edibles. El valor supera al precio pagado entre un <strong>40% y 80%</strong>. Ej: Cofre de $1,000 → recibes entre <strong>$1,600 y $1,800</strong>.</div>
+      <div class="mbox-grid">
+        <div class="mbox" onclick="addSimple('Cofre del Soldado','🗡️','$500',500)"><div class="mbox-icon">🗡️</div><div class="mbox-name">Cofre Soldado</div><div class="mbox-price">$500</div><div class="mbox-val">Valor: $700–$900</div></div>
+        <div class="mbox" onclick="addSimple('Cofre del Capitán','🏆','$1,000',1000)"><div class="mbox-icon">🏆</div><div class="mbox-name">Cofre Capitán</div><div class="mbox-price">$1,000</div><div class="mbox-val">Valor: $1,600–$1,800</div></div>
+        <div class="mbox" onclick="addSimple('Cofre del General','⚔️','$1,500',1500)"><div class="mbox-icon">⚔️</div><div class="mbox-name">Cofre General</div><div class="mbox-price">$1,500</div><div class="mbox-val">Valor: $2,100–$2,700</div></div>
+        <div class="mbox mbox-full" onclick="addSimple('Cofre Gran Conquistador +WAX','👑','$2,000',2000)"><div class="mbox-icon">👑</div><div class="mbox-name">Gran Conquistador</div><div class="mbox-price">$2,000</div><div class="mbox-val">Valor $3,200+ · Puede incluir cartucho WAX</div></div>
+      </div>
     </div>
     <div id="sub-forjados" class="subtab-panel">
       <div class="stitle">🐓 FORJADOS EN BATALLA <span class="badge b-orange">PORROS</span></div>
-      <div id="forjados-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+      <div class="scard" onclick="openModal('El Escudo Espartano','King Size · El arma estándar del guerrero','🗡️',null,[{qty:'1 porro',price:70},{qty:'6 porros',price:380},{qty:'12 porros',price:750}])"><div class="scard-top"><div class="scard-emoji">🗡️</div><div><div class="scard-name">El Escudo Espartano</div><div class="scard-sub">King Size</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$70</span></div><div class="sprice"><span class="sq">6x </span><span class="sv">$380</span></div><div class="sprice"><span class="sq">12x </span><span class="sv">$750</span></div></div></div>
+      <div class="scard" onclick="openModal('Armadura Empanizada','King+WAX BHO+Dry Hash · 1.5g Flor Premium','🛡️',null,[{qty:'1 porro',price:160},{qty:'3 porros',price:390},{qty:'6 porros',price:700}])"><div class="scard-top"><div class="scard-emoji">🛡️</div><div><div class="scard-name">Armadura Empanizada</div><div class="scard-sub">King Size + WAX + Dry Hash · 1.5g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$160</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$390</span></div><div class="sprice"><span class="sq">6x </span><span class="sv">$700</span></div></div></div>
+      <div class="scard" onclick="openModal('Anillo de Poder (Donut)','Filtro vidrio King · 0.5g extracto + 1.4g flor','💍',null,[{qty:'1 porro',price:300},{qty:'3 porros',price:750},{qty:'6 porros',price:1200}])"><div class="scard-top"><div class="scard-emoji">💍</div><div><div class="scard-name">Anillo de Poder (Donut)</div><div class="scard-sub">Filtro vidrio · 0.5g extracto · 1.4g flor</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$300</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$750</span></div><div class="sprice"><span class="sq">6x </span><span class="sv">$1,200</span></div></div></div>
+      <div class="scard" onclick="addSimple('El Gran Coloso (35cm · 20g)','🏛️','$500',500)"><div class="scard-top"><div class="scard-emoji">🏛️</div><div><div class="scard-name">El Gran Coloso</div><div class="scard-sub">35cm · 20g de flor</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$500</span></div></div></div>
+      <div class="scard" onclick="addSimple('Coloso Personalizado (con tu nombre)','✍️','$700',700)"><div class="scard-top"><div class="scard-emoji">✍️</div><div><div class="scard-name">Coloso Personalizado</div><div class="scard-sub">Empanizado · Con el nombre que quieras</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$700</span></div></div></div>
     </div>
-        <div id="sub-edibles" class="subtab-panel">
+    <div id="sub-edibles" class="subtab-panel">
       <div class="stitle">🍬 POCIONES DE BATALLA <span class="badge b-pink">EDIBLES</span></div>
       <div class="warn-box">⚠️ <strong>Dosis:</strong> Una dosis es suficiente. En caso de sobredosis ¡contáctanos antes del hospital!</div>
-      <div id="edibles-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+      <div class="scard" onclick="openModal('Oblea de Cajekush','1 Dosis','🫓',null,[{qty:'1 pieza',price:80},{qty:'3 piezas -12%',price:211}])"><div class="scard-top"><div class="scard-emoji">🫓</div><div><div class="scard-name">Oblea de Cajekush</div><div class="scard-sub">1 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$211 </span><span class="sd">-12%</span></div></div></div>
+      <div class="scard" onclick="openModal('Pelón Pone Rico','2 Dosis','🍭',null,[{qty:'1 pieza',price:100},{qty:'3 piezas -12%',price:264}])"><div class="scard-top"><div class="scard-emoji">🍭</div><div><div class="scard-name">Pelón Pone Rico</div><div class="scard-sub">2 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$100</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$264 </span><span class="sd">-12%</span></div></div></div>
+      <div class="scard" onclick="openModal('Barra de Chocolate','6 Dosis','🍫',null,[{qty:'1 barra',price:200},{qty:'3 barras -12%',price:528}])"><div class="scard-top"><div class="scard-emoji">🍫</div><div><div class="scard-name">Barra de Chocolate</div><div class="scard-sub">6 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$200</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$528 </span><span class="sd">-12%</span></div></div></div>
+      <div class="scard" onclick="openModal('Pieza de Chocolate','2 Dosis','🍫',null,[{qty:'1 pieza',price:90},{qty:'3 piezas -12%',price:237}])"><div class="scard-top"><div class="scard-emoji">🍫</div><div><div class="scard-name">Pieza de Chocolate</div><div class="scard-sub">2 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$90</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$237 </span><span class="sd">-12%</span></div></div></div>
+      <div class="scard" onclick="openModal('Galleta','2 Dosis','🍪',null,[{qty:'1 galleta',price:100},{qty:'3 galletas -12%',price:264}])"><div class="scard-top"><div class="scard-emoji">🍪</div><div><div class="scard-name">Galleta</div><div class="scard-sub">2 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$100</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$264 </span><span class="sd">-12%</span></div></div></div>
     </div>
-        <div id="sub-extractos" class="subtab-panel">
+    <div id="sub-extractos" class="subtab-panel">
       <div class="stitle">🍯 ESENCIAS DE PODER <span class="badge b-cyan">EXTRACTOS</span></div>
-      <div id="extractos-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+      <div class="stitle" style="font-size:.6rem;padding-top:6px">🖊️ VAPES</div>
+      <div class="scard" onclick="addSimple('Cartucho WAX','💨','$850',850)"><div class="scard-top"><div class="scard-emoji">💨</div><div><div class="scard-name">Cartucho WAX</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
+      <div class="scard" onclick="addSimple('Cartucho CBD','🌿','$850',850)"><div class="scard-top"><div class="scard-emoji">🌿</div><div><div class="scard-name">Cartucho CBD</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
+      <div class="scard" onclick="addSimple('Cartucho DMT (pide pila)','🌀','$850',850)"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">Cartucho DMT</div><div class="scard-sub">Pregunta por la pila</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
+      <div class="scard" onclick="addSimple('Desechable 2g','🔋','$1,299',1299)"><div class="scard-top"><div class="scard-emoji">🔋</div><div><div class="scard-name">Desechable 2g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$1,299</span></div></div></div>
+      <div class="stitle" style="font-size:.6rem;padding-top:6px">⏳ CONCENTRADOS</div>
+      <div class="scard" onclick="openModal('Dry Hash','Extracción CO2. Potente y versátil.','🏜️',null,[{qty:'1g',price:80},{qty:'3g mayoreo',price:200},{qty:'9g mayoreo',price:500}])"><div class="scard-top"><div class="scard-emoji">🏜️</div><div><div class="scard-name">Dry Hash</div><div class="scard-sub">Extracción CO2</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$200</span></div><div class="sprice"><span class="sq">9g </span><span class="sv">$500</span></div></div></div>
+      <div class="scard" onclick="openModal('WAX Cristalizado BHO','Extracción butano. Textura azúcar. Muy potente.','🥞',null,[{qty:'1g',price:500},{qty:'3g mayoreo',price:1200},{qty:'10g mayoreo',price:3000}])"><div class="scard-top"><div class="scard-emoji">🥞</div><div><div class="scard-name">WAX Cristalizado BHO</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$500</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$1,200</span></div><div class="sprice"><span class="sq">10g </span><span class="sv">$3,000</span></div></div></div>
+      <div class="scard" onclick="addSimple('MoonRock Original — 3.5g (Por Encargo)','🌕','$550',550)"><div class="scard-top"><div class="scard-emoji">🌕</div><div><div class="scard-name">MoonRock Original</div><div class="scard-sub">WAX + Dry Hash · Por encargo</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">3.5g </span><span class="sv">$550</span></div></div></div>
+      <div class="scard" onclick="openModal('Ice Bubble Hash','Tricomas por agua y hielo. Natural y potente.','🧊',null,[{qty:'1g',price:350},{qty:'3g',price:750}])"><div class="scard-top"><div class="scard-emoji">🧊</div><div><div class="scard-name">Ice Bubble Hash</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$350</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$750</span></div></div></div>
+      <div class="stitle" style="font-size:.6rem;padding-top:6px">🛠️ ACCESORIOS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 12px;margin-bottom:10px">
+        <div class="scard" style="margin:0" onclick="addSimple('Canalas','🚬','$45',45)"><div class="scard-name">Canalas</div><div class="scard-prices"><div class="sprice"><span class="sv">$45</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Hitter','🔫','$50',50)"><div class="scard-name">Hitter</div><div class="scard-prices"><div class="sprice"><span class="sv">$50</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Grinder','⚙️','$80',80)"><div class="scard-name">Grinder</div><div class="scard-prices"><div class="sprice"><span class="sv">$80</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Conotes RAW','📜','$150',150)"><div class="scard-name">Conotes RAW</div><div class="scard-prices"><div class="sprice"><span class="sv">$150</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Soplete','🔥','$250',250)"><div class="scard-name">Soplete</div><div class="scard-prices"><div class="sprice"><span class="sv">$250</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Batería/Pluma','🔋','$450',450)"><div class="scard-name">Batería/Pluma</div><div class="scard-prices"><div class="sprice"><span class="sv">$450</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Bonga','💧','$350',350)"><div class="scard-name">Bonga</div><div class="scard-prices"><div class="sprice"><span class="sv">$350</span></div></div></div>
+        <div class="scard" style="margin:0" onclick="addSimple('Kit Bonga PRO','🎁','$600',600)"><div class="scard-name">Kit Bonga PRO</div><div class="scard-prices"><div class="sprice"><span class="sv">$600</span></div></div></div>
+      </div>
     </div>
-        <div id="sub-medicina" class="subtab-panel">
+    <div id="sub-medicina" class="subtab-panel">
       <div class="stitle">🌀 MEDICINA ANCESTRAL <span class="badge b-violet">SAGRADA</span></div>
-      <div class="warn-box">🌀 <strong>Uso consciente:</strong> Pon una intención fuerte.</div>
-      <div id="medicina-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+      <div class="warn-box">🌀 <strong>Uso consciente:</strong> Pon una intención fuerte. Lo que te muestren sirve solo si actúas conforme a ello.</div>
+      <div class="stitle" style="font-size:.6rem;padding-top:4px">💊 PSILOCIBINA</div>
+      <div class="scard" onclick="openModal('Microdosis Psilocibina','0.33g por píldora. Introspección suave.','💊',null,[{qty:'1 píldora',price:80},{qty:'10 píldoras',price:620}])"><div class="scard-top"><div class="scard-emoji">💊</div><div><div class="scard-name">Microdosis Psilocibina</div><div class="scard-sub">0.33g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">10x </span><span class="sv">$620</span></div></div></div>
+      <div class="scard" onclick="openModal('Hongos Psilocibina','4-6h efecto. Hasta 3 días sensaciones. Ideal para visuales, respuestas, resolver problemas.','🍄',null,[{qty:'1g',price:250},{qty:'3g',price:550},{qty:'10g',price:1500},{qty:'30g',price:3200}])"><div class="scard-top"><div class="scard-emoji">🍄</div><div><div class="scard-name">Hongos Psilocibina</div><div class="scard-sub">4-6h efecto · Hasta 3 días sensaciones</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$250</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$550</span></div><div class="sprice"><span class="sq">10g </span><span class="sv">$1,500</span></div><div class="sprice"><span class="sq">30g </span><span class="sv">$3,200</span></div></div></div>
+      <div class="stitle" style="font-size:.6rem;padding-top:4px">💧 LSD — Cuadros & Geles</div>
+      <div class="scard" onclick="openModal('LSD — Cuadros & Geles','4-6h efecto. Visuales y creatividad.','💧',null,[{qty:'1x',price:250},{qty:'3x',price:600},{qty:'10x',price:1500},{qty:'25x',price:3000}])"><div class="scard-top"><div class="scard-emoji">💧</div><div><div class="scard-name">LSD — Cuadros & Geles</div><div class="scard-sub">4-6h efecto</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$250</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$600</span></div><div class="sprice"><span class="sq">10x </span><span class="sv">$1,500</span></div><div class="sprice"><span class="sq">25x </span><span class="sv">$3,000</span></div></div></div>
+      <div class="stitle" style="font-size:.6rem;padding-top:4px">🌀 DMT — Original MIMOSA</div>
+      <div class="warn-box" style="margin-bottom:6px">🌀 Efecto 30min · Intención hasta 30 días. Neutraliza la mente para acceder a tu divinidad.</div>
+      <div class="scard" onclick="openModal('DMT Puro — Original MIMOSA','Efecto 30min. Intención 30 días.','🌀',null,[{qty:'1g',price:1200},{qty:'1/2g',price:700},{qty:'Dosis .25g',price:400}])"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">DMT Puro — MIMOSA</div><div class="scard-sub">Efecto 30min · Intención 30 días</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$1,200</span></div><div class="sprice"><span class="sq">1/2g </span><span class="sv">$700</span></div><div class="sprice"><span class="sq">.25g </span><span class="sv">$400</span></div></div></div>
+      <div class="scard" onclick="openModal('DMT Preparado Especial','Microdosis. Más accesible.','🌀',null,[{qty:'1g',price:500},{qty:'1/2g',price:300},{qty:'.25g',price:150}])"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">DMT Preparado Especial</div><div class="scard-sub">Microdosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$500</span></div><div class="sprice"><span class="sq">1/2g </span><span class="sv">$300</span></div><div class="sprice"><span class="sq">.25g </span><span class="sv">$150</span></div></div></div>
+      <div class="scard" onclick="addSimple('Cartucho DMT (necesita pila)','🌀','$850',850)"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">Cartucho DMT</div><div class="scard-sub">Pregunta por la pila</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
     </div>
-        <div id="sub-combos" class="subtab-panel">
-      <div class="stitle">🔥 COMBOS <span class="badge b-red">TEMPORADA</span></div>
-      <div id="combos-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+    <div id="sub-combos" class="subtab-panel">
+      <div class="stitle">🔥 COMBOS & PROMOS <span class="badge b-red">TEMPORADA</span></div>
+      <div class="ccard" onclick="addCombo('Combo Espartano','🏛️',1450,'1 Oz Leonidas + 6 Porros + Raspadito')"><div class="ccard-head"><div class="ccard-emoji">🏛️</div><div><div class="ccard-name">Combo Espartano</div><div class="ccard-desc">1 Oz Leonidas + 6 Porros + 1 Raspadito</div></div></div><div class="ccard-quote">"El kit completo del guerrero. Flores, forjados y suerte."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,740</div><div class="nw">$1,450<span class="save-badge">AHORRO $290</span></div></div><div class="add-btn">+ Agregar</div></div></div>
+      <div class="ccard" onclick="addCombo('Combo Valhalla','⚡',900,'1/2 Oz Ragnar + Chocolate + 1g Dry Hash')"><div class="ccard-head"><div class="ccard-emoji">⚡</div><div><div class="ccard-name">Combo Valhalla</div><div class="ccard-desc">1/2 Oz Ragnar + Chocolate Barra + 1g Dry Hash</div></div></div><div class="ccard-quote">"Para el guerrero que relaja con estilo nórdico."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,080</div><div class="nw">$900<span class="save-badge">AHORRO $180</span></div></div><div class="add-btn">+ Agregar</div></div></div>
+      <div class="ccard" onclick="addCombo('Combo Meditación Sagrada','🌀',1200,'1/2 Oz Juana + 3x Microdosis + Kit Bonga PRO')"><div class="ccard-head"><div class="ccard-emoji">🌀</div><div><div class="ccard-name">Combo Meditación</div><div class="ccard-desc">1/2 Oz Juana + 3x Microdosis + Kit Bonga PRO</div></div></div><div class="ccard-quote">"Flores, medicina y equipo para una noche de introspección."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,490</div><div class="nw">$1,200<span class="save-badge">AHORRO $290</span></div></div><div class="add-btn">+ Agregar</div></div></div>
       <div class="stitle" style="margin-top:4px">🪙 PROMOS CON COINS</div>
-      <div class="info-box">🪙 <strong>500 coins</strong> = $50 MXN descuento<br>🪙 <strong>1,000 coins</strong> = producto gratis (hasta $100)<br>🪙 <strong>2,500 coins</strong> = pedido VIP con prioridad</div>
+      <div class="info-box">🪙 <strong>500 coins</strong> = $50 MXN descuento<br>🪙 <strong>1,000 coins</strong> = producto gratis (hasta $100)<br>🪙 <strong>2,500 coins</strong> = pedido VIP con prioridad<br><br><span style="color:var(--muted)">Menciona tus coins al confirmar por WhatsApp.</span></div>
     </div>
-        <div id="sub-promos" class="subtab-panel"><div class="stitle">🔧 HERRAMIENTAS <span class="badge b-orange">ACCESORIOS</span></div><div id="herramientas-container"><div class="info-box" style="text-align:center">Cargando...</div></div></div>
+    <div id="sub-promos" class="subtab-panel"><div class="stitle">🎁 PROMOS DEL DÍA</div><div id="promos-container"><div class="info-box">No hay promos activas.</div></div></div>
     <div id="sub-sala" class="subtab-panel">
       <div class="sala-world" id="salaWorld"><div class="sala-floor"></div></div>
       <div class="sala-ctrl"><button class="mv-btn" onclick="moveAv(-1)">◀</button><button class="mv-btn" onclick="moveAv(1)">▶</button><button class="mv-btn" style="margin-left:auto" onclick="changeAv()">😀 Avatar</button></div>
@@ -673,24 +723,25 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
       </div>
       <div style="padding:0 12px 20px;display:flex;flex-direction:column;gap:10px">
         <div class="user-field"><label>TELEFONO</label><input class="user-inp" id="eTel" readonly style="opacity:.6"></div>
-        <div class="user-field"><label>DIRECCION PRINCIPAL</label>
+        <div class="user-field"><label>DIRECCIÓN DE ENTREGA</label>
           <div style="position:relative">
-            <input class="user-inp" id="eDir1" placeholder="Calle, numero, colonia" style="padding-right:36px">
+            <input class="user-inp" id="eDir1" placeholder="Calle, número, colonia" style="padding-right:36px">
             <button onclick="usarUbicacion('eDir1')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">📍</button>
           </div>
-        </div>
-        <div class="user-field"><label>DIRECCION ALTERNATIVA</label>
-          <div style="position:relative">
-            <input class="user-inp" id="eDir2" placeholder="Opcional" style="padding-right:36px">
-            <button onclick="usarUbicacion('eDir2')" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.1rem;cursor:pointer">📍</button>
-          </div>
+          <!-- Direcciones guardadas -->
+          <div id="dirs-guardadas" style="margin-top:6px;display:flex;flex-direction:column;gap:4px"></div>
         </div>
         <div class="user-field"><label>FACEBOOK</label><input class="user-inp" id="eFb" placeholder="Tu Facebook"></div>
         <div class="user-field"><label>CORREO</label><input class="user-inp" id="eEmail" type="email"></div>
         <div class="user-field">
-          <label>CAMBIAR CONTRASEÑA <span style="font-size:.55rem;color:var(--muted)">(deja vacío para no cambiar)</span></label>
+          <label>CONTRASEÑA ACTUAL <span style="font-size:.55rem;color:var(--muted)">(para cambiar contraseña)</span></label>
+          <input class="user-inp" id="ePassActual" type="password" placeholder="Tu contraseña actual">
+        </div>
+        <div class="user-field">
+          <label>NUEVA CONTRASEÑA <span style="font-size:.55rem;color:var(--muted)">(deja vacío para no cambiar)</span></label>
           <input class="user-inp" id="ePass" type="password" placeholder="Nueva contraseña (mín. 4 caracteres)">
         </div>
+        <div id="perfil-save-msg" style="font-size:.6rem;min-height:16px;text-align:center"></div>
         <button class="btn-gold" onclick="actualizarDatos()">✦ Guardar cambios</button>
       </div>
     </div>
@@ -974,10 +1025,9 @@ function goPage(p){
   const bn=document.getElementById('bn-'+p);
   if(bn)bn.classList.add('on');
   if(p==='carrito'){renderCart();}
-  if(p==='usuario'){renderUsuarioPage();if(window.google&&window.google.maps)initAllAutocompletes();}
+  if(p==='usuario'){renderUsuarioPage();cargarSeguimientoPerfil();if(window.google&&window.google.maps)initAllAutocompletes();}
   if(p==='coins')renderCoins();
   if(p==='menu'&&!S.salaReady){S.salaReady=true;setTimeout(initSala,200);}
-  if(p==='menu'&&!_menuProds.length)cargarMenuDinamico();
   updUI();
 }
 
@@ -1053,8 +1103,9 @@ async function registrarUsuario(){
   var ex=await sb.from('clientes').select('id').eq('telefono',tel).single();
   if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   var coins=fb?200:100;
+  var codigo='CLI'+Date.now().toString().slice(-6);
   var res=await sb.from('clientes').insert({
-    codigo:'CLI000',
+    codigo:codigo,
     nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,
     direccion:dir1.trim()||null,
     facebook:fb||null,email:email||null,
@@ -1063,10 +1114,7 @@ async function registrarUsuario(){
     gastado:0,pedidos_count:0
   }).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  var codigoReal='CLI'+String(res.data.id).padStart(3,'0');
-  await sb.from('clientes').update({codigo:codigoReal}).eq('id',res.data.id);
-  res.data.codigo=codigoReal;
-  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
@@ -1107,7 +1155,7 @@ function cerrarSesion(){
 }
 
 function guardarSesionLocal(user){
-  try{ sessionStorage.setItem('tia_cid', String(user.id)); }catch(e){}
+  try{ sessionStorage.setItem('tia_uid', user.id); }catch(e){}
 }
 
 async function cargarSesion(){
@@ -1142,15 +1190,24 @@ async function registrarUsuario(){
   if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   S.cart=[];S.coins=0;
   var coins=fb?200:100;
-  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
+  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0,fecha_registro:new Date().toISOString().split('T')[0]}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  var codigoNuevo='CLI'+String(res.data.id).padStart(3,'0');
-  await sb.from('clientes').update({codigo:codigoNuevo}).eq('id',res.data.id);
-  res.data.codigo=codigoNuevo;
-  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
+}
+async function loginUsuario(){
+  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
+  var msg=document.getElementById('loginMsg');
+  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
+  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
+  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
+  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
+  if(res.error||!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
+  S.user=res.data;guardarSesionLocal(res.data);
+  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
+  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
 }
 function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
@@ -1170,16 +1227,9 @@ async function llenarPerfil(){
   else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
   val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
   await cargarSeguimientoPerfil();await cargarLogros();await cargarPedidosUsuario();
-  // Banner perfil incompleto
-  var banner=document.getElementById('banner-perfil-incompleto');
-  var bannerMsg=document.getElementById('banner-perfil-msg');
-  if(banner&&bannerMsg){
-    var faltantes=[];
-    if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
-    if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
-    if(faltantes.length){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
-    else{banner.style.display='none';}
-  }
+  renderDirsGuardadas();
+  checkBannerPerfilIncompleto();
+  checkBannerPerfilIncompleto();
 }
 async function cargarLogros(){
   var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
@@ -1194,13 +1244,13 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('seguimientos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
-  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','preparando':'⚙️ En preparacion','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
-  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','preparando':'#f59e0b','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
+  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','concretado':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
+  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','concretado':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
   el.innerHTML=data.map(function(p){
-    var est=p.estado||p.status||'pendiente';
+    var est=p.status||'pendiente';
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
       '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
       '<div><div style="font-family:Cinzel,serif;font-size:.68rem;color:var(--gold)">'+p.folio+'</div>'+
@@ -1243,7 +1293,7 @@ function cerrarMP(){var el=document.getElementById('mp-overlay');if(el)el.style.
 async function generarTicket(pedidoId){
   var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
   if(!jsPDF){notif('Cargando PDF...','var(--muted)');return;}
-  var res=await sb.from('seguimientos').select('*').eq('id',pedidoId).single();
+  var res=await sb.from('pedidos').select('*').eq('id',pedidoId).single();
   var p=res.data;if(!p){notif('Pedido no encontrado','var(--red)');return;}
   var doc=new jsPDF({unit:'mm',format:[58,200],orientation:'portrait'});
   var x=4,y=6,w=50;
@@ -1284,12 +1334,12 @@ function buyCustom(){
   mostrarPagoCoins(amt,0,amt);
 }
 
-function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimientos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
+function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
 async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
+  try{await cargarSesionERP();}catch(e){}
   renderHeroes();renderCoins();updUI();goPage('inicio');
-  cargarMenuDinamico();
   if(S.user)initRealtime();
 }
 window.addEventListener('load',init);
@@ -1354,10 +1404,9 @@ function goPage(p){
   const bn=document.getElementById('bn-'+p);
   if(bn)bn.classList.add('on');
   if(p==='carrito'){renderCart();}
-  if(p==='usuario'){renderUsuarioPage();if(window.google&&window.google.maps)initAllAutocompletes();}
+  if(p==='usuario'){renderUsuarioPage();cargarSeguimientoPerfil();renderDirsGuardadas();if(window.google&&window.google.maps)initAllAutocompletes();}
   if(p==='coins')renderCoins();
   if(p==='menu'&&!S.salaReady){S.salaReady=true;setTimeout(initSala,200);}
-  if(p==='menu'&&!_menuProds.length)cargarMenuDinamico();
   updUI();
 }
 
@@ -1462,14 +1511,9 @@ async function registrarUsuario(){
     return;
   }
 
-  // Asignar codigo basado en ID real
-  var codigoR='CLI'+String(data.id).padStart(3,'0');
-  await sb.from('clientes').update({codigo:codigoR}).eq('id',data.id);
-  data.codigo=codigoR;
-
   // Registrar transacción de bienvenida
   await sb.from('coins_transacciones').insert({
-    cliente_id:data.id, tipo:'credito', cantidad:fb?200:100, descripcion:'Coins de bienvenida'
+    usuario_id:res.data.id, tipo:'credito', cantidad:coins, descripcion:'Coins de bienvenida'
   });
 
   S.user = data;
@@ -1523,7 +1567,7 @@ function cerrarSesion(){
 }
 
 function guardarSesionLocal(user){
-  try{ sessionStorage.setItem('tia_cid', String(user.id)); }catch(e){}
+  try{ sessionStorage.setItem('tia_uid', user.id); }catch(e){}
 }
 
 async function cargarSesion(){
@@ -1605,7 +1649,7 @@ async function cargarLogros(){
 
 function toggleDetalle(btn){var pid=btn.dataset.xid||btn.dataset.pid;var el=document.querySelector('.det-'+pid);if(!el)return;var s=el.style.display!=='none';el.style.display=s?'none':'block';btn.textContent=s?'📋 Ver detalle':'▲ Ocultar';}
 async function cargarPedidosUsuario(){
-  var res = await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
+  var res = await sb.from('seguimientos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data = res.data;
   var el = document.getElementById('pPedidos');
   if(!el) return;
@@ -1616,16 +1660,15 @@ async function cargarPedidosUsuario(){
 
   var ESTADOS = [
     {key:'pendiente',      label:'Pedido recibido',  icon:'📋', color:'#6b7280'},
-    {key:'en_preparacion', label:'Empacando',         icon:'📦', color:'#f59e0b'},
+    {key:'concretado', label:'Empacando',         icon:'📦', color:'#f59e0b'},
     {key:'en_camino',      label:'En ruta',           icon:'🚚', color:'#7c3aed'},
     {key:'entregado',      label:'Entregado',         icon:'✅', color:'#16a34a'},
   ];
 
   function estadoIdx(est){
-    est=est||'pendiente';
     if(est==='entregado') return 3;
     if(est==='en_camino') return 2;
-    if(est==='en_preparacion'||est==='preparando') return 1;
+    if(est==='concretado') return 1;
     return 0;
   }
 
@@ -1720,13 +1763,13 @@ function pagarEnvioEfectivo(pedidoId){
   // Give cashback
   if(S.user){
     var pedido = null;
-    sb.from('seguimientos').select('costo_viaje').eq('id',pedidoId).single().then(function(r){
+    sb.from('pedidos').select('costo_viaje').eq('id',pedidoId).single().then(function(r){
       if(r.data&&r.data.costo_viaje){
         var cashback = Math.floor(r.data.costo_viaje*0.2);
         var newCoins = (S.user.coins||0)+cashback;
         sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id).then(function(){
           S.user.coins=newCoins;updUI();
-          sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'credito',cantidad:cashback,descripcion:'Cashback 20% envio efectivo'});
+          sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'credito',cantidad:cashback,descripcion:'Cashback 20% envio efectivo'});
           notif('🪙 +'+cashback+' coins cashback!');
         });
       }
@@ -1743,10 +1786,10 @@ function pagarEnvioDigital(pedidoId,costo){
 function initPedidosRealtime(){
   if(!sb||!S.user||window._pedidosChannel)return;
   window._pedidosChannel = sb.channel('pedidos-user-'+S.user.id)
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'usuario_id=eq.'+S.user.id},
     function(payload){
       var p=payload.new;
-      var labels={pendiente:'Tu pedido fue recibido',preparando:'Tu pedido se está empacando',en_preparacion:'Tu pedido se está empacando',en_camino:'Tu pedido está en camino!',entregado:'Tu pedido fue entregado!'};
+      var labels={pendiente:'Tu pedido fue recibido',concretado:'Tu pedido se esta empacando',en_camino:'Tu pedido esta en camino!',entregado:'Tu pedido fue entregado!'};
       notif(labels[p.estado]||'Tu pedido fue actualizado');
       cargarPedidosUsuario();
     }).subscribe();
@@ -1755,21 +1798,82 @@ function initPedidosRealtime(){
 
 async function actualizarDatos(){
   if(!S.user) return;
-  var newPass=(document.getElementById('ePass')||{}).value||'';
-  if(newPass&&newPass.length<4){notif('La contraseña debe tener al menos 4 caracteres','var(--red)');return;}
+  var msg = document.getElementById('perfil-save-msg');
+  var newPass = (document.getElementById('ePass')||{value:''}).value||'';
+  var passActual = (document.getElementById('ePassActual')||{value:''}).value||'';
+  var dir = (document.getElementById('eDir1')||{value:''}).value.trim();
+
+  // Verificar contraseña actual si quiere cambiarla
+  if(newPass){
+    if(newPass.length<4){
+      if(msg){msg.textContent='La contraseña nueva debe tener al menos 4 caracteres';msg.style.color='var(--red)';}
+      return;
+    }
+    if(!passActual){
+      if(msg){msg.textContent='Ingresa tu contraseña actual para cambiarla';msg.style.color='var(--red)';}
+      return;
+    }
+    if(passActual !== S.user.password){
+      if(msg){msg.textContent='Contraseña actual incorrecta';msg.style.color='var(--red)';}
+      return;
+    }
+  }
+
   var upd={
-    direccion: (document.getElementById('eDir1')||{value:''}).value.trim()||null,
-    facebook:   (document.getElementById('eFb')||{value:''}).value.trim()||null,
-    email:      (document.getElementById('eEmail')||{value:''}).value.trim()||null,
+    direccion: dir||null,
+    facebook:  (document.getElementById('eFb')||{value:''}).value.trim()||null,
+    email:     (document.getElementById('eEmail')||{value:''}).value.trim()||null,
   };
-  if(newPass) upd.password=newPass;
-  var res=await sb.from('clientes').update(upd).eq('id',S.user.id).select().single();
-  if(!res.error){
-    S.user=res.data;
-    var ep=document.getElementById('ePass');if(ep)ep.value='';
-    notif(newPass?'Datos y contraseña guardados!':'Datos actualizados');
-  } else notif('Error al guardar','var(--red)');
+  if(newPass) upd.password = newPass;
+
+  var res = await sb.from('clientes').update(upd).eq('id',S.user.id).select().single();
+  if(res.error){
+    if(msg){msg.textContent='Error al guardar: '+res.error.message;msg.style.color='var(--red)';}
+    return;
+  }
+  S.user = res.data;
+  guardarSesionLocal(res.data);
+
+  // Guardar dirección en historial local
+  if(dir) guardarDireccionHistorial(dir);
+
+  var ep=document.getElementById('ePass');if(ep)ep.value='';
+  var epa=document.getElementById('ePassActual');if(epa)epa.value='';
+  if(msg){msg.textContent=newPass?'✅ Datos y contraseña guardados':'✅ Datos guardados';msg.style.color='var(--green)';}
+  setTimeout(()=>{if(msg)msg.textContent='';},3000);
+  checkBannerPerfilIncompleto();
+  notif(newPass?'✅ Datos y contraseña guardados':'✅ Datos actualizados');
 }
+
+// ── DIRECCIONES GUARDADAS ─────────────────────────────────────────────────
+function guardarDireccionHistorial(dir){
+  var key='tia_dirs_'+(S.user?S.user.id:'');
+  var dirs=JSON.parse(sessionStorage.getItem(key)||'[]');
+  if(!dirs.includes(dir)){
+    dirs.unshift(dir);
+    if(dirs.length>5)dirs=dirs.slice(0,5);
+    sessionStorage.setItem(key,JSON.stringify(dirs));
+  }
+  renderDirsGuardadas();
+}
+
+function renderDirsGuardadas(){
+  var wrap=document.getElementById('dirs-guardadas');
+  if(!wrap)return;
+  var key='tia_dirs_'+(S.user?S.user.id:'');
+  var dirs=JSON.parse(sessionStorage.getItem(key)||'[]');
+  if(!dirs.length){wrap.innerHTML='';return;}
+  wrap.innerHTML='<div style="font-size:.55rem;color:var(--muted);margin-bottom:3px">Direcciones usadas:</div>'+
+    dirs.map(d=>`<button onclick="document.getElementById('eDir1').value='${d.replace(/'/g,"\\'")}'" 
+      style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:.55rem;text-align:left;cursor:pointer;width:100%">📍 ${d}</button>`).join('');
+}
+
+// También guardar dirección cuando hace un pedido exitoso
+function guardarDirDesdePedido(dir){
+  if(!S.user||!dir)return;
+  guardarDireccionHistorial(dir);
+}
+
 
 async function verificarLogros(){
   if(!S.user) return;
@@ -1849,78 +1953,12 @@ function renderCart(){
   setTimeout(function(){if(S.user)llenarCkDatos();},50);
 }
 
-
-// ══════════════════════════════════════════
-// SEGUIMIENTO EN PERFIL
-// ══════════════════════════════════════════
-async function cargarSeguimientoPerfil(){
-  var el=document.getElementById('perfil-orders-panel');
-  if(!el)return;
-  if(!S.user||!sb){el.innerHTML='';return;}
-  var res=await sb.from('seguimientos').select('*')
-    .eq('cliente_id',S.user.id)
-    .eq('origen','tienda')
-    .not('estado','eq','entregado')
-    .order('created_at',{ascending:false}).limit(3);
-  var pedidos=res.data||[];
-  if(!pedidos.length){
-    el.innerHTML='<div style="font-size:.6rem;color:var(--muted);padding:8px 12px">Sin pedidos activos</div>';
-    return;
-  }
-  var PASOS=[
-    {key:'pendiente',      label:'Creado',    icon:'📋', color:'#6b7280'},
-    {key:'en_preparacion', label:'En preparación',  icon:'✅', color:'#f59e0b'},
-    {key:'en_camino',      label:'En ruta',   icon:'🚚', color:'#7c3aed'},
-    {key:'entregado',      label:'Entregado', icon:'🏆', color:'#16a34a'},
-  ];
-  function eIdx(s){
-    if(s==='entregado')return 3;if(s==='en_camino')return 2;if(s==='en_preparacion'||s==='preparando')return 1;return 0;
-  }
-  el.innerHTML=pedidos.map(function(p){
-    var est=p.estado||p.status||'pendiente';var ei=eIdx(est);
-    var steps='<div style="display:flex;align-items:flex-start;margin:10px 0 6px">';
-    PASOS.forEach(function(paso,i){
-      var done=i<=ei,curr=i===ei;
-      steps+='<div style="display:flex;flex-direction:column;align-items:center;flex:1">'+
-        '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?paso.color:'var(--bg3)')+
-        ';border:2px solid '+(curr?paso.color:'transparent')+
-        (curr?';box-shadow:0 0 8px '+paso.color:'')+
-        ';display:flex;align-items:center;justify-content:center;font-size:.8rem">'+
-        (done?paso.icon:(i+1))+'</div>'+
-        '<div style="font-size:.45rem;margin-top:3px;text-align:center;color:'+
-        (curr?'var(--gold)':done?'var(--text)':'var(--muted)')+
-        ';font-weight:'+(curr?'700':'400')+'">'+paso.label+'</div></div>';
-      if(i<3)steps+='<div style="flex:0 0 16px;height:2px;background:'+(i<ei?'#16a34a':'var(--border)')+';margin-top:16px;border-radius:2px"></div>';
-    });
-    steps+='</div>';
-    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'+
-      '<span style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold)">'+p.folio+'</span>'+
-      '<b style="font-size:.75rem">$'+p.total+'</b></div>'+
-      '<div style="font-size:.52rem;color:var(--muted);margin-bottom:4px">'+
-      new Date(p.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</div>'+
-      steps+'<div style="font-size:.55rem;color:var(--muted)">📍 '+(p.dir||'—')+'</div></div>';
-  }).join('');
-  // Realtime
-  if(!window._perfilRealtimeInit&&S.user){
-    window._perfilRealtimeInit=true;
-    sb.channel('perfil-seg-'+S.user.id)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
-      function(payload){
-        var labels={pendiente:'📋 Pedido recibido',preparando:'✅ ¡Aceptado y empacando!',en_preparacion:'✅ ¡Aceptado y empacando!',en_camino:'🚚 ¡En camino!',entregado:'🏆 ¡Entregado!'};
-        notif(labels[payload.new.estado]||'Pedido actualizado');
-        cargarSeguimientoPerfil();
-      }).subscribe();
-  }
-}
-
 async function cargarPedidosActivos(){
   var el=document.getElementById('active-orders-panel');
   if(!el||!S.user||!sb)return;
 
   var res=await sb.from('seguimientos').select('*')
-    .eq('cliente_id',S.user.id)
-    .eq('origen','tienda')
+    .eq('usuario_id',S.user.id)
     .not('estado','eq','entregado')
     .order('created_at',{ascending:false})
     .limit(5);
@@ -1933,7 +1971,7 @@ async function cargarPedidosActivos(){
 
   var ESTADOS=[
     {key:'pendiente',      label:'Pedido recibido', icon:'📋', color:'#6b7280'},
-    {key:'en_preparacion', label:'Empacando',        icon:'📦', color:'#f59e0b'},
+    {key:'concretado', label:'Empacando',        icon:'📦', color:'#f59e0b'},
     {key:'en_camino',      label:'En ruta',          icon:'🚚', color:'#7c3aed'},
     {key:'entregado',      label:'Entregado',        icon:'✅', color:'#16a34a'},
   ];
@@ -1941,7 +1979,7 @@ async function cargarPedidosActivos(){
   function eIdx(est){
     if(est==='entregado')return 3;
     if(est==='en_camino')return 2;
-    if(est==='en_preparacion'||est==='preparando')return 1;
+    if(est==='concretado')return 1;
     return 0;
   }
 
@@ -1997,10 +2035,10 @@ async function cargarPedidosActivos(){
   if(!window._cartRealtimeInit&&S.user){
     window._cartRealtimeInit=true;
     sb.channel('cart-orders-'+S.user.id)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'cliente_id=eq.'+S.user.id},
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'usuario_id=eq.'+S.user.id},
       function(payload){
-        var labels={pendiente:'Tu pedido fue recibido',preparando:'¡Tu pedido se está empacando!',en_preparacion:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
-        notif(labels[payload.new.status]||'Pedido actualizado');
+        var labels={pendiente:'Tu pedido fue recibido',concretado:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
+        notif(labels[key]||'Pedido actualizado');
         cargarPedidosActivos();
       }).subscribe();
   }
@@ -2057,7 +2095,7 @@ async function confirmarYEnviar(metodo){
   const prods=S.cart.filter(x=>!x.isGift);
   const gifts=S.cart.filter(x=>x.isGift);
   const total=prods.reduce((s,x)=>s+x.price,0);
-  const folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
+  const folio='TIA-'+Date.now().toString().slice(-6);
   const pagado = metodo==='coins';
 
   // Verificar coins si paga con coins
@@ -2068,18 +2106,14 @@ async function confirmarYEnviar(metodo){
     }
   }
 
-  // Guardar pedido en seguimientos
-  const {data:pedido, error} = await sb.from('seguimientos').insert({
-    id: 'tid_'+Date.now(),
-    cliente_id: S.user.id,
-    cliente: nombre,
-    folio, tel, dir,
+  // Guardar pedido en Supabase
+  const {data:pedido, error} = await sb.from('pedidos').insert({
+    usuario_id: S.user.id,
+    folio, nb:nombre, tel, dir,
     items: prods, regalos: gifts, total,
     pago: metodo, pagado,
     pagado_at: pagado ? new Date().toISOString() : null,
-    estado: 'pendiente', origen: 'tienda',
-    fecha_creado: new Date().toISOString().slice(0,10),
-    historial: [{estado:'pendiente',fecha:new Date().toLocaleDateString('es-MX')}]
+    status: 'pendiente', origen: 'tienda'
   }).select().single();
 
   if(error){notif('❌ Error al guardar pedido','var(--red)');return;}
@@ -2089,7 +2123,7 @@ async function confirmarYEnviar(metodo){
     const newCoins = (S.user.coins||0) - total;
     await sb.from('clientes').update({coins:newCoins}).eq('id',S.user.id);
     await sb.from('coins_transacciones').insert({
-      cliente_id:S.user.id, tipo:'debito', cantidad:total,
+      usuario_id:S.user.id, tipo:'debito', cantidad:total,
       descripcion:'Pago pedido '+folio
     });
     S.user.coins = newCoins;
@@ -2207,6 +2241,12 @@ function mostrarDetallePago(tipo,coins,bonus,precio,clienteInfo){
   if(!cnt)return;
 
   var totalDesc=coins+(bonus?' + '+bonus+' gratis':'');
+  var waMsg='Quiero comprar '+totalDesc+' Tia Coins por $'+precio+' MXN\n';
+  if(tipo==='oxxo') waMsg+='Metodo: Deposito OXXO\n';
+  else waMsg+='Metodo: Transferencia bancaria\n';
+  waMsg+=clienteInfo?'Cliente: '+clienteInfo+'\n':'';
+  waMsg+='Adjunto mi comprobante de pago.';
+
   var detalleHtml='';
   if(tipo==='oxxo'){
     var qrImg=document.querySelector('[src^="data:image/jpeg"]');
@@ -2218,9 +2258,9 @@ function mostrarDetallePago(tipo,coins,bonus,precio,clienteInfo){
       '<div style="font-size:.6rem;color:var(--coin);margin-top:4px">Deposita $'+precio+' en efectivo</div></div>';
   } else {
     detalleHtml='<div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:12px;font-size:.72rem">'+
-      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Banco: </span><b>BBVA / SPIN</b></div>'+
-      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">CLABE: </span><b>2242 1767 2860 4506</b></div>'+
-      '<div style="padding:5px 0"><span style="color:var(--muted)">Monto: </span><b>$'+precio+' MXN</b></div></div>';
+      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Banco: </span><b>Por confirmar</b></div>'+
+      '<div style="padding:5px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">CLABE: </span><b>Por confirmar</b></div>'+
+      '<div style="padding:5px 0"><span style="color:var(--muted)">Titular: </span><b>Por confirmar</b></div></div>';
   }
 
   cnt.innerHTML=
@@ -2229,73 +2269,8 @@ function mostrarDetallePago(tipo,coins,bonus,precio,clienteInfo){
     '<div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--gold)">'+totalDesc+' Tía Coins</div>'+
     '<div style="font-family:Cinzel,serif;font-size:1.3rem;color:var(--text)">$'+precio+' MXN</div></div>'+
     detalleHtml+
-    '<div style="margin-bottom:12px">'+
-    '<div style="font-size:.62rem;color:var(--muted);margin-bottom:6px">COMPROBANTE DE PAGO</div>'+
-    '<label style="display:block;background:var(--bg3);border:1px dashed var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer">'+
-    '<input type="file" id="coinsComprobanteFile" accept="image/*" style="display:none" onchange="previewCoinsComprobante(this)">'+
-    '<div id="coinsComprobantePreview" style="font-size:.7rem;color:var(--muted)">📎 Toca para subir foto del comprobante</div>'+
-    '</label></div>'+
-    '<button onclick="enviarSolicitudCoins('+coins+','+bonus+','+precio+',\''+tipo+'\')" style="width:100%;background:linear-gradient(135deg,#b45309,var(--coin));border:none;border-radius:10px;padding:13px;font-family:Cinzel,serif;font-size:.8rem;color:#1a0a00;cursor:pointer;font-weight:700">✦ Enviar solicitud</button>';
-}
-
-function previewCoinsComprobante(input){
-  var prev=document.getElementById('coinsComprobantePreview');
-  if(!prev)return;
-  if(input.files&&input.files[0]){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      prev.innerHTML='<img src="'+e.target.result+'" style="max-height:80px;border-radius:6px;margin-bottom:4px"><div style="font-size:.6rem;color:var(--green)">✓ Comprobante listo</div>';
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-
-async function enviarSolicitudCoins(coins,bonus,precio,metodo){
-  if(!S.user){notif('Debes iniciar sesión','var(--red)');return;}
-  var fi=document.getElementById('coinsComprobanteFile');
-  var btn=document.querySelector('[onclick^="enviarSolicitudCoins"]');
-  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
-
-  var compBase64=null;
-  if(fi&&fi.files&&fi.files[0]){
-    compBase64=await new Promise(function(resolve){
-      var reader=new FileReader();
-      reader.onload=function(e){resolve(e.target.result);};
-      reader.readAsDataURL(fi.files[0]);
-    });
-  }
-
-  var {error}=await sb.from('coins_transacciones').insert({
-    cliente_id:S.user.id,
-    tipo:'credito',
-    cantidad:coins+bonus,
-    bonus:bonus||0,
-    precio_mxn:precio,
-    metodo_pago:metodo,
-    descripcion:'Compra '+(coins+bonus)+' coins — $'+precio+' MXN',
-    comprobante_url:compBase64||null,
-    estado:'pendiente'
-  });
-
-  if(error){
-    notif('Error al enviar solicitud','var(--red)');
-    if(btn){btn.disabled=false;btn.textContent='✦ Enviar solicitud';}
-    return;
-  }
-
-  // Armar y enviar WhatsApp
-  var ml={oxxo:'Depósito OXXO',transferencia:'Transferencia bancaria'};
-  var waMsg='🪙 Solicitud de Tía Coins\n';
-  waMsg+=(coins+bonus)+' coins — $'+precio+' MXN\n';
-  waMsg+='Método: '+(ml[metodo]||metodo)+'\n';
-  waMsg+='Cliente: '+(S.user.nombre||'')+(S.user.telefono?' — '+S.user.telefono:'')+'\n';
-  if(compBase64)waMsg+='[Comprobante adjunto en la app]';
-
-  cerrarCoinsPago();
-  notif('🪙 Solicitud enviada — tu vendedor la aprobará pronto','var(--coin)');
-  setTimeout(function(){
-    window.open('https://wa.me/523322740209?text='+encodeURIComponent(waMsg),'_blank');
-  },800);
+    '<a href="https://wa.me/523322740209?text='+encodeURIComponent(waMsg)+'" target="_blank" style="display:block;width:100%;background:#25d366;border-radius:10px;padding:12px;font-family:Cinzel,serif;font-size:.8rem;color:white;text-decoration:none;text-align:center;box-sizing:border-box">'+
+    '💬 Confirmar por WhatsApp</a>';
 }
 
 
@@ -2308,21 +2283,8 @@ function toggleCoinsPago(btn,tipo){
 }
 
 async function pagarConTarjeta(precio,coins,bonus){
-  if(!S.user){notif('Debes iniciar sesión','var(--red)');return;}
+  // Create MP payment link via API
   notif('Generando link de pago...');
-
-  // Guardar solicitud en DB primero
-  await sb.from('coins_transacciones').insert({
-    cliente_id:S.user.id,
-    tipo:'credito',
-    cantidad:coins+bonus,
-    bonus:bonus||0,
-    precio_mxn:precio,
-    metodo_pago:'tarjeta',
-    descripcion:'Compra '+(coins+bonus)+' coins — $'+precio+' MXN (tarjeta)',
-    estado:'pendiente'
-  });
-
   try{
     var res=await fetch('https://api.mercadopago.com/checkout/preferences',{
       method:'POST',
@@ -2331,21 +2293,21 @@ async function pagarConTarjeta(precio,coins,bonus){
         items:[{title:'Tia Coins '+coins+(bonus?' + '+bonus+' gratis':''),unit_price:precio,quantity:1,currency_id:'MXN'}],
         back_urls:{success:window.location.href,failure:window.location.href},
         auto_return:'approved',
-        external_reference:String(S.user.id)+'_'+coins+'_'+Date.now()
+        external_reference:(S.user?S.user.id:'')+'_'+coins+'_'+Date.now()
       })
     });
     var data=await res.json();
     if(data.init_point){
-      cerrarCoinsPago();
       window.open(data.init_point,'_blank');
     } else {
       throw new Error('No se pudo generar el link');
     }
   }catch(e){
-    var msg='🪙 Compra de Tía Coins con tarjeta\n'+(coins+bonus)+' coins — $'+precio+' MXN\nCliente: '+(S.user.nombre||'')+' — '+(S.user.telefono||'');
-    cerrarCoinsPago();
+    // Fallback: WhatsApp
+    var msg='Quiero comprar '+coins+' Tia Coins'+( bonus?' + '+bonus+' gratis':'')+' por $'+precio+' MXN con tarjeta.\nCliente: '+(S.user?S.user.nombre:'')+' — '+(S.user?S.user.telefono:'');
     window.open('https://wa.me/523322740209?text='+encodeURIComponent(msg),'_blank');
   }
+  cerrarCoinsPago();
 }
 
 async function confirmarPagoCoins(coins,bonus,precio,metodo){
@@ -2366,204 +2328,22 @@ function cerrarCoinsPago(){
 
 function bars(v,max=10){let h='';for(let i=0;i<max;i++)h+=`<div class="sb${i<v?' f':''}"></div>`;return h;}
 
-// ══════════════════════════════════════════
-// MENU DINAMICO — carga de Supabase
-// ══════════════════════════════════════════
-var _menuProds=[], _menuInv={}, _menuCombos=[];
-
-async function cargarMenuDinamico(){
-  if(!sb)return;
-  // 1. Productos visibles
-  var {data:prods}=await sb.from('productos').select('*').eq('visible_tienda',true);
-  _menuProds=prods||[];
-  // 2. Inventario (stock por SKU)
-  var {data:lotes}=await sb.from('lotes').select('sku,movimiento,cantidad');
-  _menuInv={};
-  (lotes||[]).forEach(function(l){
-    if(!_menuInv[l.sku])_menuInv[l.sku]=0;
-    _menuInv[l.sku]+=(l.movimiento==='entrada'?1:-1)*parseFloat(l.cantidad||0);
-  });
-  // 3. Combos
-  var {data:combos}=await sb.from('combos').select('*').eq('activo',true);
-  _menuCombos=combos||[];
-
-  renderMenuDinamico();
-}
-
-function getStock(sku){ return Math.max(0,_menuInv[sku]||0); }
-
-function renderMenuDinamico(){
-  renderHeroesDin();
-  renderSeccion('forjados','Gallos',['forjados-container']);
-  renderSeccion('edibles','Edibles',['edibles-container']);
-  renderSeccion('extractos','Extractos',['extractos-container']);
-  renderSeccion('medicina','Medicina',['medicina-container']);
-  renderSeccion('herramientas','Accesorios',['herramientas-container']);
-  renderCombosDin();
-  renderCofreDin();
-}
-
-function renderHeroesDin(){
-  var el=document.getElementById('heroes-container');
-  if(!el)return;
-  // Flor: agrupar por cepa base (ej: P1, P2, G1...)
-  var florProds=_menuProds.filter(function(p){return p.categoria&&(p.categoria.toLowerCase().includes('flor')||p.categoria.toLowerCase().includes('premium')||p.categoria.toLowerCase().includes('green')||p.categoria.toLowerCase().includes('indoor')||p.categoria.toLowerCase().includes('exotica')||p.categoria.toLowerCase().includes('regular'));});
-  
-  // Agrupar por nombre_tienda (cepa)
-  var cepas={};
-  florProds.forEach(function(p){
-    var clave=p.nombre_tienda||p.sku;
-    if(!cepas[clave])cepas[clave]=[];
-    cepas[clave].push(p);
-  });
-
-  if(!Object.keys(cepas).length){
-    el.innerHTML='<div class="info-box" style="text-align:center">🌿 Próximamente nuevos héroes...</div>';
-    return;
-  }
-
-  var html='';
-  Object.keys(cepas).forEach(function(cepa){
-    var items=cepas[cepa];
-    var rep=items[0]; // representante para datos de cepa
-    var tieneStock=items.some(function(p){return getStock(p.sku)>0;});
-    var agotado=!tieneStock;
-
-    // Botones de gramaje
-    var btns=items.map(function(p){
-      var stock=getStock(p.sku);
-      var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1]||p.sku;
-      if(stock>0){
-        return '<div class="ptag" onclick="event.stopPropagation();menuAddFlor(\''+p.sku+'\',\''+label+'\','+p.precio_menu+',\''+cepa+'\')"><div class="pq">'+label+'</div><div class="pp">$'+p.precio_menu+'</div></div>';
-      } else {
-        return '<div class="ptag" style="opacity:.4;cursor:not-allowed"><div class="pq">'+label+'</div><div class="pp">Agotado</div></div>';
-      }
-    }).join('');
-
-    var poder=rep.poder||0,fuerza=rep.fuerza||0,esencia=rep.esencia||0;
-    html+='<div class="hcard"'+(agotado?' style="opacity:.6"':'')+' onclick="openHeroDin(\''+cepa+'\')">';
-    html+='<div class="hcard-top">';
-    html+='<div class="hcard-emoji">'+(rep.emoji||'🌿')+'</div>';
-    html+='<div><div class="hcard-name">'+cepa+'</div>';
-    html+='<div class="hcard-strain">'+(rep.subtitulo||'')+'</div></div>';
-    if(agotado)html+='<div style="margin-left:auto;background:#F8514920;border:1px solid #F85149;border-radius:2px;padding:2px 8px;font-size:10px;color:#F85149;font-weight:700">AGOTADO</div>';
-    html+='</div>';
-    if(rep.descripcion_larga)html+='<div class="hcard-quote">'+rep.descripcion_larga.substring(0,110)+'...</div>';
-    html+='<div class="hcard-stats">';
-    html+='<div class="stat"><div class="stat-val">'+poder+'</div><div class="stat-bars">'+bars(poder)+'</div><div class="stat-lbl">PODER</div></div>';
-    html+='<div class="stat"><div class="stat-val">'+fuerza+'</div><div class="stat-bars">'+bars(fuerza)+'</div><div class="stat-lbl">FUERZA</div></div>';
-    html+='<div class="stat"><div class="stat-val">'+esencia+'</div><div class="stat-bars">'+bars(esencia)+'</div><div class="stat-lbl">ESENCIA</div></div>';
-    html+='</div>';
-    html+='<div class="hcard-prices">'+btns+'</div>';
-    html+='</div>';
-  });
-  el.innerHTML=html;
-}
-
-function openHeroDin(cepa){
-  var items=_menuProds.filter(function(p){return (p.nombre_tienda||p.sku)===cepa;});
-  if(!items.length)return;
-  var rep=items[0];
-  var prices=items.filter(function(p){return getStock(p.sku)>0;}).map(function(p){
-    var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1];
-    return{qty:label,price:p.precio_menu,sku:p.sku};
-  });
-  if(!prices.length)prices=items.map(function(p){var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1];return{qty:label+'(agotado)',price:p.precio_menu,sku:p.sku,agotado:true};});
-  S._modal={name:cepa,emoji:rep.emoji||'🌿',prices:prices};S._selQty=null;
-  document.getElementById('mTitle').textContent=(rep.emoji||'🌿')+' '+cepa;
-  document.getElementById('mSub').textContent=rep.subtitulo||'';
-  var mq=document.getElementById('mQuote');
-  if(rep.descripcion_larga){mq.textContent=rep.descripcion_larga;mq.style.display='block';}else mq.style.display='none';
-  buildQtyGrid(prices);
-  document.getElementById('overlay').classList.add('on');
-}
-
-function menuAddFlor(sku,label,precio,cepa){
-  var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
-  S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,isGift:false});
-  updUI();notif('⚔️ '+cepa+' ('+label+') agregado');
-}
-
-function renderSeccion(cat,categoria,containerIds){
-  var catMap={
-    'forjados':['Gallos','Insumo Gallos'],
-    'edibles':['Edibles','Comestibles'],
-    'extractos':['Extractos'],
-    'medicina':['Medicina'],
-    'herramientas':['Accesorios','Herramientas']
-  };
-  var cats=catMap[cat]||[categoria];
-  var prods=_menuProds.filter(function(p){return cats.some(function(c){return (p.categoria||'').toLowerCase()===c.toLowerCase();});});
-  
-  containerIds.forEach(function(cid){
-    var el=document.getElementById(cid);if(!el)return;
-    if(!prods.length){
-      el.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">🚧 Próximamente...</div>';
-      return;
-    }
-    el.innerHTML=prods.map(function(p){
-      var stock=getStock(p.sku);
-      var agotado=stock<=0;
-      var nombre=p.nombre_tienda&&p.nombre_tienda!=='NA'?p.nombre_tienda:p.descripcion;
-      var subtitulo=p.subtitulo||'';
-      return '<div class="scard"'+(agotado?' style="opacity:.6"':' onclick="menuAddProd(\''+p.sku+'\',\''+nombre.replace(/'/g,'')+'\',' +p.precio_menu+',\''+(p.emoji||'📦')+'\')"')+'>'+
-        '<div class="scard-top">'+
-        '<div class="scard-emoji">'+(p.emoji||'📦')+'</div>'+
-        '<div>'+
-        '<div class="scard-name">'+nombre+'</div>'+
-        (subtitulo?'<div class="scard-sub">'+subtitulo+'</div>':'')+
-        '</div>'+
-        (agotado?'<div style="margin-left:auto;background:#F8514920;border:1px solid #F85149;border-radius:2px;padding:2px 8px;font-size:10px;color:#F85149;font-weight:700">AGOTADO</div>':'')+'</div>'+
-        '<div class="scard-prices">'+
-        (agotado?'<div style="font-size:11px;color:#8B949E">Sin stock por el momento</div>':
-          '<div class="sprice"><span class="sv">$'+p.precio_menu+'</span></div>')+
-        '</div></div>';
-    }).join('');
-  });
-}
-
-function menuAddProd(sku,nombre,precio,emoji){
-  S.cart.push({name:nombre,sku:sku,emoji:emoji,qty:'1x',price:precio,isGift:false});
-  updUI();notif(emoji+' '+nombre+' agregado');
-}
-
-function renderCombosDin(){
-  var el=document.getElementById('combos-container');if(!el)return;
-  var combos=_menuCombos.filter(function(c){return c.tipo==='combo';});
-  if(!combos.length){el.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">🔥 Próximamente combos especiales...</div>';return;}
-  el.innerHTML=combos.map(function(co){
-    var ahorro=co.valor_min>0?'<div class="old">Normal: $'+co.valor_min+'</div>':'';
-    return '<div class="ccard" onclick="addCombo(\''+co.nombre+'\',\''+co.emoji+'\','+co.precio+',\''+co.descripcion+'\')">'+
-      '<div class="ccard-head"><div class="ccard-emoji">'+co.emoji+'</div><div><div class="ccard-name">'+co.nombre+'</div><div class="ccard-desc">'+co.descripcion+'</div></div></div>'+
-      '<div class="ccard-footer"><div class="ccard-prices">'+ahorro+'<div class="nw">$'+co.precio+
-      (co.valor_min>0?'<span class="save-badge">AHORRO $'+(co.valor_min-co.precio)+'</span>':'')+
-      '</div></div><div class="add-btn">+ Agregar</div></div></div>';
-  }).join('');
-}
-
-function renderCofreDin(){
-  var el=document.getElementById('cofre-container');if(!el)return;
-  var cofres=_menuCombos.filter(function(c){return c.tipo==='caja_misteriosa';});
-  if(!cofres.length){el.innerHTML='<div class="mbox-grid">'+
-    '<div class="mbox" onclick="addSimple(\'Cofre del Soldado\',\'🗡️\',\'$500\',500)"><div class="mbox-icon">🗡️</div><div class="mbox-name">Cofre Soldado</div><div class="mbox-price">$500</div><div class="mbox-val">Valor: $700–$900</div></div>'+
-    '<div class="mbox" onclick="addSimple(\'Cofre del Capitán\',\'🏆\',\'$1,000\',1000)"><div class="mbox-icon">🏆</div><div class="mbox-name">Cofre Capitán</div><div class="mbox-price">$1,000</div><div class="mbox-val">Valor: $1,600–$1,800</div></div>'+
-    '<div class="mbox" onclick="addSimple(\'Cofre del General\',\'⚔️\',\'$1,500\',1500)"><div class="mbox-icon">⚔️</div><div class="mbox-name">Cofre General</div><div class="mbox-price">$1,500</div><div class="mbox-val">Valor: $2,100–$2,700</div></div>'+
-    '<div class="mbox mbox-full" onclick="addSimple(\'Cofre Gran Conquistador +WAX\',\'👑\',\'$2,000\',2000)"><div class="mbox-icon">👑</div><div class="mbox-name">Gran Conquistador</div><div class="mbox-price">$2,000</div><div class="mbox-val">Valor $3,200+</div></div>'+
-    '</div>';return;}
-  el.innerHTML='<div class="mbox-grid">'+cofres.map(function(co){
-    return '<div class="mbox'+(co.valor_max>1500?' mbox-full':'')+'" onclick="addSimple(\''+co.nombre+'\',\''+co.emoji+'\',\'$'+co.precio+'\','+co.precio+')">'+
-      '<div class="mbox-icon">'+co.emoji+'</div>'+
-      '<div class="mbox-name">'+co.nombre+'</div>'+
-      '<div class="mbox-price">$'+co.precio+'</div>'+
-      (co.valor_min&&co.valor_max?'<div class="mbox-val">Valor: $'+co.valor_min+'–$'+co.valor_max+'</div>':'')+
-      '</div>';
-  }).join('')+'</div>';
-}
-
 function renderHeroes(){
-  // Ahora usa la versión dinámica
-  if(_menuProds.length)renderHeroesDin();
-  else cargarMenuDinamico();
+  const cats={oraculo:'heroOraculo',legion:'heroLegion',guardia:'heroGuardia'};
+  Object.entries(cats).forEach(([cat,elId])=>{
+    const el=document.getElementById(elId);if(!el)return;
+    el.innerHTML=HEROES.filter(h=>h.cat===cat).map(h=>`
+      <div class="hcard" onclick="openHero('${h.id}')">
+        <div class="hcard-top"><div class="hcard-emoji">${h.emoji}</div><div><div class="hcard-name">${h.name}</div><div class="hcard-strain">${h.tipo} · ${h.sabor}</div></div></div>
+        <div class="hcard-quote">${h.quote.substring(0,110)}...</div>
+        <div class="hcard-stats">
+          <div class="stat"><div class="stat-val">${h.poder}</div><div class="stat-bars">${bars(h.poder)}</div><div class="stat-lbl">PODER</div></div>
+          <div class="stat"><div class="stat-val">${h.fuerza}</div><div class="stat-bars">${bars(h.fuerza)}</div><div class="stat-lbl">FUERZA</div></div>
+          <div class="stat"><div class="stat-val">${h.esencia}</div><div class="stat-bars">${bars(h.esencia)}</div><div class="stat-lbl">ESENCIA</div></div>
+        </div>
+        <div class="hcard-prices">${h.prices.map(p=>`<div class="ptag" onclick="event.stopPropagation();quickAdd('${h.id}','${p.qty}',${p.price})"><div class="pq">${p.qty}</div><div class="pp">$${p.price}</div></div>`).join('')}</div>
+      </div>`).join('');
+  });
 }
 
 function openHero(id){
@@ -2836,74 +2616,150 @@ function llenarCkDatos(){
 
 async function confirmarPedido(){
   var errEl=document.getElementById('ck-error');if(errEl)errEl.style.display='none';
-  if(!S.user){notif('Regístrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}
-  var nombre=(document.getElementById('ck-nombre')||{}).value||'';
-  var tel=(document.getElementById('ck-tel')||{}).value||'';
-  var dir=(document.getElementById('ck-dir')||{}).value||'';
-  var horario=(document.getElementById('ck-horario')||{}).value||'';
-  var zona='';
-  var costoEnvio=0;
-  if(!nombre.trim()){mostrarError('⚠️ Escribe el nombre del receptor');if(document.getElementById('ck-nombre'))document.getElementById('ck-nombre').focus();return;}
-  if(tel.replace(/\D/g,'').length<10){mostrarError('⚠️ Teléfono de 10 dígitos');if(document.getElementById('ck-tel'))document.getElementById('ck-tel').focus();return;}
-  if(!dir.trim()){mostrarError('⚠️ Escribe la dirección de entrega');if(document.getElementById('ck-dir'))document.getElementById('ck-dir').focus();return;}
 
+  // 1. Sesión
+  if(!S.user){notif('Regístrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}
+
+  // 2. Perfil completo
+  var u=S.user;
+  var faltantes=[];
+  if(!u.direccion||!u.direccion.trim())faltantes.push('dirección');
+  if(!u.password||!u.password.trim())faltantes.push('contraseña');
+  if(faltantes.length){
+    mostrarError('⚠️ Completa tu perfil antes de hacer un pedido: '+faltantes.join(', '));
+    setTimeout(function(){goPage('usuario');},1800);return;
+  }
+
+  // 3. Campos carrito
+  var nombre=(document.getElementById('ck-nombre')||{value:''}).value||'';
+  var tel=(document.getElementById('ck-tel')||{value:''}).value||'';
+  var dir=(document.getElementById('ck-dir')||{value:''}).value||'';
+  var horario=(document.getElementById('ck-horario')||{value:''}).value||'';
+  if(!nombre.trim()){mostrarError('⚠️ Escribe el nombre del receptor');document.getElementById('ck-nombre')&&document.getElementById('ck-nombre').focus();return;}
+  if(tel.replace(/\D/g,'').length<10){mostrarError('⚠️ Teléfono de 10 dígitos');return;}
+  if(!dir.trim()){mostrarError('⚠️ Escribe la dirección de entrega');return;}
   if(!_ckMetodo){mostrarError('⚠️ Elige un método de pago');return;}
+
+  // 4. Validar comprobante si pago es transferencia o depósito
+  var fi=document.getElementById('ck-comp-file');
+  if((_ckMetodo==='transferencia'||_ckMetodo==='deposito')&&(!fi||!fi.files||!fi.files[0])){
+    mostrarError('⚠️ Adjunta el comprobante de pago para '+_ckMetodo);return;
+  }
+
+  // 5. Productos
   var prods=S.cart.filter(function(x){return !x.isGift;});
   var gifts=S.cart.filter(function(x){return x.isGift;});
   var total=prods.reduce(function(s,x){return s+x.price;},0);
   if(_ckMetodo==='coins'&&(S.user.coins||0)<total){mostrarError('⚠️ No tienes suficientes Tía Coins');return;}
-  var compBase64=null;
-  var fi=document.getElementById('ck-comp-file');
-  if(fi&&fi.files&&fi.files[0]){
-    compBase64=await new Promise(function(resolve){var reader=new FileReader();reader.onload=function(e){resolve(e.target.result);};reader.readAsDataURL(fi.files[0]);});
-  }
+
   var btn=document.getElementById('btn-confirmar');
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
-  var folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
+
+  // 6. Subir comprobante a Supabase Storage → guardar URL pública
+  var comprobanteUrl=null;
+  if(fi&&fi.files&&fi.files[0]){
+    try{
+      var file=fi.files[0];
+      var ext=file.name.split('.').pop()||'jpg';
+      var path='comprobantes/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+      var upRes=await sb.storage.from('comprobantes').upload(path,file,{contentType:file.type,upsert:false});
+      if(!upRes.error){
+        comprobanteUrl=sb.storage.from('comprobantes').getPublicUrl(path).data.publicUrl;
+      }else{
+        console.warn('Storage error:',upRes.error.message);
+      }
+    }catch(e){console.warn('Comprobante:',e);}
+  }
+
+  // 7. Guardar pedido — todos los campos de la tabla
+  var folio='TIA-'+Date.now().toString().slice(-6);
   var pagado=_ckMetodo==='coins';
+  var hoy=new Date().toISOString().split('T')[0];
+
+  // Insertar en seguimientos (tabla que usa el ERP para Pedidos Tienda)
+  var segId = String(Date.now());
   var res=await sb.from('seguimientos').insert({
-    id:'tid_'+Date.now(),
-    cliente_id:S.user.id,
-    cliente:nombre.trim(),tel:tel.replace(/\D/g,''),dir:dir.trim(),
-    folio:folio,
-    items:prods,regalos:gifts,total:total,
-    pago:_ckMetodo,
-    comprobante_url:compBase64||null,
-    pagado:pagado,pagado_at:pagado?new Date().toISOString():null,
-    estado:'pendiente',origen:'tienda',
-    fecha_creado:new Date().toISOString().slice(0,10),
-    historial:[{estado:'pendiente',fecha:new Date().toLocaleDateString('es-MX')}]
+    id:              segId,
+    pedido_id:       'tia_'+segId,
+    cliente:         nombre.trim(),
+    nb:              nombre.trim(),
+    cliente_id:      S.user.id,
+    tel:             tel.replace(/\D/g,''),
+    dir:             dir.trim(),
+    items:           prods,
+    regalos:         gifts,
+    total,
+    pago:            _ckMetodo,
+    comprobante_url: comprobanteUrl,
+    captura:         comprobanteUrl,
+    estado:          'pendiente',
+    historial:       [{estado:'pendiente', fecha:hoy}],
+    origen:          'tienda',
+    fecha_creado:    hoy,
+    folio:           folio,
+    usuario_id:      S.user.id,
+    pagado:          pagado,
+    pagado_at:       pagado?new Date().toISOString():null,
+    costo_viaje:     null
   }).select().single();
-  if(res.error){mostrarError('Error: '+res.error.message);if(btn){btn.disabled=false;btn.textContent='⚔️ Confirmar pedido';}return;}
+
+  if(res.error){
+    mostrarError('Error: '+res.error.message);
+    if(btn){btn.disabled=false;btn.textContent='⚔️ Confirmar pedido';}
+    return;
+  }
+
+  // 8. Descontar coins si aplica
   if(pagado){
     var nc=(S.user.coins||0)-total;
     var ur=await sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single();
     if(ur.data)S.user=ur.data;
-    await sb.from('coins_transacciones').insert({cliente_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
+    await sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
   }
-  var ng=(S.user.gastado||0)+total;var nc2=(S.user.pedidos_count||0)+1;
-  var uu=await sb.from('clientes').update({gastado:ng,pedidos_count:nc2}).eq('id',S.user.id).select().single();
+
+  // 9. Actualizar gastado + pedidos_count
+  var ng=(S.user.gastado||0)+total;
+  var np=(S.user.pedidos_count||0)+1;
+  var uu=await sb.from('clientes').update({gastado:ng,pedidos_count:np}).eq('id',S.user.id).select().single();
   if(uu.data)S.user=uu.data;
+
+  // 10. Guardar dirección en historial
+  guardarDirDesdePedido(dir.trim());
+
+  // 11. Verificar logros
   await verificarLogros();
-  var ml={coins:'Tia Coins',transferencia:'Transferencia',deposito:'Deposito OXXO'};
+
+  // 12. Mensaje WhatsApp
+  var ml={coins:'Tia Coins 🪙',transferencia:'Transferencia 🏦',deposito:'Depósito OXXO 🏪',efectivo:'Efectivo 💵'};
   var nl='\n';
-  var msg='PEDIDO La Tia Risuena'+nl+'Folio: '+folio+nl+'Pago: '+(ml[_ckMetodo]||_ckMetodo)+nl;
-  if(horario)msg+='Horario: '+horario+nl;
-  msg+='[El costo de envio lo asigna el admin]'+nl;
-  msg+=nl+'PRODUCTOS:'+nl+prods.map(function(x){return '• '+x.name+' ('+x.qty+') $'+x.price;}).join(nl);
-  if(gifts.length)msg+=nl+nl+'REGALOS:'+nl+gifts.map(function(x){return '• '+x.name;}).join(nl);
-  msg+=nl+nl+'TOTAL: $'+total+' MXN';
-  if(pagado)msg+=nl+'[PAGADO con Tia Coins]';
-  msg+=nl+nl+'Cliente: '+nombre.trim()+nl+'Tel: '+tel+nl+'Entrega: '+dir.trim();
-  S.cart=[];saveCart();
+  var msg='🌿 *NUEVO PEDIDO — La Tía Risueña*'+nl;
+  msg+='━━━━━━━━━━━━━━━━'+nl;
+  msg+='📋 Folio: *'+folio+'*'+nl;
+  msg+='📅 '+hoy+nl;
+  msg+='💳 Pago: '+(ml[_ckMetodo]||_ckMetodo)+(pagado?' ✅ *PAGADO*':' ⏳ Pendiente')+nl;
+  if(horario)msg+='🕐 Horario: '+horario+nl;
+  msg+=nl+'🛍 *PRODUCTOS:*'+nl;
+  msg+=prods.map(function(x){return '  • '+x.name+' x'+(x.qty||1)+' — $'+x.price;}).join(nl);
+  if(gifts.length)msg+=nl+'🎁 *Regalos:* '+gifts.map(function(x){return x.name;}).join(', ');
+  msg+=nl+nl+'💰 *TOTAL: $'+total+' MXN*';
+  msg+=nl+'━━━━━━━━━━━━━━━━'+nl;
+  msg+='👤 '+nombre.trim()+nl+'📱 '+tel+nl+'📍 '+dir.trim();
+  if(comprobanteUrl)msg+=nl+nl+'🧾 Comprobante: '+comprobanteUrl;
+  msg+=nl+nl+'[Costo de envío: el encargado lo asignará y notificará]';
+
+  // 13. Limpiar
+  S.cart=[];saveCart();_ckMetodo='';
+  ['ck-nombre','ck-tel','ck-dir'].forEach(function(id){var el=document.getElementById(id);if(el){el.value='';if(el._touched!==undefined)el._touched=false;}});
   var dirOpts=document.getElementById('ck-dir-opciones');if(dirOpts)dirOpts.innerHTML='';
-  var nEl=document.getElementById('ck-nombre');var tEl=document.getElementById('ck-tel');var dEl=document.getElementById('ck-dir');
-  if(nEl){nEl.value='';nEl._touched=false;}if(tEl){tEl.value='';tEl._touched=false;}if(dEl){dEl.value='';dEl._touched=false;}
-  _ckMetodo='';renderCart();updUI();
+  renderCart();updUI();
+
+  // 14. WhatsApp + ir a seguimiento
   window.open('https://wa.me/523322740209?text='+encodeURIComponent(msg),'_blank');
-  notif('Pedido enviado — Folio '+folio);
+  notif('✅ Pedido enviado — Folio '+folio);
   if(btn){btn.disabled=false;btn.textContent='⚔️ Confirmar pedido';}
+  setTimeout(function(){goPage('usuario');},1200);
 }
+
 
 function initFlappy(){
   var cv=document.getElementById('cvFlappy');
@@ -2972,7 +2828,7 @@ function flStartLevel(){
   fBird={x:80,y:240,vy:0,r:16};fPipes=[];fScore=0;fRun=true;fStart=true;fLp=0;fPassed=false;
   var cv=document.getElementById('cvFlappy');
   if(cv){
-    function flap(e){e.preventDefault();if(fRun)fFlap();}
+    function flap(e){e.preventDefault();if(fRun){fBird.vy=-7.5;}else if(!fStart){fStart=true;fRun=true;fBird.vy=-7.5;fLoop();}}
     cv.onclick=flap;cv.ontouchstart=flap;
   }
   requestAnimationFrame(fLoop);
@@ -3169,7 +3025,7 @@ function drawHero(c, x, y){
 }
 
 
-function rnJump(){if(rnY>=RH-62){rnVY=-12;}}
+function rnJump(){if(rnY>=RH-80){rnVY=-12;}}
 function rnLoop(){
   if(!rnRun) return;
   rnFrm = requestAnimationFrame(rnLoop);
@@ -3356,10 +3212,11 @@ async function init(){
   try {
     await cargarSesion();
   } catch(e) { console.log('No session:', e); }
+  try{await cargarSesionERP();}catch(e){}
   renderHeroes();
   renderCoins();
   updUI();
-  goPage('inicio');
+  goPage('usuario');
   // Init Places when Maps loads
   if(window.google && window.google.maps){
     initAllAutocompletes();
@@ -3396,15 +3253,24 @@ async function registrarUsuario(){
   if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   S.cart=[];S.coins=0;
   var coins=fb?200:100;
-  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
+  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0,fecha_registro:new Date().toISOString().split('T')[0]}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
-  var codigoNuevo='CLI'+String(res.data.id).padStart(3,'0');
-  await sb.from('clientes').update({codigo:codigoNuevo}).eq('id',res.data.id);
-  res.data.codigo=codigoNuevo;
-  await sb.from('coins_transacciones').insert({cliente_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
   S.user=res.data;guardarSesionLocal(res.data);
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
+}
+async function loginUsuario(){
+  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
+  var msg=document.getElementById('loginMsg');
+  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
+  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
+  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
+  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
+  if(res.error||!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
+  S.user=res.data;guardarSesionLocal(res.data);
+  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
+  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
 }
 function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
@@ -3424,16 +3290,9 @@ async function llenarPerfil(){
   else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
   val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
   await cargarSeguimientoPerfil();await cargarLogros();await cargarPedidosUsuario();
-  // Banner perfil incompleto
-  var banner=document.getElementById('banner-perfil-incompleto');
-  var bannerMsg=document.getElementById('banner-perfil-msg');
-  if(banner&&bannerMsg){
-    var faltantes=[];
-    if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
-    if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
-    if(faltantes.length){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
-    else{banner.style.display='none';}
-  }
+  renderDirsGuardadas();
+  checkBannerPerfilIncompleto();
+  checkBannerPerfilIncompleto();
 }
 async function cargarLogros(){
   var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
@@ -3448,13 +3307,13 @@ async function cargarLogros(){
   }).join('');
 }
 async function cargarPedidosUsuario(){
-  var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
+  var res=await sb.from('seguimientos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
   var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
   if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
-  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','preparando':'⚙️ En preparacion','en_preparacion':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
-  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','preparando':'#f59e0b','en_preparacion':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
+  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','concretado':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
+  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','concretado':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
   el.innerHTML=data.map(function(p){
-    var est=p.estado||p.status||'pendiente';
+    var est=p.status||'pendiente';
     return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
       '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
       '<div><div style="font-family:Cinzel,serif;font-size:.68rem;color:var(--gold)">'+p.folio+'</div>'+
@@ -3497,7 +3356,7 @@ function cerrarMP(){var el=document.getElementById('mp-overlay');if(el)el.style.
 async function generarTicket(pedidoId){
   var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
   if(!jsPDF){notif('Cargando PDF...','var(--muted)');return;}
-  var res=await sb.from('seguimientos').select('*').eq('id',pedidoId).single();
+  var res=await sb.from('pedidos').select('*').eq('id',pedidoId).single();
   var p=res.data;if(!p){notif('Pedido no encontrado','var(--red)');return;}
   var doc=new jsPDF({unit:'mm',format:[58,200],orientation:'portrait'});
   var x=4,y=6,w=50;
@@ -3538,18 +3397,448 @@ function buyCustom(){
   mostrarPagoCoins(amt,0,amt);
 }
 
-function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'seguimientos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
+function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
 async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
-  renderHeroes();renderCoins();updUI();goPage('inicio');
-  cargarMenuDinamico();
+  try{await cargarSesionERP();}catch(e){}
+  renderHeroes();renderCoins();updUI();
+  // Arrancar en Usuario (no en Inicio/Reglas)
+  goPage('usuario');
   if(S.user)initRealtime();
 }
 window.addEventListener('load',init);
 
+// ══════════════════════════════════════════════════════════════
+// ERP ESTADO
+// ══════════════════════════════════════════════════════════════
+var ERP={user:null};
+
+function abrirLoginERP(){
+  if(ERP.user){abrirPanelERP();return;}
+  var ov=document.getElementById('erp-login-overlay');
+  if(ov)ov.style.display='flex';
+}
+
+async function erpLogin(){
+  var u=(document.getElementById('erpUser')||{value:''}).value.trim();
+  var p=(document.getElementById('erpPass')||{value:''}).value.trim();
+  var msg=document.getElementById('erpLoginMsg');
+  if(!u||!p){if(msg)msg.textContent='Completa usuario y contraseña';return;}
+  if(msg)msg.textContent='Verificando...';
+  var res=await sb.from('erp_usuarios').select('*').eq('usuario',u).eq('activo',true).single();
+  if(!res.data){if(msg)msg.textContent='Usuario no encontrado';return;}
+  if(res.data.password!==p){if(msg)msg.textContent='Contraseña incorrecta';return;}
+  ERP.user=res.data;
+  sessionStorage.setItem('erp_uid',res.data.id);
+  document.getElementById('erp-login-overlay').style.display='none';
+  abrirPanelERP();
+}
+
+async function cargarSesionERP(){
+  var uid=sessionStorage.getItem('erp_uid');if(!uid)return;
+  var res=await sb.from('erp_usuarios').select('*').eq('id',uid).single();
+  if(res.data&&res.data.activo)ERP.user=res.data;
+}
+
+function cerrarSesionERP(){
+  ERP.user=null;sessionStorage.removeItem('erp_uid');
+  var p=document.getElementById('erp-panel-overlay');if(p)p.style.display='none';
+}
+
+function abrirPanelERP(){
+  var ov=document.getElementById('erp-panel-overlay');
+  if(!ov){ov=crearPanelERPDOM();}
+  ov.style.display='flex';
+  renderERPTabs();
+  erpMostrarSeccion('pedidos');
+}
+
+function crearPanelERPDOM(){
+  var div=document.createElement('div');
+  div.id='erp-panel-overlay';
+  div.style.cssText='position:fixed;inset:0;z-index:999;background:var(--bg1);display:flex;flex-direction:column;overflow:hidden';
+  div.innerHTML=`
+    <div style="background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div style="flex:1"><div style="font-family:Cinzel,serif;font-size:.8rem;color:var(--gold)">⚔️ ERP · LA TÍA RISUEÑA</div>
+      <div style="font-size:.58rem;color:var(--muted)" id="erp-rol-label"></div></div>
+      <button onclick="cerrarSesionERP()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red);border-radius:8px;padding:5px 12px;font-size:.6rem;font-family:Cinzel,serif;cursor:pointer">Salir</button>
+    </div>
+    <div style="display:flex;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0" id="erp-tabs"></div>
+    <div style="flex:1;overflow-y:auto;padding:12px" id="erp-content"><div style="text-align:center;padding:20px;color:var(--muted);font-size:.7rem">Cargando...</div></div>`;
+  document.body.appendChild(div);
+  return div;
+}
+
+var ERP_TABS=[
+  {id:'pedidos',    label:'📋 Pedidos',    roles:['admin','super_admin','repartidor']},
+  {id:'envios',     label:'🚚 Envíos',     roles:['admin','super_admin','repartidor']},
+  {id:'inventario', label:'📦 Inventario', roles:['admin','super_admin','produccion']},
+  {id:'clientes',   label:'👥 Clientes',   roles:['admin','super_admin']},
+  {id:'finanzas',   label:'💰 Finanzas',   roles:['admin','super_admin']},
+];
+
+function renderERPTabs(){
+  if(!ERP.user)return;
+  var lbl=document.getElementById('erp-rol-label');
+  if(lbl)lbl.textContent=ERP.user.nombre+' · '+ERP.user.rol;
+  var tabs=document.getElementById('erp-tabs');if(!tabs)return;
+  tabs.innerHTML=ERP_TABS.filter(t=>t.roles.includes(ERP.user.rol))
+    .map(t=>`<button onclick="erpMostrarSeccion('${t.id}')" id="erp-tab-${t.id}"
+      style="padding:10px 14px;font-size:.62rem;font-family:Cinzel,serif;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0">${t.label}</button>`).join('');
+}
+
+async function erpMostrarSeccion(sec){
+  document.querySelectorAll('[id^=erp-tab-]').forEach(b=>{b.style.borderBottomColor='transparent';b.style.color='var(--muted)';});
+  var a=document.getElementById('erp-tab-'+sec);
+  if(a){a.style.borderBottomColor='var(--gold)';a.style.color='var(--gold)';}
+  var content=document.getElementById('erp-content');
+  if(!content)return;
+  content.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:.7rem">Cargando...</div>';
+  if(sec==='pedidos')await erpRenderPedidos();
+  else if(sec==='envios')await erpRenderEnvios();
+  else if(sec==='inventario')await erpRenderInventario();
+  else if(sec==='clientes')await erpRenderClientes();
+  else if(sec==='finanzas')await erpRenderFinanzas();
+}
+
+// ── PEDIDOS ERP ───────────────────────────────────────────────
+async function erpRenderPedidos(){
+  var content=document.getElementById('erp-content');
+  var filtro=(document.getElementById('erp-pedido-filtro')||{value:''}).value||'';
+  var q=sb.from('pedidos').select('*').order('created_at',{ascending:false}).limit(60);
+  if(filtro)q=q.eq('status',filtro);
+  var res=await q;
+  var pedidos=res.data||[];
+  var ST={
+    pendiente:      {label:'Pendiente',  color:'#6b7280',next:'concretado',nextLabel:'✅ Aceptar'},
+    concretado: {label:'Preparando', color:'#f59e0b',next:'en_camino',     nextLabel:'🚚 Despachar'},
+    en_camino:      {label:'En ruta',    color:'#7c3aed',next:'entregado',     nextLabel:'🏆 Entregar'},
+    entregado:      {label:'Entregado',  color:'#16a34a',next:null,           nextLabel:''},
+  };
+  var counts={pendiente:0,concretado:0,en_camino:0,entregado:0};
+  (res.data||[]).forEach(p=>{if(counts[p.status]!==undefined)counts[p.status]++;});
+  content.innerHTML=`
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+      <div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold)">📋 PEDIDOS</div>
+      <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap">
+        ${Object.entries(counts).map(([k,v])=>`<span style="background:${(ST[k]||{color:'#666'}).color}22;color:${(ST[k]||{color:'#666'}).color};border-radius:6px;padding:2px 7px;font-size:.55rem">${(ST[k]||{label:k}).label}: ${v}</span>`).join('')}
+        <select id="erp-pedido-filtro" onchange="erpRenderPedidos()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:3px 7px;font-size:.6rem">
+          <option value="">Todos</option>
+          <option value="pendiente" ${filtro==='pendiente'?'selected':''}>Pendiente</option>
+          <option value="concretado" ${filtro==='concretado'?'selected':''}>Preparando</option>
+          <option value="en_camino" ${filtro==='en_camino'?'selected':''}>En ruta</option>
+          <option value="entregado" ${filtro==='entregado'?'selected':''}>Entregado</option>
+        </select>
+        <button onclick="erpRenderPedidos()" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 8px;font-size:.65rem;cursor:pointer">↻</button>
+      </div>
+    </div>
+    ${pedidos.length===0?'<div style="text-align:center;color:var(--muted);font-size:.7rem;padding:20px">Sin pedidos</div>':
+    pedidos.map(p=>{
+      var st=ST[p.status]||ST.pendiente;
+      var items=(p.items||[]).map(i=>i.name+' x'+(i.qty||1)).join(', ');
+      var fecha=new Date(p.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div><span style="font-family:Cinzel,serif;font-size:.72rem;color:var(--gold)">${p.folio}</span>
+          <span style="font-size:.52rem;color:var(--muted);margin-left:6px">${fecha}</span></div>
+          <span style="background:${st.color}22;color:${st.color};border-radius:6px;padding:2px 8px;font-size:.58rem">${st.label}</span>
+        </div>
+        <div style="font-size:.63rem;color:var(--text);margin-bottom:2px">👤 ${p.nb||'—'} · 📱 ${p.tel||'—'}</div>
+        <div style="font-size:.58rem;color:var(--muted);margin-bottom:2px">📍 ${p.dir||'—'}</div>
+        <div style="font-size:.58rem;color:var(--muted);margin-bottom:6px">🛍 ${items||'—'}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+          <div>
+            <span style="font-size:.78rem;font-weight:700">$${p.total||0}</span>
+            <span style="font-size:.55rem;color:${p.pagado?'var(--green)':'var(--red)'};margin-left:4px">${p.pagado?'✅ Pagado':'⏳ Sin pago'}</span>
+            ${p.costo_viaje?`<span style="font-size:.55rem;color:var(--gold);margin-left:6px">🚗 $${p.costo_viaje}</span>`:''}
+          </div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap">
+            ${st.next?`<button onclick="erpCambiarStatus('${p.id}','${st.next}')" style="background:${st.color};color:white;border:none;border-radius:8px;padding:5px 10px;font-size:.6rem;font-family:Cinzel,serif;cursor:pointer">${st.nextLabel}</button>`:''}
+            <button onclick="erpSetCostoViaje('${p.id}','${p.folio}')" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:.6rem;cursor:pointer">💵 ${p.costo_viaje?'Editar envío':'Asignar envío'}</button>
+            ${p.comprobante_url?`<a href="${p.comprobante_url}" target="_blank" style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:5px 10px;font-size:.6rem;text-decoration:none">🧾 Comprobante</a>`:''}
+          </div>
+        </div>
+      </div>`;
+    }).join('')}`;
+
+  // Realtime ERP
+  if(!window._erpRealtimeInit){
+    window._erpRealtimeInit=true;
+    sb.channel('erp-pedidos-live').on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},function(p){
+      notif('🆕 Nuevo pedido: '+(p.new.folio||'')+'  — '+(p.new.nb||''));
+      erpRenderPedidos();
+    }).subscribe();
+  }
+}
+
+async function erpCambiarStatus(pedidoId,nuevoStatus){
+  var upd={status:nuevoStatus};
+  if(nuevoStatus==='concretado')upd.estado_envio='preparando';
+  if(nuevoStatus==='en_camino')upd.estado_envio='en_camino';
+  if(nuevoStatus==='entregado'){upd.estado_envio='entregado';upd.fecha=new Date().toISOString().split('T')[0];}
+  var res=await sb.from('pedidos').update(upd).eq('id',pedidoId).select().single();
+  if(res.error){notif('Error: '+res.error.message,'var(--red)');return;}
+  if(nuevoStatus==='entregado'&&res.data){
+    var p=res.data;
+    if(p.total){
+      await sb.from('movimientos').insert({
+        fecha:new Date().toISOString().split('T')[0],
+        cuenta:'Ventas Tienda',movimiento:'Ingreso',
+        concepto:'Pedido '+p.folio+' — '+(p.nb||''),
+        monto:p.total,egreso:false,
+        metodo_pago:p.pago||'efectivo',
+        cliente_id:p.usuario_id,tipo_pago:p.pago||'efectivo'
+      });
+    }
+    // Descuento de inventario por lotes
+    var items=p.items||[];
+    for(var item of items){
+      if(item.sku){
+        await sb.from('lotes').insert({
+          sku:item.sku,tipo:'producto',movimiento:'salida',ref_id:p.id,
+          fecha:new Date().toISOString().split('T')[0],
+          cantidad:item.qty||1,concepto:'Venta pedido '+p.folio,num_ref:p.folio
+        });
+      }
+    }
+    // Actualizar pedidos_count y gastado del cliente
+    if(p.usuario_id&&p.total){
+      var cli=await sb.from('clientes').select('gastado,pedidos_count').eq('id',p.usuario_id).single();
+      if(cli.data){
+        await sb.from('clientes').update({
+          gastado:(cli.data.gastado||0)+p.total,
+          pedidos_count:(cli.data.pedidos_count||0)+1
+        }).eq('id',p.usuario_id);
+      }
+    }
+  }
+  notif('Status actualizado');
+  erpRenderPedidos();
+}
+
+async function erpSetCostoViaje(pedidoId,folio){
+  var costo=prompt('Costo de envío para '+folio+' ($MXN):');
+  if(!costo||isNaN(costo))return;
+  var res=await sb.from('pedidos').update({costo_viaje:parseFloat(costo)}).eq('id',pedidoId);
+  if(res.error){notif('Error: '+res.error.message,'var(--red)');return;}
+  notif('✅ Costo de envío asignado: $'+costo+' — el cliente lo verá en su seguimiento');
+  erpRenderPedidos();
+}
+
+// ── ENVÍOS ERP ────────────────────────────────────────────────
+async function erpRenderEnvios(){
+  var content=document.getElementById('erp-content');
+  var res=await sb.from('envios').select('*').order('created_at',{ascending:false}).limit(30);
+  var envios=res.data||[];
+  content.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold)">🚚 ENVÍOS</div>
+      <button onclick="erpNuevoEnvio()" style="background:var(--gold);color:#000;border:none;border-radius:8px;padding:6px 12px;font-size:.6rem;font-family:Cinzel,serif;cursor:pointer">+ Nuevo Envío</button>
+    </div>
+    ${envios.length===0?'<div style="text-align:center;color:var(--muted);font-size:.7rem;padding:20px">Sin envíos registrados</div>':
+    envios.map(e=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold)">Envío #${e.num_envio||e.id}</span>
+        <span style="font-size:.55rem;color:var(--muted)">${e.fecha||'—'}</span>
+      </div>
+      <div style="font-size:.62rem;color:var(--text);margin-bottom:2px">🚴 ${e.repartidor||'—'} · 📍 ${e.ruta||'—'}</div>
+      <div style="font-size:.58rem;color:var(--muted)">📦 ${(e.pedidos||[]).length} pedidos · $${e.costo_total||0} total · <span style="color:var(--gold)">${e.status||'—'}</span></div>
+    </div>`).join('')}`;
+}
+
+async function erpNuevoEnvio(){
+  var repartidor=prompt('Nombre del repartidor:');if(!repartidor)return;
+  var ruta=prompt('Ruta (ej: Zona Norte, Centro):');
+  var res=await sb.from('pedidos').select('id,folio,nb,dir,total,costo_viaje').eq('status','en_camino');
+  var pedidos=res.data||[];
+  var num=await sb.from('envios').select('num_envio').order('num_envio',{ascending:false}).limit(1);
+  var nextNum=((num.data&&num.data[0]&&num.data[0].num_envio)||0)+1;
+  var costoTotal=pedidos.reduce((s,p)=>s+(p.costo_viaje||0),0);
+  await sb.from('envios').insert({
+    num_envio:nextNum,fecha:new Date().toISOString().split('T')[0],
+    repartidor,ruta,costo_total:costoTotal,status:'en_ruta',
+    pedidos:pedidos.map(p=>({id:p.id,folio:p.folio,nb:p.nb,dir:p.dir}))
+  });
+  notif('✅ Envío #'+nextNum+' creado con '+pedidos.length+' pedidos');
+  erpRenderEnvios();
+}
+
+// ── INVENTARIO ERP ────────────────────────────────────────────
+async function erpRenderInventario(){
+  var content=document.getElementById('erp-content');
+  var [invRes,lotesRes]=await Promise.all([
+    sb.from('inventario').select('*').order('nombre'),
+    sb.from('lotes').select('sku,movimiento,cantidad')
+  ]);
+  var items=invRes.data||[];
+  var stock={};
+  (lotesRes.data||[]).forEach(l=>{
+    if(!stock[l.sku])stock[l.sku]=0;
+    stock[l.sku]+=l.movimiento==='entrada'?Number(l.cantidad):-Number(l.cantidad);
+  });
+  content.innerHTML=`
+    <div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);margin-bottom:12px">📦 INVENTARIO</div>
+    ${items.length===0?'<div style="text-align:center;color:var(--muted);font-size:.7rem;padding:20px">Sin registros</div>':
+    items.map(item=>{
+      var st=stock[item.id]!==undefined?stock[item.id]:(item.cantidad||0);
+      var bajo=st<10;
+      return `<div style="background:var(--card);border:1px solid ${bajo?'rgba(239,68,68,.4)':'var(--border)'};border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-size:.68rem;color:var(--text);font-weight:600">${item.nombre}</div>
+        <div style="font-size:.55rem;color:var(--muted)">${item.categoria||''} · ${item.tipo||''}</div></div>
+        <div style="text-align:right">
+          <div style="font-size:.8rem;font-weight:700;color:${bajo?'var(--red)':'var(--green)'}">${Number(st).toFixed(1)}g</div>
+          <div style="font-size:.52rem;color:var(--muted)">$${item.costo_unit||0}/g</div>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+// ── CLIENTES ERP ──────────────────────────────────────────────
+async function erpRenderClientes(){
+  var content=document.getElementById('erp-content');
+  var res=await sb.from('clientes').select('id,nombre,apodo,telefono,gastado,pedidos_count,coins,created_at').order('gastado',{ascending:false}).limit(50);
+  var clientes=res.data||[];
+  content.innerHTML=`
+    <div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);margin-bottom:12px">👥 CLIENTES (${clientes.length})</div>
+    ${clientes.map((c,i)=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.68rem;color:var(--text)">${i+1}. ${c.nombre}${c.apodo?' ('+c.apodo+')':''}</div>
+      <div style="font-size:.55rem;color:var(--muted)">📱 ${c.telefono} · 🛍 ${c.pedidos_count||0} pedidos</div></div>
+      <div style="text-align:right">
+        <div style="font-size:.72rem;font-weight:700;color:var(--gold)">$${(c.gastado||0).toLocaleString()}</div>
+        <div style="font-size:.52rem;color:var(--muted)">🪙 ${c.coins||0} coins</div>
+      </div>
+    </div>`).join('')}`;
+}
+
+// ── FINANZAS ERP ──────────────────────────────────────────────
+async function erpRenderFinanzas(){
+  var content=document.getElementById('erp-content');
+  var inicioMes=new Date().toISOString().slice(0,7)+'-01';
+  var [movRes,pedRes]=await Promise.all([
+    sb.from('movimientos').select('*').gte('fecha',inicioMes).order('fecha',{ascending:false}),
+    sb.from('pedidos').select('total,pagado,status,pago').eq('status','entregado').gte('fecha',inicioMes)
+  ]);
+  var movs=movRes.data||[];
+  var peds=pedRes.data||[];
+  var ingresos=peds.reduce((s,p)=>s+(p.total||0),0);
+  var gastos=movs.filter(m=>m.egreso).reduce((s,m)=>s+(m.monto||0),0);
+  content.innerHTML=`
+    <div style="font-family:Cinzel,serif;font-size:.75rem;color:var(--gold);margin-bottom:12px">💰 FINANZAS — ${new Date().toLocaleDateString('es-MX',{month:'long',year:'numeric'}).toUpperCase()}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:.52rem;color:var(--muted);margin-bottom:2px">INGRESOS</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--green)">$${ingresos.toLocaleString()}</div>
+      </div>
+      <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:.52rem;color:var(--muted);margin-bottom:2px">GASTOS</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--red)">$${gastos.toLocaleString()}</div>
+      </div>
+      <div style="background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:.52rem;color:var(--muted);margin-bottom:2px">UTILIDAD</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--gold)">$${(ingresos-gastos).toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="font-family:Cinzel,serif;font-size:.62rem;color:var(--muted);margin-bottom:8px">MOVIMIENTOS RECIENTES</div>
+    ${movs.slice(0,20).map(m=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.62rem;color:var(--text)">${m.concepto||m.movimiento||'—'}</div>
+      <div style="font-size:.52rem;color:var(--muted)">${m.fecha||'—'} · ${m.metodo_pago||m.tipo_pago||'—'}</div></div>
+      <span style="font-size:.72rem;font-weight:700;color:${m.egreso?'var(--red)':'var(--green)'}"> ${m.egreso?'-':'+'}$${(m.monto||0).toLocaleString()}</span>
+    </div>`).join('')}`;
+}
+
+// ── SEGUIMIENTO EN PERFIL ──────────────────────────────────────
+async function cargarSeguimientoPerfil(){
+  var el=document.getElementById('perfil-orders-panel');if(!el)return;
+  if(!S.user||!sb){el.innerHTML='';return;}
+  var res=await sb.from('seguimientos').select('*').eq('usuario_id',S.user.id).not('estado','eq','entregado').order('created_at',{ascending:false}).limit(3);
+  var pedidos=res.data||[];
+  if(!pedidos.length){
+    el.innerHTML='<div style="font-size:.6rem;color:var(--muted);padding:8px 0">Sin pedidos activos en este momento</div>';
+    return;
+  }
+  var PASOS=[
+    {key:'pendiente',  label:'Creado',        icon:'📋',color:'#6b7280'},
+    {key:'concretado', label:'En preparación',icon:'✅',color:'#f59e0b'},
+    {key:'en_camino',  label:'En ruta',       icon:'🚚',color:'#7c3aed'},
+    {key:'entregado',  label:'Entregado',     icon:'🏆',color:'#16a34a'},
+  ];
+  function eIdx(p){
+    var s=p.estado||p.status||'pendiente';
+    var e=p.estado_envio||'';
+    if(s==='entregado')return 3;
+    if(e==='en_camino'||e==='entregado')return 2;
+    if(s==='concretado')return 1;
+    return 0;
+  }
+  el.innerHTML=pedidos.map(function(p){
+    var ei=eIdx(p);
+    var steps='<div style="display:flex;align-items:flex-start;margin:10px 0 6px">';
+    PASOS.forEach(function(paso,i){
+      var done=i<=ei,curr=i===ei;
+      steps+='<div style="display:flex;flex-direction:column;align-items:center;flex:1">'+
+        '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?paso.color:'var(--bg3)')+
+        ';border:2px solid '+(curr?paso.color:'transparent')+
+        (curr?';box-shadow:0 0 8px '+paso.color:'')+
+        ';display:flex;align-items:center;justify-content:center;font-size:.8rem">'+
+        (done?paso.icon:(i+1))+'</div>'+
+        '<div style="font-size:.45rem;margin-top:3px;text-align:center;color:'+(curr?'var(--gold)':done?'var(--text)':'var(--muted)')+';font-weight:'+(curr?'700':'400')+'">'+paso.label+'</div></div>';
+      if(i<3)steps+='<div style="flex:0 0 16px;height:2px;background:'+(i<ei?'#16a34a':'var(--border)')+';margin-top:16px;border-radius:2px"></div>';
+    });
+    steps+='</div>';
+    var costoViaje=p.costo_viaje
+      ?'<div style="margin-top:6px;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.3);border-radius:8px;padding:6px 10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.58rem;color:var(--muted)">🚗 Costo de envío</span><span style="font-size:.72rem;font-weight:700;color:var(--gold)">$'+p.costo_viaje+' MXN</span></div>'
+      :'<div style="margin-top:6px;font-size:.55rem;color:var(--muted);font-style:italic">🚗 Costo de envío: el encargado lo asignará pronto</div>';
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">'+
+      '<span style="font-family:Cinzel,serif;font-size:.7rem;color:var(--gold)">'+p.folio+'</span>'+
+      '<b style="font-size:.75rem">$'+p.total+'</b></div>'+
+      '<div style="font-size:.52rem;color:var(--muted);margin-bottom:4px">'+
+      new Date(p.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</div>'+
+      steps+
+      '<div style="font-size:.55rem;color:var(--muted)">📍 '+(p.dir||'—')+'</div>'+
+      costoViaje+'</div>';
+  }).join('');
+  if(!window._perfilRealtimeInit&&S.user){
+    window._perfilRealtimeInit=true;
+    sb.channel('perfil-seg-'+S.user.id)
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'usuario_id=eq.'+S.user.id},
+      function(payload){
+        var labels={pendiente:'📋 Tu pedido fue recibido',concretado:'✅ ¡Tu pedido fue aceptado!',en_camino:'🚚 ¡Tu pedido está en camino!',entregado:'🏆 ¡Pedido entregado!'};
+        notif(labels[key]||'Pedido actualizado');
+        cargarSeguimientoPerfil();
+      }).subscribe();
+  }
+}
+
+// ── BANNER PERFIL INCOMPLETO ──────────────────────────────────
+function checkBannerPerfilIncompleto(){
+  var u=S.user;if(!u)return;
+  var banner=document.getElementById('banner-perfil-incompleto');
+  var bannerMsg=document.getElementById('banner-perfil-msg');
+  if(!banner||!bannerMsg)return;
+  var faltantes=[];
+  if(!u.direccion||!u.direccion.trim())faltantes.push('📍 Dirección principal');
+  if(!u.password||!u.password.trim())faltantes.push('🔑 Contraseña');
+  if(faltantes.length){banner.style.display='block';bannerMsg.innerHTML=faltantes.join('<br>');}
+  else{banner.style.display='none';}
+}
+
 </script>
 
+
+<!-- ERP LOGIN -->
+<div id="erp-login-overlay" style="display:none;position:fixed;inset:0;z-index:998;background:rgba(0,0,0,.95);align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:90%;max-width:340px">
+    <div style="font-family:'Cinzel',serif;font-size:.9rem;color:var(--gold);text-align:center;margin-bottom:4px">⚔️ ERP ACCESO</div>
+    <div style="font-size:.6rem;color:var(--muted);text-align:center;margin-bottom:20px">La Tía Risueña · Panel Interno</div>
+    <div class="user-field"><label>USUARIO</label><input class="user-inp" id="erpUser" type="text" placeholder="tu_usuario" autocomplete="off"></div>
+    <div class="user-field"><label>CONTRASEÑA</label><input class="user-inp" id="erpPass" type="password" placeholder="••••••" onkeydown="if(event.key==='Enter')erpLogin()"></div>
+    <div id="erpLoginMsg" style="font-size:.6rem;color:var(--red);margin:6px 0;min-height:16px;text-align:center"></div>
+    <button onclick="erpLogin()" class="btn-gold" style="width:100%;margin-top:4px">Entrar al ERP</button>
+    <button onclick="document.getElementById('erp-login-overlay').style.display='none'" style="width:100%;margin-top:8px;background:none;border:none;color:var(--muted);font-size:.6rem;cursor:pointer">Cancelar</button>
+  </div>
+</div>
 
 <!-- MP OVERLAY -->
 <div id="mp-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.9);align-items:flex-end;justify-content:center">
@@ -3571,11 +3860,11 @@ window.addEventListener('load',init);
 
 <!-- BOTTOM NAV -->
 <div id="botnav">
-  <button class="bnav on" id="bn-inicio" onclick="goPage('inicio')"><span>🏠</span><span>Inicio</span></button>
+  <button class="bnav on" id="bn-usuario" onclick="goPage('usuario')"><span>👤</span><span>Usuario</span></button>
+  <button class="bnav" id="bn-inicio" onclick="goPage('inicio')"><span>📜</span><span>Reglas</span></button>
   <button class="bnav" id="bn-menu" onclick="goPage('menu')"><span>⚔️</span><span>Menú</span></button>
   <button class="bnav" id="bn-arcade" onclick="goPage('arcade')"><span>🎮</span><span>Arcade</span></button>
   <button class="bnav" id="bn-carrito" onclick="goPage('carrito')"><span>🛍</span><span id="cartBadge">Carrito</span></button>
-  <button class="bnav" id="bn-usuario" onclick="goPage('usuario')"><span>👤</span><span>Usuario</span></button>
   <button class="bnav" id="bn-coins" onclick="goPage('coins')"><span>🪙</span><span>Coins</span></button>
 </div>
 </body>
