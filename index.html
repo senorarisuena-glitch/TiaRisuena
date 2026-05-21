@@ -371,87 +371,38 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
   <!-- PAGE: MENU -->
   <div id="pg-menu" class="page">
     <div id="sub-heroes" class="subtab-panel on">
-      <div class="stitle">🌿 ORÁCULO <span class="badge b-green">GREEN HOUSE</span></div>
-      <div id="heroOraculo"></div>
-      <div class="stitle">⚡ LEGIÓN <span class="badge b-purple">EXÓTICA</span></div>
-      <div id="heroLegion"></div>
-      <div class="stitle">🛡️ GUARDIA <span class="badge b-gold">PREMIUM</span></div>
-      <div id="heroGuardia"></div>
+      <div id="heroes-container"><div class="info-box" style="text-align:center">⚔️ Cargando héroes...</div></div>
     </div>
     <div id="sub-cofre" class="subtab-panel">
-      <div class="stitle">🎁 BOTÍN DE HÉROE (Mistery Box) <span class="badge b-red">MISTERY BOX</span></div>
-      <div class="info-box"><strong>⚔️ ¡El Botín del Héroe!</strong><br>Cada cofre incluye flores, porros, extractos, accesorios y edibles. El valor supera al precio pagado entre un <strong>40% y 80%</strong>. Ej: Cofre de $1,000 → recibes entre <strong>$1,600 y $1,800</strong>.</div>
-      <div class="mbox-grid">
-        <div class="mbox" onclick="addSimple('Cofre del Soldado','🗡️','$500',500)"><div class="mbox-icon">🗡️</div><div class="mbox-name">Cofre Soldado</div><div class="mbox-price">$500</div><div class="mbox-val">Valor: $700–$900</div></div>
-        <div class="mbox" onclick="addSimple('Cofre del Capitán','🏆','$1,000',1000)"><div class="mbox-icon">🏆</div><div class="mbox-name">Cofre Capitán</div><div class="mbox-price">$1,000</div><div class="mbox-val">Valor: $1,600–$1,800</div></div>
-        <div class="mbox" onclick="addSimple('Cofre del General','⚔️','$1,500',1500)"><div class="mbox-icon">⚔️</div><div class="mbox-name">Cofre General</div><div class="mbox-price">$1,500</div><div class="mbox-val">Valor: $2,100–$2,700</div></div>
-        <div class="mbox mbox-full" onclick="addSimple('Cofre Gran Conquistador +WAX','👑','$2,000',2000)"><div class="mbox-icon">👑</div><div class="mbox-name">Gran Conquistador</div><div class="mbox-price">$2,000</div><div class="mbox-val">Valor $3,200+ · Puede incluir cartucho WAX</div></div>
-      </div>
+      <div class="stitle">🎁 BOTÍN DE HÉROE <span class="badge b-red">MISTERY BOX</span></div>
+      <div class="info-box"><strong>⚔️ ¡El Botín del Héroe!</strong><br>Cada cofre incluye flores, porros, extractos, accesorios y edibles. El valor supera al precio pagado entre un <strong>40% y 80%</strong>.</div>
+      <div id="cofre-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
     <div id="sub-forjados" class="subtab-panel">
       <div class="stitle">🐓 FORJADOS EN BATALLA <span class="badge b-orange">PORROS</span></div>
-      <div class="scard" onclick="openModal('El Escudo Espartano','King Size · El arma estándar del guerrero','🗡️',null,[{qty:'1 porro',price:70},{qty:'6 porros',price:380},{qty:'12 porros',price:750}])"><div class="scard-top"><div class="scard-emoji">🗡️</div><div><div class="scard-name">El Escudo Espartano</div><div class="scard-sub">King Size</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$70</span></div><div class="sprice"><span class="sq">6x </span><span class="sv">$380</span></div><div class="sprice"><span class="sq">12x </span><span class="sv">$750</span></div></div></div>
-      <div class="scard" onclick="openModal('Armadura Empanizada','King+WAX BHO+Dry Hash · 1.5g Flor Premium','🛡️',null,[{qty:'1 porro',price:160},{qty:'3 porros',price:390},{qty:'6 porros',price:700}])"><div class="scard-top"><div class="scard-emoji">🛡️</div><div><div class="scard-name">Armadura Empanizada</div><div class="scard-sub">King Size + WAX + Dry Hash · 1.5g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$160</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$390</span></div><div class="sprice"><span class="sq">6x </span><span class="sv">$700</span></div></div></div>
-      <div class="scard" onclick="openModal('Anillo de Poder (Donut)','Filtro vidrio King · 0.5g extracto + 1.4g flor','💍',null,[{qty:'1 porro',price:300},{qty:'3 porros',price:750},{qty:'6 porros',price:1200}])"><div class="scard-top"><div class="scard-emoji">💍</div><div><div class="scard-name">Anillo de Poder (Donut)</div><div class="scard-sub">Filtro vidrio · 0.5g extracto · 1.4g flor</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$300</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$750</span></div><div class="sprice"><span class="sq">6x </span><span class="sv">$1,200</span></div></div></div>
-      <div class="scard" onclick="addSimple('El Gran Coloso (35cm · 20g)','🏛️','$500',500)"><div class="scard-top"><div class="scard-emoji">🏛️</div><div><div class="scard-name">El Gran Coloso</div><div class="scard-sub">35cm · 20g de flor</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$500</span></div></div></div>
-      <div class="scard" onclick="addSimple('Coloso Personalizado (con tu nombre)','✍️','$700',700)"><div class="scard-top"><div class="scard-emoji">✍️</div><div><div class="scard-name">Coloso Personalizado</div><div class="scard-sub">Empanizado · Con el nombre que quieras</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$700</span></div></div></div>
+      <div id="forjados-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
-    <div id="sub-edibles" class="subtab-panel">
+        <div id="sub-edibles" class="subtab-panel">
       <div class="stitle">🍬 POCIONES DE BATALLA <span class="badge b-pink">EDIBLES</span></div>
       <div class="warn-box">⚠️ <strong>Dosis:</strong> Una dosis es suficiente. En caso de sobredosis ¡contáctanos antes del hospital!</div>
-      <div class="scard" onclick="openModal('Oblea de Cajekush','1 Dosis','🫓',null,[{qty:'1 pieza',price:80},{qty:'3 piezas -12%',price:211}])"><div class="scard-top"><div class="scard-emoji">🫓</div><div><div class="scard-name">Oblea de Cajekush</div><div class="scard-sub">1 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$211 </span><span class="sd">-12%</span></div></div></div>
-      <div class="scard" onclick="openModal('Pelón Pone Rico','2 Dosis','🍭',null,[{qty:'1 pieza',price:100},{qty:'3 piezas -12%',price:264}])"><div class="scard-top"><div class="scard-emoji">🍭</div><div><div class="scard-name">Pelón Pone Rico</div><div class="scard-sub">2 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$100</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$264 </span><span class="sd">-12%</span></div></div></div>
-      <div class="scard" onclick="openModal('Barra de Chocolate','6 Dosis','🍫',null,[{qty:'1 barra',price:200},{qty:'3 barras -12%',price:528}])"><div class="scard-top"><div class="scard-emoji">🍫</div><div><div class="scard-name">Barra de Chocolate</div><div class="scard-sub">6 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$200</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$528 </span><span class="sd">-12%</span></div></div></div>
-      <div class="scard" onclick="openModal('Pieza de Chocolate','2 Dosis','🍫',null,[{qty:'1 pieza',price:90},{qty:'3 piezas -12%',price:237}])"><div class="scard-top"><div class="scard-emoji">🍫</div><div><div class="scard-name">Pieza de Chocolate</div><div class="scard-sub">2 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$90</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$237 </span><span class="sd">-12%</span></div></div></div>
-      <div class="scard" onclick="openModal('Galleta','2 Dosis','🍪',null,[{qty:'1 galleta',price:100},{qty:'3 galletas -12%',price:264}])"><div class="scard-top"><div class="scard-emoji">🍪</div><div><div class="scard-name">Galleta</div><div class="scard-sub">2 Dosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$100</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$264 </span><span class="sd">-12%</span></div></div></div>
+      <div id="edibles-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
-    <div id="sub-extractos" class="subtab-panel">
+        <div id="sub-extractos" class="subtab-panel">
       <div class="stitle">🍯 ESENCIAS DE PODER <span class="badge b-cyan">EXTRACTOS</span></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:6px">🖊️ VAPES</div>
-      <div class="scard" onclick="addSimple('Cartucho WAX','💨','$850',850)"><div class="scard-top"><div class="scard-emoji">💨</div><div><div class="scard-name">Cartucho WAX</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
-      <div class="scard" onclick="addSimple('Cartucho CBD','🌿','$850',850)"><div class="scard-top"><div class="scard-emoji">🌿</div><div><div class="scard-name">Cartucho CBD</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
-      <div class="scard" onclick="addSimple('Cartucho DMT (pide pila)','🌀','$850',850)"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">Cartucho DMT</div><div class="scard-sub">Pregunta por la pila</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
-      <div class="scard" onclick="addSimple('Desechable 2g','🔋','$1,299',1299)"><div class="scard-top"><div class="scard-emoji">🔋</div><div><div class="scard-name">Desechable 2g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$1,299</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:6px">⏳ CONCENTRADOS</div>
-      <div class="scard" onclick="openModal('Dry Hash','Extracción CO2. Potente y versátil.','🏜️',null,[{qty:'1g',price:80},{qty:'3g mayoreo',price:200},{qty:'9g mayoreo',price:500}])"><div class="scard-top"><div class="scard-emoji">🏜️</div><div><div class="scard-name">Dry Hash</div><div class="scard-sub">Extracción CO2</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$200</span></div><div class="sprice"><span class="sq">9g </span><span class="sv">$500</span></div></div></div>
-      <div class="scard" onclick="openModal('WAX Cristalizado BHO','Extracción butano. Textura azúcar. Muy potente.','🥞',null,[{qty:'1g',price:500},{qty:'3g mayoreo',price:1200},{qty:'10g mayoreo',price:3000}])"><div class="scard-top"><div class="scard-emoji">🥞</div><div><div class="scard-name">WAX Cristalizado BHO</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$500</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$1,200</span></div><div class="sprice"><span class="sq">10g </span><span class="sv">$3,000</span></div></div></div>
-      <div class="scard" onclick="addSimple('MoonRock Original — 3.5g (Por Encargo)','🌕','$550',550)"><div class="scard-top"><div class="scard-emoji">🌕</div><div><div class="scard-name">MoonRock Original</div><div class="scard-sub">WAX + Dry Hash · Por encargo</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">3.5g </span><span class="sv">$550</span></div></div></div>
-      <div class="scard" onclick="openModal('Ice Bubble Hash','Tricomas por agua y hielo. Natural y potente.','🧊',null,[{qty:'1g',price:350},{qty:'3g',price:750}])"><div class="scard-top"><div class="scard-emoji">🧊</div><div><div class="scard-name">Ice Bubble Hash</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$350</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$750</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:6px">🛠️ ACCESORIOS</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 12px;margin-bottom:10px">
-        <div class="scard" style="margin:0" onclick="addSimple('Canalas','🚬','$45',45)"><div class="scard-name">Canalas</div><div class="scard-prices"><div class="sprice"><span class="sv">$45</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Hitter','🔫','$50',50)"><div class="scard-name">Hitter</div><div class="scard-prices"><div class="sprice"><span class="sv">$50</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Grinder','⚙️','$80',80)"><div class="scard-name">Grinder</div><div class="scard-prices"><div class="sprice"><span class="sv">$80</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Conotes RAW','📜','$150',150)"><div class="scard-name">Conotes RAW</div><div class="scard-prices"><div class="sprice"><span class="sv">$150</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Soplete','🔥','$250',250)"><div class="scard-name">Soplete</div><div class="scard-prices"><div class="sprice"><span class="sv">$250</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Batería/Pluma','🔋','$450',450)"><div class="scard-name">Batería/Pluma</div><div class="scard-prices"><div class="sprice"><span class="sv">$450</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Bonga','💧','$350',350)"><div class="scard-name">Bonga</div><div class="scard-prices"><div class="sprice"><span class="sv">$350</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Kit Bonga PRO','🎁','$600',600)"><div class="scard-name">Kit Bonga PRO</div><div class="scard-prices"><div class="sprice"><span class="sv">$600</span></div></div></div>
-      </div>
+      <div id="extractos-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
-    <div id="sub-medicina" class="subtab-panel">
+        <div id="sub-medicina" class="subtab-panel">
       <div class="stitle">🌀 MEDICINA ANCESTRAL <span class="badge b-violet">SAGRADA</span></div>
-      <div class="warn-box">🌀 <strong>Uso consciente:</strong> Pon una intención fuerte. Lo que te muestren sirve solo si actúas conforme a ello.</div>
-      <div class="stitle" style="font-size:.6rem;padding-top:4px">💊 PSILOCIBINA</div>
-      <div class="scard" onclick="openModal('Microdosis Psilocibina','0.33g por píldora. Introspección suave.','💊',null,[{qty:'1 píldora',price:80},{qty:'10 píldoras',price:620}])"><div class="scard-top"><div class="scard-emoji">💊</div><div><div class="scard-name">Microdosis Psilocibina</div><div class="scard-sub">0.33g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">10x </span><span class="sv">$620</span></div></div></div>
-      <div class="scard" onclick="openModal('Hongos Psilocibina','4-6h efecto. Hasta 3 días sensaciones. Ideal para visuales, respuestas, resolver problemas.','🍄',null,[{qty:'1g',price:250},{qty:'3g',price:550},{qty:'10g',price:1500},{qty:'30g',price:3200}])"><div class="scard-top"><div class="scard-emoji">🍄</div><div><div class="scard-name">Hongos Psilocibina</div><div class="scard-sub">4-6h efecto · Hasta 3 días sensaciones</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$250</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$550</span></div><div class="sprice"><span class="sq">10g </span><span class="sv">$1,500</span></div><div class="sprice"><span class="sq">30g </span><span class="sv">$3,200</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:4px">💧 LSD — Cuadros & Geles</div>
-      <div class="scard" onclick="openModal('LSD — Cuadros & Geles','4-6h efecto. Visuales y creatividad.','💧',null,[{qty:'1x',price:250},{qty:'3x',price:600},{qty:'10x',price:1500},{qty:'25x',price:3000}])"><div class="scard-top"><div class="scard-emoji">💧</div><div><div class="scard-name">LSD — Cuadros & Geles</div><div class="scard-sub">4-6h efecto</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$250</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$600</span></div><div class="sprice"><span class="sq">10x </span><span class="sv">$1,500</span></div><div class="sprice"><span class="sq">25x </span><span class="sv">$3,000</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:4px">🌀 DMT — Original MIMOSA</div>
-      <div class="warn-box" style="margin-bottom:6px">🌀 Efecto 30min · Intención hasta 30 días. Neutraliza la mente para acceder a tu divinidad.</div>
-      <div class="scard" onclick="openModal('DMT Puro — Original MIMOSA','Efecto 30min. Intención 30 días.','🌀',null,[{qty:'1g',price:1200},{qty:'1/2g',price:700},{qty:'Dosis .25g',price:400}])"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">DMT Puro — MIMOSA</div><div class="scard-sub">Efecto 30min · Intención 30 días</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$1,200</span></div><div class="sprice"><span class="sq">1/2g </span><span class="sv">$700</span></div><div class="sprice"><span class="sq">.25g </span><span class="sv">$400</span></div></div></div>
-      <div class="scard" onclick="openModal('DMT Preparado Especial','Microdosis. Más accesible.','🌀',null,[{qty:'1g',price:500},{qty:'1/2g',price:300},{qty:'.25g',price:150}])"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">DMT Preparado Especial</div><div class="scard-sub">Microdosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$500</span></div><div class="sprice"><span class="sq">1/2g </span><span class="sv">$300</span></div><div class="sprice"><span class="sq">.25g </span><span class="sv">$150</span></div></div></div>
-      <div class="scard" onclick="addSimple('Cartucho DMT (necesita pila)','🌀','$850',850)"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">Cartucho DMT</div><div class="scard-sub">Pregunta por la pila</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
+      <div class="warn-box">🌀 <strong>Uso consciente:</strong> Pon una intención fuerte.</div>
+      <div id="medicina-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
-    <div id="sub-combos" class="subtab-panel">
-      <div class="stitle">🔥 COMBOS & PROMOS <span class="badge b-red">TEMPORADA</span></div>
-      <div class="ccard" onclick="addCombo('Combo Espartano','🏛️',1450,'1 Oz Leonidas + 6 Porros + Raspadito')"><div class="ccard-head"><div class="ccard-emoji">🏛️</div><div><div class="ccard-name">Combo Espartano</div><div class="ccard-desc">1 Oz Leonidas + 6 Porros + 1 Raspadito</div></div></div><div class="ccard-quote">"El kit completo del guerrero. Flores, forjados y suerte."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,740</div><div class="nw">$1,450<span class="save-badge">AHORRO $290</span></div></div><div class="add-btn">+ Agregar</div></div></div>
-      <div class="ccard" onclick="addCombo('Combo Valhalla','⚡',900,'1/2 Oz Ragnar + Chocolate + 1g Dry Hash')"><div class="ccard-head"><div class="ccard-emoji">⚡</div><div><div class="ccard-name">Combo Valhalla</div><div class="ccard-desc">1/2 Oz Ragnar + Chocolate Barra + 1g Dry Hash</div></div></div><div class="ccard-quote">"Para el guerrero que relaja con estilo nórdico."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,080</div><div class="nw">$900<span class="save-badge">AHORRO $180</span></div></div><div class="add-btn">+ Agregar</div></div></div>
-      <div class="ccard" onclick="addCombo('Combo Meditación Sagrada','🌀',1200,'1/2 Oz Juana + 3x Microdosis + Kit Bonga PRO')"><div class="ccard-head"><div class="ccard-emoji">🌀</div><div><div class="ccard-name">Combo Meditación</div><div class="ccard-desc">1/2 Oz Juana + 3x Microdosis + Kit Bonga PRO</div></div></div><div class="ccard-quote">"Flores, medicina y equipo para una noche de introspección."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,490</div><div class="nw">$1,200<span class="save-badge">AHORRO $290</span></div></div><div class="add-btn">+ Agregar</div></div></div>
+        <div id="sub-combos" class="subtab-panel">
+      <div class="stitle">🔥 COMBOS <span class="badge b-red">TEMPORADA</span></div>
+      <div id="combos-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
       <div class="stitle" style="margin-top:4px">🪙 PROMOS CON COINS</div>
-      <div class="info-box">🪙 <strong>500 coins</strong> = $50 MXN descuento<br>🪙 <strong>1,000 coins</strong> = producto gratis (hasta $100)<br>🪙 <strong>2,500 coins</strong> = pedido VIP con prioridad<br><br><span style="color:var(--muted)">Menciona tus coins al confirmar por WhatsApp.</span></div>
+      <div class="info-box">🪙 <strong>500 coins</strong> = $50 MXN descuento<br>🪙 <strong>1,000 coins</strong> = producto gratis (hasta $100)<br>🪙 <strong>2,500 coins</strong> = pedido VIP con prioridad</div>
     </div>
-    <div id="sub-promos" class="subtab-panel"><div class="stitle">🎁 PROMOS DEL DÍA</div><div id="promos-container"><div class="info-box">No hay promos activas.</div></div></div>
+        <div id="sub-promos" class="subtab-panel"><div class="stitle">🔧 HERRAMIENTAS <span class="badge b-orange">ACCESORIOS</span></div><div id="herramientas-container"><div class="info-box" style="text-align:center">Cargando...</div></div></div>
     <div id="sub-sala" class="subtab-panel">
       <div class="sala-world" id="salaWorld"><div class="sala-floor"></div></div>
       <div class="sala-ctrl"><button class="mv-btn" onclick="moveAv(-1)">◀</button><button class="mv-btn" onclick="moveAv(1)">▶</button><button class="mv-btn" style="margin-left:auto" onclick="changeAv()">😀 Avatar</button></div>
@@ -1026,6 +977,7 @@ function goPage(p){
   if(p==='usuario'){renderUsuarioPage();if(window.google&&window.google.maps)initAllAutocompletes();}
   if(p==='coins')renderCoins();
   if(p==='menu'&&!S.salaReady){S.salaReady=true;setTimeout(initSala,200);}
+  if(p==='menu'&&!_menuProds.length)cargarMenuDinamico();
   updUI();
 }
 
@@ -1337,6 +1289,7 @@ async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
   renderHeroes();renderCoins();updUI();goPage('inicio');
+  cargarMenuDinamico();
   if(S.user)initRealtime();
 }
 window.addEventListener('load',init);
@@ -1404,6 +1357,7 @@ function goPage(p){
   if(p==='usuario'){renderUsuarioPage();if(window.google&&window.google.maps)initAllAutocompletes();}
   if(p==='coins')renderCoins();
   if(p==='menu'&&!S.salaReady){S.salaReady=true;setTimeout(initSala,200);}
+  if(p==='menu'&&!_menuProds.length)cargarMenuDinamico();
   updUI();
 }
 
@@ -2412,22 +2366,204 @@ function cerrarCoinsPago(){
 
 function bars(v,max=10){let h='';for(let i=0;i<max;i++)h+=`<div class="sb${i<v?' f':''}"></div>`;return h;}
 
-function renderHeroes(){
-  const cats={oraculo:'heroOraculo',legion:'heroLegion',guardia:'heroGuardia'};
-  Object.entries(cats).forEach(([cat,elId])=>{
-    const el=document.getElementById(elId);if(!el)return;
-    el.innerHTML=HEROES.filter(h=>h.cat===cat).map(h=>`
-      <div class="hcard" onclick="openHero('${h.id}')">
-        <div class="hcard-top"><div class="hcard-emoji">${h.emoji}</div><div><div class="hcard-name">${h.name}</div><div class="hcard-strain">${h.tipo} · ${h.sabor}</div></div></div>
-        <div class="hcard-quote">${h.quote.substring(0,110)}...</div>
-        <div class="hcard-stats">
-          <div class="stat"><div class="stat-val">${h.poder}</div><div class="stat-bars">${bars(h.poder)}</div><div class="stat-lbl">PODER</div></div>
-          <div class="stat"><div class="stat-val">${h.fuerza}</div><div class="stat-bars">${bars(h.fuerza)}</div><div class="stat-lbl">FUERZA</div></div>
-          <div class="stat"><div class="stat-val">${h.esencia}</div><div class="stat-bars">${bars(h.esencia)}</div><div class="stat-lbl">ESENCIA</div></div>
-        </div>
-        <div class="hcard-prices">${h.prices.map(p=>`<div class="ptag" onclick="event.stopPropagation();quickAdd('${h.id}','${p.qty}',${p.price})"><div class="pq">${p.qty}</div><div class="pp">$${p.price}</div></div>`).join('')}</div>
-      </div>`).join('');
+// ══════════════════════════════════════════
+// MENU DINAMICO — carga de Supabase
+// ══════════════════════════════════════════
+var _menuProds=[], _menuInv={}, _menuCombos=[];
+
+async function cargarMenuDinamico(){
+  if(!sb)return;
+  // 1. Productos visibles
+  var {data:prods}=await sb.from('productos').select('*').eq('visible_tienda',true);
+  _menuProds=prods||[];
+  // 2. Inventario (stock por SKU)
+  var {data:lotes}=await sb.from('lotes').select('sku,movimiento,cantidad');
+  _menuInv={};
+  (lotes||[]).forEach(function(l){
+    if(!_menuInv[l.sku])_menuInv[l.sku]=0;
+    _menuInv[l.sku]+=(l.movimiento==='entrada'?1:-1)*parseFloat(l.cantidad||0);
   });
+  // 3. Combos
+  var {data:combos}=await sb.from('combos').select('*').eq('activo',true);
+  _menuCombos=combos||[];
+
+  renderMenuDinamico();
+}
+
+function getStock(sku){ return Math.max(0,_menuInv[sku]||0); }
+
+function renderMenuDinamico(){
+  renderHeroesDin();
+  renderSeccion('forjados','Gallos',['forjados-container']);
+  renderSeccion('edibles','Edibles',['edibles-container']);
+  renderSeccion('extractos','Extractos',['extractos-container']);
+  renderSeccion('medicina','Medicina',['medicina-container']);
+  renderSeccion('herramientas','Accesorios',['herramientas-container']);
+  renderCombosDin();
+  renderCofreDin();
+}
+
+function renderHeroesDin(){
+  var el=document.getElementById('heroes-container');
+  if(!el)return;
+  // Flor: agrupar por cepa base (ej: P1, P2, G1...)
+  var florProds=_menuProds.filter(function(p){return p.categoria&&(p.categoria.toLowerCase().includes('flor')||p.categoria.toLowerCase().includes('premium')||p.categoria.toLowerCase().includes('green')||p.categoria.toLowerCase().includes('indoor')||p.categoria.toLowerCase().includes('exotica')||p.categoria.toLowerCase().includes('regular'));});
+  
+  // Agrupar por nombre_tienda (cepa)
+  var cepas={};
+  florProds.forEach(function(p){
+    var clave=p.nombre_tienda||p.sku;
+    if(!cepas[clave])cepas[clave]=[];
+    cepas[clave].push(p);
+  });
+
+  if(!Object.keys(cepas).length){
+    el.innerHTML='<div class="info-box" style="text-align:center">🌿 Próximamente nuevos héroes...</div>';
+    return;
+  }
+
+  var html='';
+  Object.keys(cepas).forEach(function(cepa){
+    var items=cepas[cepa];
+    var rep=items[0]; // representante para datos de cepa
+    var tieneStock=items.some(function(p){return getStock(p.sku)>0;});
+    var agotado=!tieneStock;
+
+    // Botones de gramaje
+    var btns=items.map(function(p){
+      var stock=getStock(p.sku);
+      var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1]||p.sku;
+      if(stock>0){
+        return '<div class="ptag" onclick="event.stopPropagation();menuAddFlor(\''+p.sku+'\',\''+label+'\','+p.precio_menu+',\''+cepa+'\')"><div class="pq">'+label+'</div><div class="pp">$'+p.precio_menu+'</div></div>';
+      } else {
+        return '<div class="ptag" style="opacity:.4;cursor:not-allowed"><div class="pq">'+label+'</div><div class="pp">Agotado</div></div>';
+      }
+    }).join('');
+
+    var poder=rep.poder||0,fuerza=rep.fuerza||0,esencia=rep.esencia||0;
+    html+='<div class="hcard"'+(agotado?' style="opacity:.6"':'')+' onclick="openHeroDin(\''+cepa+'\')">';
+    html+='<div class="hcard-top">';
+    html+='<div class="hcard-emoji">'+(rep.emoji||'🌿')+'</div>';
+    html+='<div><div class="hcard-name">'+cepa+'</div>';
+    html+='<div class="hcard-strain">'+(rep.subtitulo||'')+'</div></div>';
+    if(agotado)html+='<div style="margin-left:auto;background:#F8514920;border:1px solid #F85149;border-radius:2px;padding:2px 8px;font-size:10px;color:#F85149;font-weight:700">AGOTADO</div>';
+    html+='</div>';
+    if(rep.descripcion_larga)html+='<div class="hcard-quote">'+rep.descripcion_larga.substring(0,110)+'...</div>';
+    html+='<div class="hcard-stats">';
+    html+='<div class="stat"><div class="stat-val">'+poder+'</div><div class="stat-bars">'+bars(poder)+'</div><div class="stat-lbl">PODER</div></div>';
+    html+='<div class="stat"><div class="stat-val">'+fuerza+'</div><div class="stat-bars">'+bars(fuerza)+'</div><div class="stat-lbl">FUERZA</div></div>';
+    html+='<div class="stat"><div class="stat-val">'+esencia+'</div><div class="stat-bars">'+bars(esencia)+'</div><div class="stat-lbl">ESENCIA</div></div>';
+    html+='</div>';
+    html+='<div class="hcard-prices">'+btns+'</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function openHeroDin(cepa){
+  var items=_menuProds.filter(function(p){return (p.nombre_tienda||p.sku)===cepa;});
+  if(!items.length)return;
+  var rep=items[0];
+  var prices=items.filter(function(p){return getStock(p.sku)>0;}).map(function(p){
+    var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1];
+    return{qty:label,price:p.precio_menu,sku:p.sku};
+  });
+  if(!prices.length)prices=items.map(function(p){var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1];return{qty:label+'(agotado)',price:p.precio_menu,sku:p.sku,agotado:true};});
+  S._modal={name:cepa,emoji:rep.emoji||'🌿',prices:prices};S._selQty=null;
+  document.getElementById('mTitle').textContent=(rep.emoji||'🌿')+' '+cepa;
+  document.getElementById('mSub').textContent=rep.subtitulo||'';
+  var mq=document.getElementById('mQuote');
+  if(rep.descripcion_larga){mq.textContent=rep.descripcion_larga;mq.style.display='block';}else mq.style.display='none';
+  buildQtyGrid(prices);
+  document.getElementById('overlay').classList.add('on');
+}
+
+function menuAddFlor(sku,label,precio,cepa){
+  var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
+  S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,isGift:false});
+  updUI();notif('⚔️ '+cepa+' ('+label+') agregado');
+}
+
+function renderSeccion(cat,categoria,containerIds){
+  var catMap={
+    'forjados':['Gallos','Insumo Gallos'],
+    'edibles':['Edibles','Comestibles'],
+    'extractos':['Extractos'],
+    'medicina':['Medicina'],
+    'herramientas':['Accesorios','Herramientas']
+  };
+  var cats=catMap[cat]||[categoria];
+  var prods=_menuProds.filter(function(p){return cats.some(function(c){return (p.categoria||'').toLowerCase()===c.toLowerCase();});});
+  
+  containerIds.forEach(function(cid){
+    var el=document.getElementById(cid);if(!el)return;
+    if(!prods.length){
+      el.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">🚧 Próximamente...</div>';
+      return;
+    }
+    el.innerHTML=prods.map(function(p){
+      var stock=getStock(p.sku);
+      var agotado=stock<=0;
+      var nombre=p.nombre_tienda&&p.nombre_tienda!=='NA'?p.nombre_tienda:p.descripcion;
+      var subtitulo=p.subtitulo||'';
+      return '<div class="scard"'+(agotado?' style="opacity:.6"':' onclick="menuAddProd(\''+p.sku+'\',\''+nombre.replace(/'/g,'')+'\',' +p.precio_menu+',\''+(p.emoji||'📦')+'\')"')+'>'+
+        '<div class="scard-top">'+
+        '<div class="scard-emoji">'+(p.emoji||'📦')+'</div>'+
+        '<div>'+
+        '<div class="scard-name">'+nombre+'</div>'+
+        (subtitulo?'<div class="scard-sub">'+subtitulo+'</div>':'')+
+        '</div>'+
+        (agotado?'<div style="margin-left:auto;background:#F8514920;border:1px solid #F85149;border-radius:2px;padding:2px 8px;font-size:10px;color:#F85149;font-weight:700">AGOTADO</div>':'')+'</div>'+
+        '<div class="scard-prices">'+
+        (agotado?'<div style="font-size:11px;color:#8B949E">Sin stock por el momento</div>':
+          '<div class="sprice"><span class="sv">$'+p.precio_menu+'</span></div>')+
+        '</div></div>';
+    }).join('');
+  });
+}
+
+function menuAddProd(sku,nombre,precio,emoji){
+  S.cart.push({name:nombre,sku:sku,emoji:emoji,qty:'1x',price:precio,isGift:false});
+  updUI();notif(emoji+' '+nombre+' agregado');
+}
+
+function renderCombosDin(){
+  var el=document.getElementById('combos-container');if(!el)return;
+  var combos=_menuCombos.filter(function(c){return c.tipo==='combo';});
+  if(!combos.length){el.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">🔥 Próximamente combos especiales...</div>';return;}
+  el.innerHTML=combos.map(function(co){
+    var ahorro=co.valor_min>0?'<div class="old">Normal: $'+co.valor_min+'</div>':'';
+    return '<div class="ccard" onclick="addCombo(\''+co.nombre+'\',\''+co.emoji+'\','+co.precio+',\''+co.descripcion+'\')">'+
+      '<div class="ccard-head"><div class="ccard-emoji">'+co.emoji+'</div><div><div class="ccard-name">'+co.nombre+'</div><div class="ccard-desc">'+co.descripcion+'</div></div></div>'+
+      '<div class="ccard-footer"><div class="ccard-prices">'+ahorro+'<div class="nw">$'+co.precio+
+      (co.valor_min>0?'<span class="save-badge">AHORRO $'+(co.valor_min-co.precio)+'</span>':'')+
+      '</div></div><div class="add-btn">+ Agregar</div></div></div>';
+  }).join('');
+}
+
+function renderCofreDin(){
+  var el=document.getElementById('cofre-container');if(!el)return;
+  var cofres=_menuCombos.filter(function(c){return c.tipo==='caja_misteriosa';});
+  if(!cofres.length){el.innerHTML='<div class="mbox-grid">'+
+    '<div class="mbox" onclick="addSimple(\'Cofre del Soldado\',\'🗡️\',\'$500\',500)"><div class="mbox-icon">🗡️</div><div class="mbox-name">Cofre Soldado</div><div class="mbox-price">$500</div><div class="mbox-val">Valor: $700–$900</div></div>'+
+    '<div class="mbox" onclick="addSimple(\'Cofre del Capitán\',\'🏆\',\'$1,000\',1000)"><div class="mbox-icon">🏆</div><div class="mbox-name">Cofre Capitán</div><div class="mbox-price">$1,000</div><div class="mbox-val">Valor: $1,600–$1,800</div></div>'+
+    '<div class="mbox" onclick="addSimple(\'Cofre del General\',\'⚔️\',\'$1,500\',1500)"><div class="mbox-icon">⚔️</div><div class="mbox-name">Cofre General</div><div class="mbox-price">$1,500</div><div class="mbox-val">Valor: $2,100–$2,700</div></div>'+
+    '<div class="mbox mbox-full" onclick="addSimple(\'Cofre Gran Conquistador +WAX\',\'👑\',\'$2,000\',2000)"><div class="mbox-icon">👑</div><div class="mbox-name">Gran Conquistador</div><div class="mbox-price">$2,000</div><div class="mbox-val">Valor $3,200+</div></div>'+
+    '</div>';return;}
+  el.innerHTML='<div class="mbox-grid">'+cofres.map(function(co){
+    return '<div class="mbox'+(co.valor_max>1500?' mbox-full':'')+'" onclick="addSimple(\''+co.nombre+'\',\''+co.emoji+'\',\'$'+co.precio+'\','+co.precio+')">'+
+      '<div class="mbox-icon">'+co.emoji+'</div>'+
+      '<div class="mbox-name">'+co.nombre+'</div>'+
+      '<div class="mbox-price">$'+co.precio+'</div>'+
+      (co.valor_min&&co.valor_max?'<div class="mbox-val">Valor: $'+co.valor_min+'–$'+co.valor_max+'</div>':'')+
+      '</div>';
+  }).join('')+'</div>';
+}
+
+function renderHeroes(){
+  // Ahora usa la versión dinámica
+  if(_menuProds.length)renderHeroesDin();
+  else cargarMenuDinamico();
 }
 
 function openHero(id){
@@ -3407,6 +3543,7 @@ async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
   renderHeroes();renderCoins();updUI();goPage('inicio');
+  cargarMenuDinamico();
   if(S.user)initRealtime();
 }
 window.addEventListener('load',init);
