@@ -551,7 +551,7 @@ function rPedidos(el){
     h+='<div style="background:'+col+'20;border:1px solid '+col+'50;border-radius:2px;padding:3px 10px;font-size:10px;color:'+col+';font-weight:700;align-self:flex-start">'+(p.status||"").toUpperCase()+'</div></div>';
     h+='<div style="background:#21262D;border-radius:2px;padding:8px 12px;margin-bottom:8px">'+items+'</div>';
     if(p.captura){
-      h+='<div style="margin-bottom:8px;text-align:center"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px;cursor:pointer;border:1px solid #30363D" onclick="descargarComprobante(''+p.captura+'')"><div style="font-size:10px;color:#4A9EFF;margin-top:3px;cursor:pointer" onclick="descargarComprobante(''+p.captura+'')">🖼 Toca para descargar comprobante</div></div>';
+      h+='<div style="margin-bottom:8px;text-align:center"><img src="'+p.captura+'" style="max-width:100%;max-height:80px;border-radius:3px;cursor:pointer;border:1px solid #30363D" onclick="descargarComprobante(this.src)"><div style="font-size:10px;color:#4A9EFF;margin-top:3px;cursor:pointer" onclick="descargarComprobante(this.src)">🖼 Toca para descargar comprobante</div></div>';
     } else {
       h+='<div style="margin-bottom:8px;padding:6px 10px;background:#21262D;border:1px dashed #30363D;border-radius:3px;font-size:11px;color:#8B949E;text-align:center">Sin comprobante de pago</div>';
     }
@@ -686,7 +686,7 @@ function rPedidos(el){
           html+='<div style="background:rgba(245,158,11,.2);border:1px solid rgba(245,158,11,.4);border-radius:2px;padding:3px 10px;font-size:10px;color:#F59E0B;font-weight:700">PENDIENTE</div>';
           html+='</div>';
           if(cr.comprobante_url){
-            html+='<div style="margin-bottom:10px"><img src="'+cr.comprobante_url+'" style="max-height:70px;border-radius:4px;border:1px solid #30363D;cursor:pointer" onclick="descargarComprobante(''+cr.comprobante_url+'')"></div>';
+            html+='<div style="margin-bottom:10px"><img src="'+cr.comprobante_url+'" style="max-height:70px;border-radius:4px;border:1px solid #30363D;cursor:pointer" onclick="descargarComprobante(this.src)"></div>';
           }
           // Formulario de aprobación
           html+='<div style="background:#21262D;border-radius:3px;padding:12px;margin-bottom:8px">';
