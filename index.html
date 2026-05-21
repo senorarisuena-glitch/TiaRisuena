@@ -1661,7 +1661,7 @@ async function cargarPedidosUsuario(){
   var ESTADOS = [
     {key:'pendiente',      label:'Pedido recibido',  icon:'📋', color:'#6b7280'},
     {key:'concretado', label:'Empacando',         icon:'📦', color:'#f59e0b'},
-    {key:'en_camino',      label:'En ruta',           icon:'🚚', color:'#7c3aed'},
+    {key:'en_camino',      label:'En ruta',           icon:'🚚', color:'#16a34a'},
     {key:'entregado',      label:'Entregado',         icon:'✅', color:'#16a34a'},
   ];
 
@@ -1972,7 +1972,7 @@ async function cargarPedidosActivos(){
   var ESTADOS=[
     {key:'pendiente',      label:'Pedido recibido', icon:'📋', color:'#6b7280'},
     {key:'concretado', label:'Empacando',        icon:'📦', color:'#f59e0b'},
-    {key:'en_camino',      label:'En ruta',          icon:'🚚', color:'#7c3aed'},
+    {key:'en_camino',      label:'En ruta',          icon:'🚚', color:'#16a34a'},
     {key:'entregado',      label:'Entregado',        icon:'✅', color:'#16a34a'},
   ];
 
@@ -1985,7 +1985,7 @@ async function cargarPedidosActivos(){
 
   el.innerHTML='<div style="padding:12px 12px 4px;font-family:Cinzel,serif;font-size:.68rem;color:var(--gold);letter-spacing:1px">📋 MIS PEDIDOS ACTIVOS</div>'+
     pedidos.map(function(p){
-      var est=p.status||'pendiente';
+      var est=p.estado||p.status||'pendiente';
       var ei=eIdx(est);
 
       // Progress bar
@@ -2037,7 +2037,7 @@ async function cargarPedidosActivos(){
     sb.channel('cart-orders-'+S.user.id)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'seguimientos',filter:'usuario_id=eq.'+S.user.id},
       function(payload){
-        var labels={pendiente:'Tu pedido fue recibido',concretado:'¡Tu pedido se está empacando!',en_camino:'¡Tu pedido está en camino!',entregado:'¡Tu pedido fue entregado!'};
+        var p2=payload.new;var est2=p2.estado||p2.status||'pendiente';var labels={pendiente:'Tu pedido fue recibido',concretado:'✅ ¡Tu pedido fue aceptado!',en_camino:'🚚 ¡Tu pedido está en camino!',entregado:'🏆 ¡Tu pedido fue entregado!'};
         notif(labels[key]||'Pedido actualizado');
         cargarPedidosActivos();
       }).subscribe();
@@ -2422,7 +2422,7 @@ function renderChat(){const el=document.getElementById('chatMsgs');if(!el)return
 // ══════════════════════════════════════════
 const RULETA_DATA={1:{cost:50,label:'Ruleta #1',prizes:[{name:'Canalas',emoji:'🚬',prob:13},{name:'Pipa',emoji:'🪄',prob:12},{name:'Gallo King Size',emoji:'🐓',prob:12},{name:'Grinder Plástico',emoji:'⚙️',prob:12},{name:'2g Green House',emoji:'🌿',prob:11},{name:'2g Exótica',emoji:'⚡',prob:10},{name:'2g Premium',emoji:'🛡️',prob:10},{name:'1 Sobrinito',emoji:'🍃',prob:10},{name:'1ml Terpenos',emoji:'💧',prob:10}]},
   2:{cost:100,label:'Ruleta #2',prizes:[{name:'Gallo King Size',emoji:'🐓',prob:13},{name:'Prueba Hongos',emoji:'🍄',prob:10},{name:'Prueba DMT',emoji:'🌀',prob:9},{name:'Prueba LSD',emoji:'💧',prob:9},{name:'Gallo Empanizado',emoji:'🛡️',prob:11},{name:'Sobrinito',emoji:'🍃',prob:11},{name:'5g Green House',emoji:'🌿',prob:10},{name:'5g Exótica',emoji:'⚡',prob:10},{name:'5g Premium',emoji:'🏆',prob:9},{name:'1 Nectar Collector',emoji:'🧪',prob:8}]},3:{cost:200,label:'Ruleta #3',prizes:[{name:'3 Gallos King Size',emoji:'🐓',prob:14},{name:'1 Empanizado',emoji:'🛡️',prob:13},{name:'1g Wax',emoji:'🥞',prob:12},{name:'1g Bubble Hash',emoji:'🧊',prob:12},{name:'1 Bonga',emoji:'💧',prob:11},{name:'1g DMT',emoji:'🌀',prob:10},{name:'3ml Terpenos',emoji:'💧',prob:10},{name:'1 Donut',emoji:'💍',prob:18}]},4:{cost:500,label:'Ruleta #4 VIP',prizes:[{name:'1 Oz Premium',emoji:'🏆',prob:9},{name:'1 Oz Exótica',emoji:'⚡',prob:9},{name:'Cartucho WAX',emoji:'💨',prob:10},{name:'5 Gallos Empanizados',emoji:'🛡️',prob:9},{name:'3 Gallos Empanizados',emoji:'🛡️',prob:11},{name:'1g Wax + Bubble Hash',emoji:'🥞',prob:11},{name:'1g DMT + Honguitos',emoji:'🌀',prob:10},{name:'3 Donut',emoji:'💍',prob:11},{name:'2 Donut',emoji:'💍',prob:11},{name:'3g Extracto',emoji:'🍯',prob:9}]}};
-const FLAPPY_LEVELS=[{name:'Canala',emoji:'🚬',prize:'Canalas',pasScore:8,speed:2.2,gap:160},{name:'King Size',emoji:'🐓',prize:'Gallo King Size',pasScore:10,speed:2.6,gap:148},{name:'Sobrinito',emoji:'🍃',prize:'Sobrinito Baby',pasScore:12,speed:3.0,gap:138},{name:'Empanizado',emoji:'🛡️',prize:'Gallo Empanizado',pasScore:14,speed:3.4,gap:128},{name:'Donut',emoji:'💍',prize:'1 Donut',pasScore:16,speed:3.8,gap:118},{name:'Porro 30cm',emoji:'🏛️',prize:'Porro 30cm',pasScore:18,speed:4.2,gap:108},{name:'30cm Empanizado',emoji:'👑',prize:'Porro 30cm Empanizado',pasScore:20,speed:4.6,gap:98}];
+const FLAPPY_LEVELS=[{name:'Canala',emoji:'🚬',prize:'Canalas',pasScore:5,speed:1.4,gap:200},{name:'King Size',emoji:'🐓',prize:'Gallo King Size',pasScore:7,speed:1.7,gap:188},{name:'Sobrinito',emoji:'🍃',prize:'Sobrinito Baby',pasScore:9,speed:2.0,gap:176},{name:'Empanizado',emoji:'🛡️',prize:'Gallo Empanizado',pasScore:11,speed:2.3,gap:164},{name:'Donut',emoji:'💍',prize:'1 Donut',pasScore:13,speed:2.6,gap:152},{name:'Porro 30cm',emoji:'🏛️',prize:'Porro 30cm',pasScore:15,speed:2.9,gap:140},{name:'30cm Empanizado',emoji:'👑',prize:'Porro 30cm Empanizado',pasScore:17,speed:3.2,gap:130}];
 const MEMORIA_PRIZES=[{name:'Canalas',emoji:'🚬'},{name:'Porro King Size',emoji:'🐓'},{name:'Sobrinito Baby',emoji:'🍃'},{name:'Empanizado',emoji:'🛡️'},{name:'1g Wax',emoji:'🥞'},{name:'Bubble Hash',emoji:'🧊'},{name:'1/2 Oz Premium',emoji:'🏆'},{name:'7g Exótica',emoji:'⚡'},{name:'1 Donut',emoji:'💍'}];
 
 let rSpinning={};
@@ -2828,7 +2828,7 @@ function flStartLevel(){
   fBird={x:80,y:240,vy:0,r:16};fPipes=[];fScore=0;fRun=true;fStart=true;fLp=0;fPassed=false;
   var cv=document.getElementById('cvFlappy');
   if(cv){
-    function flap(e){e.preventDefault();if(fRun){fBird.vy=-7.5;}else if(!fStart){fStart=true;fRun=true;fBird.vy=-7.5;fLoop();}}
+    function flap(e){e.preventDefault();if(fRun){fBird.vy=-4.8;}else if(!fStart){fStart=true;fRun=true;fBird.vy=-4.8;fLoop();}}
     cv.onclick=flap;cv.ontouchstart=flap;
   }
   requestAnimationFrame(fLoop);
@@ -2837,8 +2837,8 @@ function flStartLevel(){
 function flKeepPrize(){const lvl=FLAPPY_LEVELS[fLevel];addGift(lvl.prize,lvl.emoji,'Flappy Joint Nivel '+(fLevel+1));document.getElementById('flappyLevelBanner').style.display='none';notif('🎁 '+lvl.prize+' agregado!');drawFIdle();}
 function flNextLevel(){if(fLevel<FLAPPY_LEVELS.length-1){fLevel++;showFlappyLevelBanner(false);}}
 function drawFIdle(){const lvl=FLAPPY_LEVELS[fLevel],c=fCtx2;c.fillStyle='#07051a';c.fillRect(0,0,400,480);c.font='bold 48px serif';c.textAlign='center';c.fillText(lvl.emoji,80,260);c.font='bold 14px Cinzel';c.fillStyle='#c9a227';c.fillText('Flappy Joint — '+lvl.name,200,180);c.font='11px Raleway';c.fillStyle='rgba(232,213,163,.7)';c.fillText('Premio: '+lvl.prize,200,210);c.fillStyle='rgba(255,255,255,.4)';c.font='10px Raleway';c.fillText('Pasa '+lvl.pasScore+' obstáculos para ganar',200,380);c.fillStyle='#a855f7';c.font='bold 12px Cinzel';c.fillText('Toca para comenzar',200,420);}
-function fTap(e){e.preventDefault();if(!fStart){fStart=true;fRun=true;fLoop();}fBird.vy=-7.5;}
-function fLoop(){if(!fRun)return;const lvl=FLAPPY_LEVELS[fLevel];fFrm=requestAnimationFrame(fLoop);fBird.vy+=0.38;fBird.y+=fBird.vy;fLp++;if(fLp%80===0){const gap=lvl.gap,gy=80+Math.random()*(480-160-gap);fPipes.push({x:400,topH:gy,gap,sc:false});}fPipes.forEach(p=>p.x-=lvl.speed);fPipes=fPipes.filter(p=>p.x>-60);fPipes.forEach(p=>{if(!p.sc&&p.x+40<fBird.x){p.sc=true;fScore++;}});if(fScore>=lvl.pasScore&&!fPassed){fPassed=true;fRun=false;cancelAnimationFrame(fFrm);showFlappyLevelBanner(true);return;}const dead=fBird.y-fBird.r<0||fBird.y+fBird.r>480||fPipes.some(p=>fBird.x+fBird.r>p.x&&fBird.x-fBird.r<p.x+40&&(fBird.y-fBird.r<p.topH||fBird.y+fBird.r>p.topH+p.gap));if(dead){fDead();return;}drawF(lvl);}
+function fTap(e){e.preventDefault();if(!fStart){fStart=true;fRun=true;fLoop();}fBird.vy=-4.8;}
+function fLoop(){if(!fRun)return;const lvl=FLAPPY_LEVELS[fLevel];fFrm=requestAnimationFrame(fLoop);fBird.vy+=0.25;fBird.y+=fBird.vy;fLp++;if(fLp%95===0){const gap=lvl.gap,gy=80+Math.random()*(480-160-gap);fPipes.push({x:400,topH:gy,gap,sc:false});}fPipes.forEach(p=>p.x-=lvl.speed);fPipes=fPipes.filter(p=>p.x>-60);fPipes.forEach(p=>{if(!p.sc&&p.x+40<fBird.x){p.sc=true;fScore++;}});if(fScore>=lvl.pasScore&&!fPassed){fPassed=true;fRun=false;cancelAnimationFrame(fFrm);showFlappyLevelBanner(true);return;}const dead=fBird.y-fBird.r<0||fBird.y+fBird.r>480||fPipes.some(p=>fBird.x+fBird.r>p.x&&fBird.x-fBird.r<p.x+40&&(fBird.y-fBird.r<p.topH||fBird.y+fBird.r>p.topH+p.gap));if(dead){fDead();return;}drawF(lvl);}
 function drawF(lvl){const c=fCtx2;c.fillStyle='#07051a';c.fillRect(0,0,400,480);c.fillStyle='#1e3a1e';fPipes.forEach(p=>{c.fillRect(p.x,0,40,p.topH);c.fillRect(p.x,p.topH+p.gap,40,480-p.topH-p.gap);c.fillStyle='#14532d';c.fillRect(p.x-3,p.topH-15,46,15);c.fillRect(p.x-3,p.topH+p.gap,46,15);c.fillStyle='#1e3a1e';});c.save();c.translate(fBird.x,fBird.y);c.rotate(Math.min(Math.max(fBird.vy*.05,-.5),.5));c.font='bold 32px serif';c.textAlign='center';c.fillText(lvl.emoji,0,10);c.restore();c.font='bold 16px Cinzel';c.fillStyle='#c9a227';c.textAlign='center';c.fillText(fScore+' / '+lvl.pasScore,200,34);c.font='10px Raleway';c.fillStyle='rgba(232,213,163,.5)';c.fillText('Premio: '+lvl.prize,200,52);}
 function fDead(){
   fRun=false;cancelAnimationFrame(fFrm);
@@ -2942,23 +2942,25 @@ function startRunner(){
     S.coins -= 25; updUI();
   }
 
-  // Hide banner
+  // Hide banner, reset game state
   if(banner) banner.style.display = 'none';
+  cancelAnimationFrame(rnFrm);
+  rnY = RH - 80; rnVY = 0; rnObs = []; rnScore = 0; rnFrame = 0; rnRun = false;
 
-  // Attach controls
+  // Attach controls IMMEDIATELY so first tap starts the game
   function handleInput(e){
     e.preventDefault();
+    e.stopPropagation();
     if(!rnRun){ rnRun = true; rnLoop(); }
     rnJump();
   }
   cv.onclick = handleInput;
   cv.ontouchstart = handleInput;
+  cv.ontouchend = function(e){ e.preventDefault(); };
 
-  // Start
-  // Reset position and obstacles
-  rnY = RH - 60; rnVY = 0; rnObs = []; rnScore = 0; rnFrame = 0;
-  rnRun = true;
-  rnLoop();
+  // Draw idle frame so player sees the game
+  drawRnIdle();
+  notif('¡Toca la pantalla para saltar!');
 }
 
 
@@ -3759,15 +3761,15 @@ async function cargarSeguimientoPerfil(){
   }
   var PASOS=[
     {key:'pendiente',  label:'Creado',        icon:'📋',color:'#6b7280'},
-    {key:'concretado', label:'En preparación',icon:'✅',color:'#f59e0b'},
-    {key:'en_camino',  label:'En ruta',       icon:'🚚',color:'#7c3aed'},
+    {key:'concretado', label:'En preparación',icon:'✅',color:'#16a34a'},
+    {key:'en_camino',  label:'En ruta',        icon:'🚚',color:'#16a34a'},
     {key:'entregado',  label:'Entregado',     icon:'🏆',color:'#16a34a'},
   ];
   function eIdx(p){
     var s=p.estado||p.status||'pendiente';
-    var e=p.estado_envio||'';
-    if(s==='entregado')return 3;
-    if(e==='en_camino'||e==='entregado')return 2;
+    var e=p.estado_envio||p.estado||'';
+    if(s==='entregado'||e==='entregado')return 3;
+    if(s==='en_camino'||e==='en_camino')return 2;
     if(s==='concretado')return 1;
     return 0;
   }
@@ -3777,7 +3779,7 @@ async function cargarSeguimientoPerfil(){
     PASOS.forEach(function(paso,i){
       var done=i<=ei,curr=i===ei;
       steps+='<div style="display:flex;flex-direction:column;align-items:center;flex:1">'+
-        '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?paso.color:'var(--bg3)')+
+        '<div style="width:32px;height:32px;border-radius:50%;background:'+(done?paso.color:'rgba(255,255,255,.12)')+
         ';border:2px solid '+(curr?paso.color:'transparent')+
         (curr?';box-shadow:0 0 8px '+paso.color:'')+
         ';display:flex;align-items:center;justify-content:center;font-size:.8rem">'+
