@@ -661,6 +661,7 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
       </div>
       <div class="stitle" style="margin-top:0">🏆 LOGROS</div>
       <div id="pLogros" style="padding:0 12px 12px;display:flex;flex-direction:column;gap:7px"></div>
+      <div id="pRegalos" style="padding:0 12px 12px"></div>
       <div class="stitle">📦 SEGUIMIENTO DE PEDIDO</div>
       <div style="padding:0 12px 4px"><div id="perfil-orders-panel"></div></div>
       <div class="stitle">📋 MIS PEDIDOS</div>
@@ -1182,16 +1183,46 @@ async function llenarPerfil(){
   }
 }
 async function cargarLogros(){
-  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
+  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
   var todos=r1.data||[];var misIds=(r2.data||[]).map(function(x){return x.logro_id;});
   var el=document.getElementById('pLogros');if(!el)return;
   el.innerHTML=todos.map(function(l){var ob=misIds.indexOf(l.id)>=0;
+    var recompensa='';
+    if(l.regalo_tipo==='coins'&&l.regalo_valor>0)recompensa='<span style="color:var(--coin);font-size:.55rem">🪙 +'+l.regalo_valor+' coins</span>';
+    else if(l.regalo_tipo==='producto'&&l.regalo_sku)recompensa='<span style="color:var(--green);font-size:.55rem">🎁 '+l.regalo_sku+'</span>';
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid '+(ob?'rgba(74,222,128,.35)':'var(--border)')+';border-radius:10px;padding:10px 12px;'+(ob?'':'opacity:.5')+'">'+
       '<div style="font-size:1.3rem;width:28px;text-align:center">'+l.emoji+'</div>'+
       '<div style="flex:1"><div style="font-family:Cinzel,serif;font-size:.68rem;color:'+(ob?'var(--green)':'var(--text)')+'">'+l.nombre+'</div>'+
-      '<div style="font-size:.57rem;color:var(--muted)">'+l.descripcion+'</div></div>'+
+      '<div style="font-size:.57rem;color:var(--muted)">'+l.descripcion+'</div>'+
+      (recompensa?'<div style="margin-top:2px">'+recompensa+'</div>':'')+
+      '</div>'+
       '<div style="font-size:.52rem;padding:2px 8px;border-radius:6px;background:'+(ob?'rgba(74,222,128,.15)':'var(--bg3)')+';color:'+(ob?'var(--green)':'var(--muted)')+'">'+( ob?'✓ Obtenido':'Bloqueado')+'</div></div>';
   }).join('');
+  // Regalos pendientes
+  var rr=await sb.from('usuario_regalos').select('*').eq('cliente_id',u.id).eq('usado',false);
+  var regalos=rr.data||[];
+  var elR=document.getElementById('pRegalos');
+  if(elR){
+    if(!regalos.length){elR.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Sin regalos pendientes</div>';return;}
+    elR.innerHTML='<div style="font-size:.7rem;color:var(--gold);font-family:Cinzel,serif;margin-bottom:8px">🎁 REGALOS DISPONIBLES</div>'+
+      regalos.map(function(r){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid rgba(74,222,128,.3);border-radius:10px;padding:10px 12px;margin-bottom:6px">'+
+          '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div style="font-size:1.2rem">'+r.emoji+'</div>'+
+          '<div><div style="font-size:.68rem;font-family:Cinzel,serif;color:var(--green)">'+r.nombre+'</div>'+
+          '<div style="font-size:.55rem;color:var(--muted)">'+r.fuente+'</div></div></div>'+
+          '<button onclick="canjearRegalo(''+r.id+'',''+r.nombre+'',''+r.emoji+'')" style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:5px 10px;font-size:.6rem;color:var(--green);cursor:pointer">Canjear →</button>'+
+          '</div>';
+      }).join('');
+  }
+}
+
+async function canjearRegalo(rId,nombre,emoji){
+  S.cart.push({name:nombre,sku:'',emoji:emoji,qty:'1x',price:0,isGift:true,source:'regalo_'+rId});
+  await sb.from('usuario_regalos').update({usado:true}).eq('id',rId);
+  notif('🎁 '+nombre+' agregado al carrito');
+  updUI();
+  cargarLogros();
 }
 async function cargarPedidosUsuario(){
   var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
@@ -1583,7 +1614,7 @@ async function llenarPerfil(){
 async function cargarLogros(){
   const u = S.user;
   const {data:todosLogros} = await sb.from('logros').select('*');
-  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
+  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
   const misIds = (misLogros||[]).map(x=>x.logro_id);
 
   const el = document.getElementById('pLogros');
@@ -1775,7 +1806,7 @@ async function verificarLogros(){
   if(!S.user) return;
   const u = S.user;
   const {data:todosLogros} = await sb.from('logros').select('*');
-  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
+  const {data:misLogros} = await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
   const misIds = (misLogros||[]).map(x=>x.logro_id);
 
   for(const l of (todosLogros||[])){
@@ -1783,8 +1814,31 @@ async function verificarLogros(){
     let cumplido = false;
     if(l.tipo==='compras' && u.pedidos_count >= l.condicion_valor) cumplido=true;
     if(l.tipo==='gasto' && u.gastado >= l.condicion_valor) cumplido=true;
-    if(cumplido){
-      await sb.from('usuario_logros').insert({usuario_id:u.id, logro_id:l.id});
+    if(!cumplido) continue;
+
+    // Registrar logro
+    await sb.from('usuario_logros').insert({cliente_id:u.id, logro_id:l.id});
+
+    // Entregar regalo
+    if(l.regalo_tipo==='coins' && l.regalo_valor>0){
+      var nuevosCoins=(u.coins||0)+l.regalo_valor;
+      await sb.from('clientes').update({coins:nuevosCoins}).eq('id',u.id);
+      await sb.from('coins_transacciones').insert({
+        cliente_id:u.id, tipo:'credito', cantidad:l.regalo_valor,
+        descripcion:'Logro desbloqueado: '+l.nombre, estado:'aprobado'
+      });
+      S.user.coins=nuevosCoins;
+      notif('🏆 '+l.emoji+' '+l.nombre+' — +'+l.regalo_valor+' 🪙 Coins!');
+    } else if(l.regalo_tipo==='producto' && l.regalo_sku){
+      await sb.from('usuario_regalos').insert({
+        cliente_id:u.id,
+        nombre:l.nombre,
+        emoji:l.emoji||'🎁',
+        fuente:'logro_'+l.codigo,
+        usado:false
+      });
+      notif('🏆 '+l.emoji+' '+l.nombre+' — 🎁 Regalo: '+l.regalo_sku+' desbloqueado!');
+    } else {
       notif('🏆 Logro desbloqueado: '+l.nombre);
     }
   }
@@ -3460,16 +3514,46 @@ async function llenarPerfil(){
   }
 }
 async function cargarLogros(){
-  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
+  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('cliente_id',u.id);
   var todos=r1.data||[];var misIds=(r2.data||[]).map(function(x){return x.logro_id;});
   var el=document.getElementById('pLogros');if(!el)return;
   el.innerHTML=todos.map(function(l){var ob=misIds.indexOf(l.id)>=0;
+    var recompensa='';
+    if(l.regalo_tipo==='coins'&&l.regalo_valor>0)recompensa='<span style="color:var(--coin);font-size:.55rem">🪙 +'+l.regalo_valor+' coins</span>';
+    else if(l.regalo_tipo==='producto'&&l.regalo_sku)recompensa='<span style="color:var(--green);font-size:.55rem">🎁 '+l.regalo_sku+'</span>';
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid '+(ob?'rgba(74,222,128,.35)':'var(--border)')+';border-radius:10px;padding:10px 12px;'+(ob?'':'opacity:.5')+'">'+
       '<div style="font-size:1.3rem;width:28px;text-align:center">'+l.emoji+'</div>'+
       '<div style="flex:1"><div style="font-family:Cinzel,serif;font-size:.68rem;color:'+(ob?'var(--green)':'var(--text)')+'">'+l.nombre+'</div>'+
-      '<div style="font-size:.57rem;color:var(--muted)">'+l.descripcion+'</div></div>'+
+      '<div style="font-size:.57rem;color:var(--muted)">'+l.descripcion+'</div>'+
+      (recompensa?'<div style="margin-top:2px">'+recompensa+'</div>':'')+
+      '</div>'+
       '<div style="font-size:.52rem;padding:2px 8px;border-radius:6px;background:'+(ob?'rgba(74,222,128,.15)':'var(--bg3)')+';color:'+(ob?'var(--green)':'var(--muted)')+'">'+( ob?'✓ Obtenido':'Bloqueado')+'</div></div>';
   }).join('');
+  // Regalos pendientes
+  var rr=await sb.from('usuario_regalos').select('*').eq('cliente_id',u.id).eq('usado',false);
+  var regalos=rr.data||[];
+  var elR=document.getElementById('pRegalos');
+  if(elR){
+    if(!regalos.length){elR.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Sin regalos pendientes</div>';return;}
+    elR.innerHTML='<div style="font-size:.7rem;color:var(--gold);font-family:Cinzel,serif;margin-bottom:8px">🎁 REGALOS DISPONIBLES</div>'+
+      regalos.map(function(r){
+        return '<div style="display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid rgba(74,222,128,.3);border-radius:10px;padding:10px 12px;margin-bottom:6px">'+
+          '<div style="display:flex;align-items:center;gap:8px">'+
+          '<div style="font-size:1.2rem">'+r.emoji+'</div>'+
+          '<div><div style="font-size:.68rem;font-family:Cinzel,serif;color:var(--green)">'+r.nombre+'</div>'+
+          '<div style="font-size:.55rem;color:var(--muted)">'+r.fuente+'</div></div></div>'+
+          '<button onclick="canjearRegalo(''+r.id+'',''+r.nombre+'',''+r.emoji+'')" style="background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);border-radius:8px;padding:5px 10px;font-size:.6rem;color:var(--green);cursor:pointer">Canjear →</button>'+
+          '</div>';
+      }).join('');
+  }
+}
+
+async function canjearRegalo(rId,nombre,emoji){
+  S.cart.push({name:nombre,sku:'',emoji:emoji,qty:'1x',price:0,isGift:true,source:'regalo_'+rId});
+  await sb.from('usuario_regalos').update({usado:true}).eq('id',rId);
+  notif('🎁 '+nombre+' agregado al carrito');
+  updUI();
+  cargarLogros();
 }
 async function cargarPedidosUsuario(){
   var res=await sb.from('seguimientos').select('*').eq('cliente_id',S.user.id).eq('origen','tienda').order('created_at',{ascending:false}).limit(10);
