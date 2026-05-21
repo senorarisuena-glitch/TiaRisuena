@@ -2925,7 +2925,15 @@ function rProductos(el){
     html+='<input id="prcat" list="prcat_list" value="'+(esEd?pe.categoria||"":"")+'" placeholder="Selecciona o escribe una categoría" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3">';
     html+='<datalist id="prcat_list">'+allCats2.map(function(c){return'<option value="'+c+'">';}).join("")+'</datalist></div>';
     html+='<div class="fi"><label>PRECIO MENÚ ($)</label><input id="prprecio_menu" type="number" min="0" step="0.01" value="'+(esEd&&pe.precio_menu?pe.precio_menu:"0")+'" placeholder="0.00"></div>';
-    html+='<div class="fi"><label>NOMBRE EN TIENDA</label><input id="prnombre_tienda" type="text" value="'+(esEd&&pe.nombre_tienda&&pe.nombre_tienda!=="NA"?pe.nombre_tienda:"")+'" placeholder="Nombre que verá el cliente (dejar vacío si no aplica)"></div>';
+    html+='<div class="fi"><label>NOMBRE EN TIENDA</label><input id="prnombre_tienda" type="text" value="'+(esEd&&pe.nombre_tienda&&pe.nombre_tienda!=="NA"?pe.nombre_tienda:"")+'" placeholder="Nombre que verá el cliente"></div>';
+    html+='<div class="fi"><label>SUBTÍTULO <span style="color:#8B949E;font-size:10px">(tipo · sabor · etc.)</span></label><input id="prsubtitulo" type="text" value="'+(esEd&&pe.subtitulo?pe.subtitulo:"")+'" placeholder="Ej: Híbrido · Limón Ácido · Aceite Cítrico"></div>';
+    html+='<div class="fi"><label>DESCRIPCIÓN LARGA <span style="color:#8B949E;font-size:10px">(texto épico para la tienda)</span></label><textarea id="prdesc_larga" rows="3" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:12px;color:#E6EDF3;resize:vertical" placeholder="Descripción que verá el cliente en la tienda...">'+(esEd&&pe.descripcion_larga?pe.descripcion_larga:"")+'</textarea></div>';
+    html+='<div class="fi"><label>EMOJI / ÍCONO</label><input id="premoji" type="text" value="'+(esEd&&pe.emoji?pe.emoji:"🌿")+'" placeholder="🏛️" style="width:80px"></div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">';
+    html+='<div class="fi" style="margin:0"><label>PODER</label><input id="prpoder" type="number" min="0" max="10" value="'+(esEd&&pe.poder?pe.poder:0)+'" style="width:100%"></div>';
+    html+='<div class="fi" style="margin:0"><label>FUERZA</label><input id="prfuerza" type="number" min="0" max="10" value="'+(esEd&&pe.fuerza?pe.fuerza:0)+'" style="width:100%"></div>';
+    html+='<div class="fi" style="margin:0"><label>ESENCIA</label><input id="presencia" type="number" min="0" max="10" value="'+(esEd&&pe.esencia?pe.esencia:0)+'" style="width:100%"></div>';
+    html+='</div>';
     html+='<div class="fi"><label>VISIBLE EN TIENDA</label><select id="prvisible_tienda" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="false"'+(esEd&&pe.visible_tienda?'':' selected')+'>NO</option><option value="true"'+(esEd&&pe.visible_tienda?' selected':'')+'>SI</option></select></div>';
     html+='<div class="fi"><label>TIPO</label><select id="prtipo" onchange="prTipoChange()" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3">';
     TIPOS.forEach(function(t){html+='<option value="'+t.v+'"'+(esEd&&pe.tipo===t.v?' selected':(!esEd&&t.v==='insumo'?' selected':''))+'>'+t.l+'</option>';});
@@ -2953,7 +2961,18 @@ function rProductos(el){
     if(!sku.trim()){alert("El SKU es obligatorio");return;}
     if(!desc.trim()){alert("La descripción es obligatoria");return;}
     var pm=parseFloat(($("prprecio_menu")||{}).value)||0;
-    var body={sku:sku.trim().toUpperCase(),descripcion:desc.trim(),categoria:cat.trim(),tipo:tipo,precio_menu:pm>0?pm:null};
+    var nomTienda=($("prnombre_tienda")||{}).value||"NA";
+    var visTienda=($("prvisible_tienda")||{}).value==="true";
+    var subtitulo=($("prsubtitulo")||{}).value||"";
+    var descLarga=($("prdesc_larga")||{}).value||"";
+    var emoji=($("premoji")||{}).value||"🌿";
+    var poder=parseInt(($("prpoder")||{}).value)||0;
+    var fuerza=parseInt(($("prfuerza")||{}).value)||0;
+    var esencia=parseInt(($("presencia")||{}).value)||0;
+    var body={sku:sku.trim().toUpperCase(),descripcion:desc.trim(),categoria:cat.trim(),tipo:tipo,
+      precio_menu:pm>0?pm:null,nombre_tienda:nomTienda||"NA",visible_tienda:visTienda,
+      subtitulo:subtitulo||null,descripcion_larga:descLarga||null,emoji:emoji||null,
+      poder:poder,fuerza:fuerza,esencia:esencia};
     var save=pid?sPATCH("productos","id=eq."+pid,body):sPOST("productos",body);
     save.then(function(){
       // Update CATALOGO_SKU in memory
