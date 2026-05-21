@@ -1057,7 +1057,7 @@ function rVentas(el){
     html+='<table><thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th style="text-align:right">Monto</th><th style="text-align:right">Cobrado</th><th style="text-align:right">Adeudo</th><th>Origen</th><th></th></tr></thead><tbody>';
     ventas.forEach(function(v){
       var lineas=Array.isArray(v.lineas)?v.lineas:[];
-      html+='<tr style="cursor:pointer" onclick="toggleVRow(\'vd_'+v.id+'\')">';
+      html+='<tr>';
       html+='<td style="color:#4A9EFF;font-weight:700">#'+v.ticket+'</td>';
       html+='<td style="color:#8B949E">'+v.fecha+'</td>';
       var ccod=v.cliente_codigo||'';
@@ -1070,8 +1070,12 @@ function rVentas(el){
       html+='<td style="text-align:right;font-weight:700">'+fmt(v.monto_venta)+'</td>';
       html+='<td style="text-align:right;color:#00C896">'+fmt(v.cobrado||0)+'</td>';
       html+='<td style="text-align:right;color:'+(parseFloat(v.adeudo||0)>0?"#FB923C":"#8B949E")+';font-weight:700">'+fmt(v.adeudo||0)+'</td>';
-      html+='<td>'+(v.origen==="tienda"?bdg("🛍 Tienda","#C084FC"):"")+(lineas.length?'<span style="font-size:10px;color:#8B949E;margin-left:4px">'+lineas.length+' items ▾</span>':'')+'</td>';
-      html+='<td><div style="display:flex;gap:6px" onclick="event.stopPropagation()"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="vEdit('+v.id+')">editar</button><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="vDel('+v.id+')">✕</button></div></td>';
+      html+='<td>'+(v.origen==="tienda"?bdg("🛍 Tienda","#C084FC"):"")+'</td>';
+      html+='<td><div style="display:flex;gap:6px">';
+      if(lineas.length)html+='<button class="btn btn-o btn-s" style="border-color:#8B949E;color:#8B949E" onclick="toggleVRow(\'vd_'+v.id+'\')">▾ '+lineas.length+'</button>';
+      html+='<button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="vEdit('+v.id+')">editar</button>';
+      html+='<button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="vDel('+v.id+')">✕</button>';
+      html+='</div></td>';
       html+='</tr>';
       // Fila expandible
       if(lineas.length){
@@ -1914,7 +1918,7 @@ function rCompras(el){
         html+='<td style="font-size:11px;color:#8B949E">'+items.length+' producto(s) · <span style="color:#4A9EFF">ver detalle ▾</span></td>';
         html+='<td style="text-align:right;font-weight:700">'+fmt(totalCompra)+'</td>';
         html+='<td style="text-align:right;font-weight:700;color:'+(adeudo>0?"#FB923C":"#8B949E")+'">'+fmt(adeudo)+'</td>';
-        html+='<td><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="event.stopPropagation();cDelGrupo('+n+')">✕</button></td>';
+        html+='<td><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="event.stopPropagation();cEditGrupo('+n+')">editar</button><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="event.stopPropagation();cDelGrupo('+n+')">✕</button></div></td>';
         html+='</tr>';
 
         // Fila expandible con detalle
@@ -1929,7 +1933,7 @@ function rCompras(el){
           html+='<td style="padding:6px;text-align:right;font-size:12px">'+fmt(c.pu)+'</td>';
           html+='<td style="padding:6px;text-align:right;font-size:12px;font-weight:700">'+fmt(c.total)+'</td>';
           html+='<td style="padding:6px">'+bdg(c.tipo_inv==="terminado"?"📦 Venta":"⚗️ Insumo",tc)+'</td>';
-          html+='<td style="padding:6px"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF;font-size:10px" onclick="cEdit('+c.id+')">editar</button></td>';
+          html+='<td></td>'; // editar individual removido - usar editar del grupo
           html+='</tr>';
         });
         html+='</tbody></table></td></tr>';
@@ -1942,8 +1946,30 @@ function rCompras(el){
         var row=document.getElementById(id);
         if(row)row.style.display=row.style.display==='none'?'table-row':'none';
       };
-      window.cDelGrupo=function(n){
-        if(!confirm("¿Eliminar todas las líneas de la Compra #"+n+"?"))return;
+      window.cEditGrupo=function(n){
+        // Crear un objeto compra virtual con todas las líneas del grupo
+        var items=grupos[n];
+        if(!items||!items.length)return;
+        var rep=items[0];
+        var ceVirtual={
+          id:rep.id,
+          num_compra:n,
+          proveedor:rep.proveedor,
+          fecha:rep.fecha,
+          responsable:rep.responsable,
+          lineas:items.map(function(c){return{
+            nombre:c.producto_nombre||'',
+            desc:c.descripcion||'',
+            categoria:(CATALOGO_SKU.find(function(s){return s.sku===c.producto_nombre;})||{}).cat||'',
+            tipo_inv:c.tipo_inv||'insumo',
+            cantidad:c.cantidad||1,
+            pu:c.pu||0
+          };})
+        };
+        cForm(ceVirtual);
+      };
+
+      window.cDelGrupo=function(n){        if(!confirm("¿Eliminar todas las líneas de la Compra #"+n+"?"))return;
         var ids=grupos[n].map(function(c){return c.id;});
         Promise.all(ids.map(function(id){
           return sDEL("compras","id=eq."+id).then(function(){
@@ -1977,15 +2003,8 @@ function rCompras(el){
     var autoNC=esEd?ce.num_compra:maxNC+1;
     var histProvs=compras.reduce(function(a,x){if(x.proveedor&&a.indexOf(x.proveedor)<0)a.push(x.proveedor);return a},[]);
     var CATS=["Gallos","Accesorios","Comestibles","Extractos","Flor Green House","Flor Otro","Insumo General","Otro"];
-    // Lines: al editar, construir desde campos del registro individual
-    var lineas=esEd?[{
-      nombre:ce.producto_nombre||"",
-      desc:ce.descripcion||"",
-      categoria:(CATALOGO_SKU.find(function(s){return s.sku===ce.producto_nombre;})||{}).cat||"",
-      tipo_inv:ce.tipo_inv||"insumo",
-      cantidad:ce.cantidad||1,
-      pu:ce.pu||0
-    }]:[{nombre:"",desc:"",categoria:"",tipo_inv:"insumo",cantidad:1,pu:0}];
+    // Lines: al editar, usar lineas si existe (grupo), si no construir desde campos individuales
+    var lineas=esEd&&ce.lineas&&ce.lineas.length?JSON.parse(JSON.stringify(ce.lineas)):[{nombre:"",desc:"",categoria:"",tipo_inv:"insumo",cantidad:1,pu:0}];
 
     function calcTotal(){return lineas.reduce(function(a,l){return a+(parseFloat(l.cantidad)||0)*(parseFloat(l.pu)||0)},0)}
 
