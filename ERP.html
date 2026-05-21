@@ -1850,19 +1850,70 @@ function rCompras(el){
           if(m){var n=parseInt(m[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(p.monto||0));}
         });
       });
-      html+='<table><thead><tr><th>#</th><th>Fecha</th><th>Proveedor</th><th>Producto / Desc.</th><th style="text-align:right">Cant</th><th style="text-align:right">P.Unit</th><th style="text-align:right">Total</th><th style="text-align:right">Adeudo</th><th>Destino</th><th></th></tr></thead><tbody>';
+
+      // Agrupar por num_compra
+      var grupos={};
       soloCompras.forEach(function(c){
-        var tc=c.tipo_inv==="terminado"?"#00C896":"#4A9EFF";
-        var adeudo=Math.max(0,parseFloat(c.total||0)-(pagosMap[c.num_compra]||0));
-        html+='<tr><td style="color:#C084FC;font-weight:700">#'+c.num_compra+'</td><td style="color:#8B949E">'+c.fecha+'</td><td>'+c.proveedor+'</td>';
-        html+='<td>'+(c.producto_nombre||"—")+(c.desc?'<br><span style="font-size:10px;color:#8B949E">'+c.desc+'</span>':"")+'</td>';
-        html+='<td style="text-align:right">'+c.cantidad+'</td><td style="text-align:right">'+fmt(c.pu)+'</td><td style="text-align:right;font-weight:700">'+fmt(c.total)+'</td>';
-        html+='<td style="text-align:right;font-weight:700;color:'+(adeudo>0?"#FB923C":"#8B949E")+'">'+fmt(adeudo)+'</td>';
-        html+='<td>'+bdg(c.tipo_inv==="terminado"?"📦 Venta":"⚗️ Insumo",tc)+'</td>';
-        html+='<td><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="cEdit('+c.id+')">editar</button><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="cDel('+c.id+')">✕</button></div></td></tr>';
+        var n=c.num_compra;
+        if(!grupos[n])grupos[n]=[];
+        grupos[n].push(c);
       });
+      var numsSorted=Object.keys(grupos).map(Number).sort(function(a,b){return b-a;});
+
+      html+='<table><thead><tr><th>#</th><th>Fecha</th><th>Proveedor</th><th>Productos</th><th style="text-align:right">Total</th><th style="text-align:right">Adeudo</th><th></th></tr></thead><tbody>';
+
+      numsSorted.forEach(function(n){
+        var items=grupos[n];
+        var rep=items[0];
+        var totalCompra=items.reduce(function(a,c){return a+parseFloat(c.total||0);},0);
+        var adeudo=Math.max(0,totalCompra-(pagosMap[n]||0));
+        var skuList=items.map(function(c){return c.producto_nombre+'('+c.cantidad+')'}).join(', ');
+        var rowId='cg_'+n;
+
+        html+='<tr style="cursor:pointer" onclick="toggleCGroup(\''+rowId+'\')">';
+        html+='<td style="color:#C084FC;font-weight:700">#'+n+'</td>';
+        html+='<td style="color:#8B949E">'+rep.fecha+'</td>';
+        html+='<td>'+rep.proveedor+'</td>';
+        html+='<td style="font-size:11px;color:#8B949E">'+items.length+' producto(s) · <span style="color:#4A9EFF">ver detalle ▾</span></td>';
+        html+='<td style="text-align:right;font-weight:700">'+fmt(totalCompra)+'</td>';
+        html+='<td style="text-align:right;font-weight:700;color:'+(adeudo>0?"#FB923C":"#8B949E")+'">'+fmt(adeudo)+'</td>';
+        html+='<td><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="event.stopPropagation();cDelGrupo('+n+')">✕</button></td>';
+        html+='</tr>';
+
+        // Fila expandible con detalle
+        html+='<tr id="'+rowId+'" style="display:none"><td colspan="7" style="padding:0">';
+        html+='<table style="width:100%;background:#0D1117;border-top:1px solid #30363D"><tbody>';
+        items.forEach(function(c){
+          var tc=c.tipo_inv==="terminado"?"#00C896":"#4A9EFF";
+          html+='<tr>';
+          html+='<td style="padding:6px 16px;color:#E6EDF3;font-size:12px">'+c.producto_nombre+'</td>';
+          html+='<td style="padding:6px;color:#8B949E;font-size:11px">'+c.descripcion+'</td>';
+          html+='<td style="padding:6px;text-align:right;font-size:12px">'+c.cantidad+'</td>';
+          html+='<td style="padding:6px;text-align:right;font-size:12px">'+fmt(c.pu)+'</td>';
+          html+='<td style="padding:6px;text-align:right;font-size:12px;font-weight:700">'+fmt(c.total)+'</td>';
+          html+='<td style="padding:6px">'+bdg(c.tipo_inv==="terminado"?"📦 Venta":"⚗️ Insumo",tc)+'</td>';
+          html+='<td style="padding:6px"><button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF;font-size:10px" onclick="cEdit('+c.id+')">editar</button></td>';
+          html+='</tr>';
+        });
+        html+='</tbody></table></td></tr>';
+      });
+
       html+='</tbody></table></div>';
       el.innerHTML=html;
+
+      window.toggleCGroup=function(id){
+        var row=document.getElementById(id);
+        if(row)row.style.display=row.style.display==='none'?'table-row':'none';
+      };
+      window.cDelGrupo=function(n){
+        if(!confirm("¿Eliminar todas las líneas de la Compra #"+n+"?"))return;
+        var ids=grupos[n].map(function(c){return c.id;});
+        Promise.all(ids.map(function(id){
+          return sDEL("compras","id=eq."+id).then(function(){
+            return sDEL("lotes","tipo=eq.compra&ref_id=eq."+id);
+          });
+        })).then(function(){load();toast("Compra #"+n+" eliminada","err");});
+      };
     });
   }
   window.cNueva=function(){cForm(null)};
