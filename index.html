@@ -1860,7 +1860,7 @@ async function cargarSeguimientoPerfil(){
   var res=await sb.from('seguimientos').select('*')
     .eq('cliente_id',S.user.id)
     .eq('origen','tienda')
-    .not('estado','eq','entregado')
+    .not('estado','eq','entregado').not('estado','eq','cancelado')
     .order('created_at',{ascending:false}).limit(3);
   var pedidos=res.data||[];
   if(!pedidos.length){
@@ -1921,7 +1921,7 @@ async function cargarPedidosActivos(){
   var res=await sb.from('seguimientos').select('*')
     .eq('cliente_id',S.user.id)
     .eq('origen','tienda')
-    .not('estado','eq','entregado')
+    .not('estado','eq','entregado').not('estado','eq','cancelado')
     .order('created_at',{ascending:false})
     .limit(5);
   var pedidos=res.data||[];
