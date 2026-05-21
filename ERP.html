@@ -1119,9 +1119,6 @@ function rVentas(el){
     var row=document.getElementById(id);
     if(row)row.style.display=row.style.display==='none'?'table-row':'none';
   };
-    var rows=el.querySelectorAll("tbody tr");
-    rows.forEach(function(r){r.style.display=r.textContent.toLowerCase().indexOf(q.toLowerCase())>=0?"":"none"});
-  };
   window.vNueva=function(){
     sGET("clientes","order=codigo").then(function(d){
       clientes=Array.isArray(d)?d:[];
