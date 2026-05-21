@@ -372,19 +372,12 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
   <!-- PAGE: MENU -->
   <div id="pg-menu" class="page">
     <div id="sub-heroes" class="subtab-panel on">
-      <div id="heroes-container"><div class="info-box" style="text-align:center">🌿 Cargando menú...</div></div>
+      <div id="heroes-container"><div class="info-box" style="text-align:center">⚔️ Cargando héroes...</div></div>
     </div>
     <div id="sub-cofre" class="subtab-panel">
-      <div class="stitle">🎁 BOTÍN DE HÉROE (Mistery Box) <span class="badge b-red">MISTERY BOX</span></div>
-      <div class="info-box"><strong>⚔️ ¡El Botín del Héroe!</strong><br>Cada cofre incluye flores, porros, extractos, accesorios y edibles. El valor supera al precio pagado entre un <strong>40% y 80%</strong>. Ej: Cofre de $1,000 → recibes entre <strong>$1,600 y $1,800</strong>.</div>
-      <div id="cofre-container">
-        <div class="mbox-grid">
-          <div class="mbox" onclick="addSimple('Cofre del Soldado','🗡️','$500',500)"><div class="mbox-icon">🗡️</div><div class="mbox-name">Cofre Soldado</div><div class="mbox-price">$500</div><div class="mbox-val">Valor: $700–$900</div></div>
-          <div class="mbox" onclick="addSimple('Cofre del Capitán','🏆','$1,000',1000)"><div class="mbox-icon">🏆</div><div class="mbox-name">Cofre Capitán</div><div class="mbox-price">$1,000</div><div class="mbox-val">Valor: $1,600–$1,800</div></div>
-          <div class="mbox" onclick="addSimple('Cofre del General','⚔️','$1,500',1500)"><div class="mbox-icon">⚔️</div><div class="mbox-name">Cofre General</div><div class="mbox-price">$1,500</div><div class="mbox-val">Valor: $2,100–$2,700</div></div>
-          <div class="mbox mbox-full" onclick="addSimple('Cofre Gran Conquistador +WAX','👑','$2,000',2000)"><div class="mbox-icon">👑</div><div class="mbox-name">Gran Conquistador</div><div class="mbox-price">$2,000</div><div class="mbox-val">Valor $3,200+ · Puede incluir cartucho WAX</div></div>
-        </div>
-      </div>
+      <div class="stitle">🎁 BOTÍN DE HÉROE <span class="badge b-red">MISTERY BOX</span></div>
+      <div class="info-box"><strong>⚔️ ¡El Botín del Héroe!</strong><br>Cada cofre incluye flores, porros, extractos, accesorios y edibles. El valor supera al precio pagado entre un <strong>40% y 80%</strong>.</div>
+      <div id="cofre-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
     <div id="sub-forjados" class="subtab-panel">
       <div class="stitle">🐓 FORJADOS EN BATALLA <span class="badge b-orange">PORROS</span></div>
@@ -397,51 +390,23 @@ canvas#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
     </div>
     <div id="sub-extractos" class="subtab-panel">
       <div class="stitle">🍯 ESENCIAS DE PODER <span class="badge b-cyan">EXTRACTOS</span></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:6px">🖊️ VAPES</div>
-      <div class="scard" onclick="addSimple('Cartucho WAX','💨','$850',850)"><div class="scard-top"><div class="scard-emoji">💨</div><div><div class="scard-name">Cartucho WAX</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
-      <div class="scard" onclick="addSimple('Cartucho CBD','🌿','$850',850)"><div class="scard-top"><div class="scard-emoji">🌿</div><div><div class="scard-name">Cartucho CBD</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
-      <div class="scard" onclick="addSimple('Cartucho DMT (pide pila)','🌀','$850',850)"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">Cartucho DMT</div><div class="scard-sub">Pregunta por la pila</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
-      <div class="scard" onclick="addSimple('Desechable 2g','🔋','$1,299',1299)"><div class="scard-top"><div class="scard-emoji">🔋</div><div><div class="scard-name">Desechable 2g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$1,299</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:6px">⏳ CONCENTRADOS</div>
-      <div class="scard" onclick="openModal('Dry Hash','Extracción CO2. Potente y versátil.','🏜️',null,[{qty:'1g',price:80},{qty:'3g mayoreo',price:200},{qty:'9g mayoreo',price:500}])"><div class="scard-top"><div class="scard-emoji">🏜️</div><div><div class="scard-name">Dry Hash</div><div class="scard-sub">Extracción CO2</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$200</span></div><div class="sprice"><span class="sq">9g </span><span class="sv">$500</span></div></div></div>
-      <div class="scard" onclick="openModal('WAX Cristalizado BHO','Extracción butano. Textura azúcar. Muy potente.','🥞',null,[{qty:'1g',price:500},{qty:'3g mayoreo',price:1200},{qty:'10g mayoreo',price:3000}])"><div class="scard-top"><div class="scard-emoji">🥞</div><div><div class="scard-name">WAX Cristalizado BHO</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$500</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$1,200</span></div><div class="sprice"><span class="sq">10g </span><span class="sv">$3,000</span></div></div></div>
-      <div class="scard" onclick="addSimple('MoonRock Original — 3.5g (Por Encargo)','🌕','$550',550)"><div class="scard-top"><div class="scard-emoji">🌕</div><div><div class="scard-name">MoonRock Original</div><div class="scard-sub">WAX + Dry Hash · Por encargo</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">3.5g </span><span class="sv">$550</span></div></div></div>
-      <div class="scard" onclick="openModal('Ice Bubble Hash','Tricomas por agua y hielo. Natural y potente.','🧊',null,[{qty:'1g',price:350},{qty:'3g',price:750}])"><div class="scard-top"><div class="scard-emoji">🧊</div><div><div class="scard-name">Ice Bubble Hash</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$350</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$750</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:6px">🛠️ ACCESORIOS</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 12px;margin-bottom:10px">
-        <div class="scard" style="margin:0" onclick="addSimple('Canalas','🚬','$45',45)"><div class="scard-name">Canalas</div><div class="scard-prices"><div class="sprice"><span class="sv">$45</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Hitter','🔫','$50',50)"><div class="scard-name">Hitter</div><div class="scard-prices"><div class="sprice"><span class="sv">$50</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Grinder','⚙️','$80',80)"><div class="scard-name">Grinder</div><div class="scard-prices"><div class="sprice"><span class="sv">$80</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Conotes RAW','📜','$150',150)"><div class="scard-name">Conotes RAW</div><div class="scard-prices"><div class="sprice"><span class="sv">$150</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Soplete','🔥','$250',250)"><div class="scard-name">Soplete</div><div class="scard-prices"><div class="sprice"><span class="sv">$250</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Batería/Pluma','🔋','$450',450)"><div class="scard-name">Batería/Pluma</div><div class="scard-prices"><div class="sprice"><span class="sv">$450</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Bonga','💧','$350',350)"><div class="scard-name">Bonga</div><div class="scard-prices"><div class="sprice"><span class="sv">$350</span></div></div></div>
-        <div class="scard" style="margin:0" onclick="addSimple('Kit Bonga PRO','🎁','$600',600)"><div class="scard-name">Kit Bonga PRO</div><div class="scard-prices"><div class="sprice"><span class="sv">$600</span></div></div></div>
-      </div>
+      <div id="extractos-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
     <div id="sub-medicina" class="subtab-panel">
       <div class="stitle">🌀 MEDICINA ANCESTRAL <span class="badge b-violet">SAGRADA</span></div>
-      <div class="warn-box">🌀 <strong>Uso consciente:</strong> Pon una intención fuerte. Lo que te muestren sirve solo si actúas conforme a ello.</div>
-      <div class="stitle" style="font-size:.6rem;padding-top:4px">💊 PSILOCIBINA</div>
-      <div class="scard" onclick="openModal('Microdosis Psilocibina','0.33g por píldora. Introspección suave.','💊',null,[{qty:'1 píldora',price:80},{qty:'10 píldoras',price:620}])"><div class="scard-top"><div class="scard-emoji">💊</div><div><div class="scard-name">Microdosis Psilocibina</div><div class="scard-sub">0.33g</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$80</span></div><div class="sprice"><span class="sq">10x </span><span class="sv">$620</span></div></div></div>
-      <div class="scard" onclick="openModal('Hongos Psilocibina','4-6h efecto. Hasta 3 días sensaciones. Ideal para visuales, respuestas, resolver problemas.','🍄',null,[{qty:'1g',price:250},{qty:'3g',price:550},{qty:'10g',price:1500},{qty:'30g',price:3200}])"><div class="scard-top"><div class="scard-emoji">🍄</div><div><div class="scard-name">Hongos Psilocibina</div><div class="scard-sub">4-6h efecto · Hasta 3 días sensaciones</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$250</span></div><div class="sprice"><span class="sq">3g </span><span class="sv">$550</span></div><div class="sprice"><span class="sq">10g </span><span class="sv">$1,500</span></div><div class="sprice"><span class="sq">30g </span><span class="sv">$3,200</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:4px">💧 LSD — Cuadros & Geles</div>
-      <div class="scard" onclick="openModal('LSD — Cuadros & Geles','4-6h efecto. Visuales y creatividad.','💧',null,[{qty:'1x',price:250},{qty:'3x',price:600},{qty:'10x',price:1500},{qty:'25x',price:3000}])"><div class="scard-top"><div class="scard-emoji">💧</div><div><div class="scard-name">LSD — Cuadros & Geles</div><div class="scard-sub">4-6h efecto</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1x </span><span class="sv">$250</span></div><div class="sprice"><span class="sq">3x </span><span class="sv">$600</span></div><div class="sprice"><span class="sq">10x </span><span class="sv">$1,500</span></div><div class="sprice"><span class="sq">25x </span><span class="sv">$3,000</span></div></div></div>
-      <div class="stitle" style="font-size:.6rem;padding-top:4px">🌀 DMT — Original MIMOSA</div>
-      <div class="warn-box" style="margin-bottom:6px">🌀 Efecto 30min · Intención hasta 30 días. Neutraliza la mente para acceder a tu divinidad.</div>
-      <div class="scard" onclick="openModal('DMT Puro — Original MIMOSA','Efecto 30min. Intención 30 días.','🌀',null,[{qty:'1g',price:1200},{qty:'1/2g',price:700},{qty:'Dosis .25g',price:400}])"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">DMT Puro — MIMOSA</div><div class="scard-sub">Efecto 30min · Intención 30 días</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$1,200</span></div><div class="sprice"><span class="sq">1/2g </span><span class="sv">$700</span></div><div class="sprice"><span class="sq">.25g </span><span class="sv">$400</span></div></div></div>
-      <div class="scard" onclick="openModal('DMT Preparado Especial','Microdosis. Más accesible.','🌀',null,[{qty:'1g',price:500},{qty:'1/2g',price:300},{qty:'.25g',price:150}])"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">DMT Preparado Especial</div><div class="scard-sub">Microdosis</div></div></div><div class="scard-prices"><div class="sprice"><span class="sq">1g </span><span class="sv">$500</span></div><div class="sprice"><span class="sq">1/2g </span><span class="sv">$300</span></div><div class="sprice"><span class="sq">.25g </span><span class="sv">$150</span></div></div></div>
-      <div class="scard" onclick="addSimple('Cartucho DMT (necesita pila)','🌀','$850',850)"><div class="scard-top"><div class="scard-emoji">🌀</div><div><div class="scard-name">Cartucho DMT</div><div class="scard-sub">Pregunta por la pila</div></div></div><div class="scard-prices"><div class="sprice"><span class="sv">$850</span></div></div></div>
+      <div class="warn-box">🌀 <strong>Uso consciente:</strong> Pon una intención fuerte.</div>
+      <div id="medicina-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
     </div>
     <div id="sub-combos" class="subtab-panel">
-      <div class="stitle">🔥 COMBOS & PROMOS <span class="badge b-red">TEMPORADA</span></div>
-      <div class="ccard" onclick="addCombo('Combo Espartano','🏛️',1450,'1 Oz Leonidas + 6 Porros + Raspadito')"><div class="ccard-head"><div class="ccard-emoji">🏛️</div><div><div class="ccard-name">Combo Espartano</div><div class="ccard-desc">1 Oz Leonidas + 6 Porros + 1 Raspadito</div></div></div><div class="ccard-quote">"El kit completo del guerrero. Flores, forjados y suerte."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,740</div><div class="nw">$1,450<span class="save-badge">AHORRO $290</span></div></div><div class="add-btn">+ Agregar</div></div></div>
-      <div class="ccard" onclick="addCombo('Combo Valhalla','⚡',900,'1/2 Oz Ragnar + Chocolate + 1g Dry Hash')"><div class="ccard-head"><div class="ccard-emoji">⚡</div><div><div class="ccard-name">Combo Valhalla</div><div class="ccard-desc">1/2 Oz Ragnar + Chocolate Barra + 1g Dry Hash</div></div></div><div class="ccard-quote">"Para el guerrero que relaja con estilo nórdico."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,080</div><div class="nw">$900<span class="save-badge">AHORRO $180</span></div></div><div class="add-btn">+ Agregar</div></div></div>
-      <div class="ccard" onclick="addCombo('Combo Meditación Sagrada','🌀',1200,'1/2 Oz Juana + 3x Microdosis + Kit Bonga PRO')"><div class="ccard-head"><div class="ccard-emoji">🌀</div><div><div class="ccard-name">Combo Meditación</div><div class="ccard-desc">1/2 Oz Juana + 3x Microdosis + Kit Bonga PRO</div></div></div><div class="ccard-quote">"Flores, medicina y equipo para una noche de introspección."</div><div class="ccard-footer"><div class="ccard-prices"><div class="old">Normal: $1,490</div><div class="nw">$1,200<span class="save-badge">AHORRO $290</span></div></div><div class="add-btn">+ Agregar</div></div></div>
+      <div class="stitle">🔥 COMBOS <span class="badge b-red">TEMPORADA</span></div>
+      <div id="combos-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
       <div class="stitle" style="margin-top:4px">🪙 PROMOS CON COINS</div>
-      <div class="info-box">🪙 <strong>500 coins</strong> = $50 MXN descuento<br>🪙 <strong>1,000 coins</strong> = producto gratis (hasta $100)<br>🪙 <strong>2,500 coins</strong> = pedido VIP con prioridad<br><br><span style="color:var(--muted)">Menciona tus coins al confirmar por WhatsApp.</span></div>
+      <div class="info-box">🪙 <strong>500 coins</strong> = $50 MXN descuento<br>🪙 <strong>1,000 coins</strong> = producto gratis (hasta $100)<br>🪙 <strong>2,500 coins</strong> = pedido VIP con prioridad</div>
     </div>
-    <div id="sub-promos" class="subtab-panel"><div class="stitle">🎁 PROMOS DEL DÍA</div><div id="promos-container"><div class="info-box">No hay promos activas.</div></div></div>
+    <div id="sub-promos" class="subtab-panel">
+      <div class="stitle">🔧 HERRAMIENTAS <span class="badge b-orange">ACCESORIOS</span></div>
+      <div id="herramientas-container"><div class="info-box" style="text-align:center">Cargando...</div></div>
+    </div>
     <div id="sub-sala" class="subtab-panel">
       <div class="sala-world" id="salaWorld"><div class="sala-floor"></div></div>
       <div class="sala-ctrl"><button class="mv-btn" onclick="moveAv(-1)">◀</button><button class="mv-btn" onclick="moveAv(1)">▶</button><button class="mv-btn" style="margin-left:auto" onclick="changeAv()">😀 Avatar</button></div>
@@ -3407,6 +3372,1283 @@ var _menuProds=[], _menuInv={}, _menuCombos=[];
 
 async function cargarMenuDinamico(){
   if(!sb)return;
+  // 1. Productos visibles
+  var {data:prods}=await sb.from('productos').select('*').eq('visible_tienda',true);
+  _menuProds=prods||[];
+  // 2. Inventario (stock por SKU)
+  var {data:lotes}=await sb.from('lotes').select('sku,movimiento,cantidad');
+  _menuInv={};
+  (lotes||[]).forEach(function(l){
+    if(!_menuInv[l.sku])_menuInv[l.sku]=0;
+    _menuInv[l.sku]+=(l.movimiento==='entrada'?1:-1)*parseFloat(l.cantidad||0);
+  });
+  // 3. Combos
+  var {data:combos}=await sb.from('combos').select('*').eq('activo',true);
+  _menuCombos=combos||[];
+
+  renderMenuDinamico();
+}
+
+function getStock(sku){ return Math.max(0,_menuInv[sku]||0); }
+
+function renderMenuDinamico(){
+  renderHeroesDin();
+  renderSeccion('forjados','Gallos',['forjados-container']);
+  renderSeccion('edibles','Edibles',['edibles-container']);
+  renderSeccion('extractos','Extractos',['extractos-container']);
+  renderSeccion('medicina','Medicina',['medicina-container']);
+  renderSeccion('herramientas','Accesorios',['herramientas-container']);
+  renderCombosDin();
+  renderCofreDin();
+}
+
+function renderHeroesDin(){
+  var el=document.getElementById('heroes-container');
+  if(!el)return;
+  // Flor: agrupar por cepa base (ej: P1, P2, G1...)
+  var florProds=_menuProds.filter(function(p){return p.categoria&&(p.categoria.toLowerCase().includes('flor')||p.categoria.toLowerCase().includes('premium')||p.categoria.toLowerCase().includes('green')||p.categoria.toLowerCase().includes('indoor')||p.categoria.toLowerCase().includes('exotica')||p.categoria.toLowerCase().includes('regular'));});
+  
+  // Agrupar por nombre_tienda (cepa)
+  var cepas={};
+  florProds.forEach(function(p){
+    var clave=p.nombre_tienda||p.sku;
+    if(!cepas[clave])cepas[clave]=[];
+    cepas[clave].push(p);
+  });
+
+  if(!Object.keys(cepas).length){
+    el.innerHTML='<div class="info-box" style="text-align:center">🌿 Próximamente nuevos héroes...</div>';
+    return;
+  }
+
+  var html='';
+  Object.keys(cepas).forEach(function(cepa){
+    var items=cepas[cepa];
+    var rep=items[0]; // representante para datos de cepa
+    var tieneStock=items.some(function(p){return getStock(p.sku)>0;});
+    var agotado=!tieneStock;
+
+    // Botones de gramaje
+    var btns=items.map(function(p){
+      var stock=getStock(p.sku);
+      var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1]||p.sku;
+      if(stock>0){
+        return '<div class="ptag" onclick="event.stopPropagation();menuAddFlor(\''+p.sku+'\',\''+label+'\','+p.precio_menu+',\''+cepa+'\')"><div class="pq">'+label+'</div><div class="pp">$'+p.precio_menu+'</div></div>';
+      } else {
+        return '<div class="ptag" style="opacity:.4;cursor:not-allowed"><div class="pq">'+label+'</div><div class="pp">Agotado</div></div>';
+      }
+    }).join('');
+
+    var poder=rep.poder||0,fuerza=rep.fuerza||0,esencia=rep.esencia||0;
+    html+='<div class="hcard"'+(agotado?' style="opacity:.6"':'')+' onclick="openHeroDin(\''+cepa+'\')">';
+    html+='<div class="hcard-top">';
+    html+='<div class="hcard-emoji">'+(rep.emoji||'🌿')+'</div>';
+    html+='<div><div class="hcard-name">'+cepa+'</div>';
+    html+='<div class="hcard-strain">'+(rep.subtitulo||'')+'</div></div>';
+    if(agotado)html+='<div style="margin-left:auto;background:#F8514920;border:1px solid #F85149;border-radius:2px;padding:2px 8px;font-size:10px;color:#F85149;font-weight:700">AGOTADO</div>';
+    html+='</div>';
+    if(rep.descripcion_larga)html+='<div class="hcard-quote">'+rep.descripcion_larga.substring(0,110)+'...</div>';
+    html+='<div class="hcard-stats">';
+    html+='<div class="stat"><div class="stat-val">'+poder+'</div><div class="stat-bars">'+bars(poder)+'</div><div class="stat-lbl">PODER</div></div>';
+    html+='<div class="stat"><div class="stat-val">'+fuerza+'</div><div class="stat-bars">'+bars(fuerza)+'</div><div class="stat-lbl">FUERZA</div></div>';
+    html+='<div class="stat"><div class="stat-val">'+esencia+'</div><div class="stat-bars">'+bars(esencia)+'</div><div class="stat-lbl">ESENCIA</div></div>';
+    html+='</div>';
+    html+='<div class="hcard-prices">'+btns+'</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function openHeroDin(cepa){
+  var items=_menuProds.filter(function(p){return (p.nombre_tienda||p.sku)===cepa;});
+  if(!items.length)return;
+  var rep=items[0];
+  var prices=items.filter(function(p){return getStock(p.sku)>0;}).map(function(p){
+    var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1];
+    return{qty:label,price:p.precio_menu,sku:p.sku};
+  });
+  if(!prices.length)prices=items.map(function(p){var label=p.descripcion.split(' ')[0]+' '+p.descripcion.split(' ')[1];return{qty:label+'(agotado)',price:p.precio_menu,sku:p.sku,agotado:true};});
+  S._modal={name:cepa,emoji:rep.emoji||'🌿',prices:prices};S._selQty=null;
+  document.getElementById('mTitle').textContent=(rep.emoji||'🌿')+' '+cepa;
+  document.getElementById('mSub').textContent=rep.subtitulo||'';
+  var mq=document.getElementById('mQuote');
+  if(rep.descripcion_larga){mq.textContent=rep.descripcion_larga;mq.style.display='block';}else mq.style.display='none';
+  buildQtyGrid(prices);
+  document.getElementById('overlay').classList.add('on');
+}
+
+function menuAddFlor(sku,label,precio,cepa){
+  var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
+  S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,isGift:false});
+  updUI();notif('⚔️ '+cepa+' ('+label+') agregado');
+}
+
+function renderSeccion(cat,categoria,containerIds){
+  var catMap={
+    'forjados':['Gallos','Insumo Gallos'],
+    'edibles':['Edibles','Comestibles'],
+    'extractos':['Extractos'],
+    'medicina':['Medicina'],
+    'herramientas':['Accesorios','Herramientas']
+  };
+  var cats=catMap[cat]||[categoria];
+  var prods=_menuProds.filter(function(p){return cats.some(function(c){return (p.categoria||'').toLowerCase()===c.toLowerCase();});});
+  
+  containerIds.forEach(function(cid){
+    var el=document.getElementById(cid);if(!el)return;
+    if(!prods.length){
+      el.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">🚧 Próximamente...</div>';
+      return;
+    }
+    el.innerHTML=prods.map(function(p){
+      var stock=getStock(p.sku);
+      var agotado=stock<=0;
+      var nombre=p.nombre_tienda&&p.nombre_tienda!=='NA'?p.nombre_tienda:p.descripcion;
+      var subtitulo=p.subtitulo||'';
+      return '<div class="scard"'+(agotado?' style="opacity:.6"':' onclick="menuAddProd(\''+p.sku+'\',\''+nombre.replace(/'/g,'')+'\',' +p.precio_menu+',\''+(p.emoji||'📦')+'\')"')+'>'+
+        '<div class="scard-top">'+
+        '<div class="scard-emoji">'+(p.emoji||'📦')+'</div>'+
+        '<div>'+
+        '<div class="scard-name">'+nombre+'</div>'+
+        (subtitulo?'<div class="scard-sub">'+subtitulo+'</div>':'')+
+        '</div>'+
+        (agotado?'<div style="margin-left:auto;background:#F8514920;border:1px solid #F85149;border-radius:2px;padding:2px 8px;font-size:10px;color:#F85149;font-weight:700">AGOTADO</div>':'')+'</div>'+
+        '<div class="scard-prices">'+
+        (agotado?'<div style="font-size:11px;color:#8B949E">Sin stock por el momento</div>':
+          '<div class="sprice"><span class="sv">$'+p.precio_menu+'</span></div>')+
+        '</div></div>';
+    }).join('');
+  });
+}
+
+function menuAddProd(sku,nombre,precio,emoji){
+  S.cart.push({name:nombre,sku:sku,emoji:emoji,qty:'1x',price:precio,isGift:false});
+  updUI();notif(emoji+' '+nombre+' agregado');
+}
+
+function renderCombosDin(){
+  var el=document.getElementById('combos-container');if(!el)return;
+  var combos=_menuCombos.filter(function(c){return c.tipo==='combo';});
+  if(!combos.length){el.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">🔥 Próximamente combos especiales...</div>';return;}
+  el.innerHTML=combos.map(function(co){
+    var ahorro=co.valor_min>0?'<div class="old">Normal: $'+co.valor_min+'</div>':'';
+    return '<div class="ccard" onclick="addCombo(\''+co.nombre+'\',\''+co.emoji+'\','+co.precio+',\''+co.descripcion+'\')">'+
+      '<div class="ccard-head"><div class="ccard-emoji">'+co.emoji+'</div><div><div class="ccard-name">'+co.nombre+'</div><div class="ccard-desc">'+co.descripcion+'</div></div></div>'+
+      '<div class="ccard-footer"><div class="ccard-prices">'+ahorro+'<div class="nw">$'+co.precio+
+      (co.valor_min>0?'<span class="save-badge">AHORRO $'+(co.valor_min-co.precio)+'</span>':'')+
+      '</div></div><div class="add-btn">+ Agregar</div></div></div>';
+  }).join('');
+}
+
+function renderCofreDin(){
+  var el=document.getElementById('cofre-container');if(!el)return;
+  var cofres=_menuCombos.filter(function(c){return c.tipo==='caja_misteriosa';});
+  if(!cofres.length){el.innerHTML='<div class="mbox-grid">'+
+    '<div class="mbox" onclick="addSimple(\'Cofre del Soldado\',\'🗡️\',\'$500\',500)"><div class="mbox-icon">🗡️</div><div class="mbox-name">Cofre Soldado</div><div class="mbox-price">$500</div><div class="mbox-val">Valor: $700–$900</div></div>'+
+    '<div class="mbox" onclick="addSimple(\'Cofre del Capitán\',\'🏆\',\'$1,000\',1000)"><div class="mbox-icon">🏆</div><div class="mbox-name">Cofre Capitán</div><div class="mbox-price">$1,000</div><div class="mbox-val">Valor: $1,600–$1,800</div></div>'+
+    '<div class="mbox" onclick="addSimple(\'Cofre del General\',\'⚔️\',\'$1,500\',1500)"><div class="mbox-icon">⚔️</div><div class="mbox-name">Cofre General</div><div class="mbox-price">$1,500</div><div class="mbox-val">Valor: $2,100–$2,700</div></div>'+
+    '<div class="mbox mbox-full" onclick="addSimple(\'Cofre Gran Conquistador +WAX\',\'👑\',\'$2,000\',2000)"><div class="mbox-icon">👑</div><div class="mbox-name">Gran Conquistador</div><div class="mbox-price">$2,000</div><div class="mbox-val">Valor $3,200+</div></div>'+
+    '</div>';return;}
+  el.innerHTML='<div class="mbox-grid">'+cofres.map(function(co){
+    return '<div class="mbox'+(co.valor_max>1500?' mbox-full':'')+'" onclick="addSimple(\''+co.nombre+'\',\''+co.emoji+'\',\'$'+co.precio+'\','+co.precio+')">'+
+      '<div class="mbox-icon">'+co.emoji+'</div>'+
+      '<div class="mbox-name">'+co.nombre+'</div>'+
+      '<div class="mbox-price">$'+co.precio+'</div>'+
+      (co.valor_min&&co.valor_max?'<div class="mbox-val">Valor: $'+co.valor_min+'–$'+co.valor_max+'</div>':'')+
+      '</div>';
+  }).join('')+'</div>';
+}
+
+function renderHeroes(){
+  const cats={oraculo:'heroOraculo',legion:'heroLegion',guardia:'heroGuardia'};
+  Object.entries(cats).forEach(([cat,elId])=>{
+    const el=document.getElementById(elId);if(!el)return;
+    el.innerHTML=HEROES.filter(h=>h.cat===cat).map(h=>`
+      <div class="hcard" onclick="openHero('${h.id}')">
+        <div class="hcard-top"><div class="hcard-emoji">${h.emoji}</div><div><div class="hcard-name">${h.name}</div><div class="hcard-strain">${h.tipo} · ${h.sabor}</div></div></div>
+        <div class="hcard-quote">${h.quote.substring(0,110)}...</div>
+        <div class="hcard-stats">
+          <div class="stat"><div class="stat-val">${h.poder}</div><div class="stat-bars">${bars(h.poder)}</div><div class="stat-lbl">PODER</div></div>
+          <div class="stat"><div class="stat-val">${h.fuerza}</div><div class="stat-bars">${bars(h.fuerza)}</div><div class="stat-lbl">FUERZA</div></div>
+          <div class="stat"><div class="stat-val">${h.esencia}</div><div class="stat-bars">${bars(h.esencia)}</div><div class="stat-lbl">ESENCIA</div></div>
+        </div>
+        <div class="hcard-prices">${h.prices.map(p=>`<div class="ptag" onclick="event.stopPropagation();quickAdd('${h.id}','${p.qty}',${p.price})"><div class="pq">${p.qty}</div><div class="pp">$${p.price}</div></div>`).join('')}</div>
+      </div>`).join('');
+  });
+}
+
+function openHero(id){
+  const h=HEROES.find(x=>x.id===id);
+  S._modal={name:h.name,emoji:h.emoji,prices:h.prices};S._selQty=null;
+  document.getElementById('mTitle').textContent=h.emoji+' '+h.name;
+  document.getElementById('mSub').textContent=h.tipo+' · '+h.sabor;
+  const mq=document.getElementById('mQuote');mq.textContent=h.quote;mq.style.display='block';
+  buildQtyGrid(h.prices);
+  document.getElementById('overlay').classList.add('on');
+}
+
+function quickAdd(id,qty,price){
+  const h=HEROES.find(x=>x.id===id);
+  S.cart.push({name:h.name,emoji:h.emoji,qty,price,isGift:false});
+  updUI();notif('⚔️ '+h.name+' ('+qty+') agregado');
+}
+
+function openModal(name,desc,emoji,quote,prices){
+  S._modal={name,emoji,prices};S._selQty=null;
+  document.getElementById('mTitle').textContent=emoji+' '+name;
+  document.getElementById('mSub').textContent=desc;
+  const mq=document.getElementById('mQuote');
+  if(quote){mq.textContent=quote;mq.style.display='block';}else mq.style.display='none';
+  buildQtyGrid(prices);
+  document.getElementById('overlay').classList.add('on');
+}
+
+function buildQtyGrid(prices){
+  const el=document.getElementById('mQty');
+  el.innerHTML=prices.map((p,i)=>`<div class="qopt${i===0?' on':''}" onclick="selQty(${i},this)"><div class="ql">${p.qty}</div><div class="qp">$${p.price}</div></div>`).join('');
+  S._selQty=prices[0];
+}
+
+function selQty(i,el){
+  document.querySelectorAll('.qopt').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');S._selQty=S._modal.prices[i];
+}
+
+function addToCart(){
+  if(!S._modal||!S._selQty)return;
+  S.cart.push({name:S._modal.name,emoji:S._modal.emoji,qty:S._selQty.qty,price:S._selQty.price,isGift:false});
+  closeOverlay();updUI();
+  notif('⚔️ '+S._modal.name+' agregado');
+}
+
+function closeOverlay(){document.getElementById('overlay').classList.remove('on');}
+
+// ══════════════════════════════════════════
+// SALA
+// ══════════════════════════════════════════
+function initSala(){
+  const w=document.getElementById('salaWorld');if(!w)return;
+  w.querySelectorAll('.av').forEach(a=>a.remove());
+  const me=document.createElement('div');me.className='av';me.id='myAv';me.style.left=S.avX+'%';
+  me.innerHTML=`<div class="av-m" id="myMsg"></div><div class="av-b">${AVS[S.avIdx]}</div><div class="av-n">${S.user?S.user.apodo||S.user.nombre:'Tú'}</div>`;
+  w.appendChild(me);
+  BOTS.forEach((b,i)=>{
+    const el=document.createElement('div');el.className='av';el.id='bot'+i;el.style.left=b.x+'%';
+    el.innerHTML=`<div class="av-m" id="botMsg${i}"></div><div class="av-b">${b.e}</div><div class="av-n">${b.n}</div>`;
+    w.appendChild(el);
+  });
+  renderChat();
+  setTimeout(()=>botSay(0,'¡Bienvenido al salón del héroe! 🏛️'),1500);
+  setTimeout(()=>botSay(1,'¿Ya probaste algún guerrero de la temporada?'),3500);
+}
+function moveAv(d){S.avX=Math.max(5,Math.min(85,S.avX+d*8));const a=document.getElementById('myAv');if(a)a.style.left=S.avX+'%';}
+function changeAv(){S.avIdx=(S.avIdx+1)%AVS.length;const a=document.getElementById('myAv');if(a)a.querySelector('.av-b').textContent=AVS[S.avIdx];}
+function sendChat(){const inp=document.getElementById('chatIn');const msg=inp ? inp.value : ''.trim();if(!msg)return;S.chatMsgs.push({n:S.user?S.user.apodo||S.user.nombre:'Tú',t:msg,me:true});showAvMsg('myMsg',msg);inp.value='';renderChat();const rs=['⚔️ Interesante!','¡Qué bueno!','😄 Jaja sí','¿Ya pediste?','Buena onda!'];setTimeout(()=>{const bi=Math.floor(Math.random()*BOTS.length);botSay(bi,rs[Math.floor(Math.random()*rs.length)]);},1200+Math.random()*1500);}
+function botSay(i,msg){S.chatMsgs.push({n:BOTS[i].n,t:msg,me:false});showAvMsg('botMsg'+i,msg);renderChat();}
+function showAvMsg(id,msg){const el=document.getElementById(id);if(!el)return;el.textContent=msg;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),3000);}
+function renderChat(){const el=document.getElementById('chatMsgs');if(!el)return;el.innerHTML=S.chatMsgs.slice(-30).map(m=>`<div class="cmsg${m.me?' me':''}"><span class="cn">${m.n}:</span>${m.t}</div>`).join('');el.scrollTop=el.scrollHeight;}
+
+// ══════════════════════════════════════════
+// GAMES (igual que antes)
+// ══════════════════════════════════════════
+const RULETA_DATA={1:{cost:50,label:'Ruleta #1',prizes:[{name:'Canalas',emoji:'🚬',prob:13},{name:'Pipa',emoji:'🪄',prob:12},{name:'Gallo King Size',emoji:'🐓',prob:12},{name:'Grinder Plástico',emoji:'⚙️',prob:12},{name:'2g Green House',emoji:'🌿',prob:11},{name:'2g Exótica',emoji:'⚡',prob:10},{name:'2g Premium',emoji:'🛡️',prob:10},{name:'1 Sobrinito',emoji:'🍃',prob:10},{name:'1ml Terpenos',emoji:'💧',prob:10}]},
+  2:{cost:100,label:'Ruleta #2',prizes:[{name:'Gallo King Size',emoji:'🐓',prob:13},{name:'Prueba Hongos',emoji:'🍄',prob:10},{name:'Prueba DMT',emoji:'🌀',prob:9},{name:'Prueba LSD',emoji:'💧',prob:9},{name:'Gallo Empanizado',emoji:'🛡️',prob:11},{name:'Sobrinito',emoji:'🍃',prob:11},{name:'5g Green House',emoji:'🌿',prob:10},{name:'5g Exótica',emoji:'⚡',prob:10},{name:'5g Premium',emoji:'🏆',prob:9},{name:'1 Nectar Collector',emoji:'🧪',prob:8}]},3:{cost:200,label:'Ruleta #3',prizes:[{name:'3 Gallos King Size',emoji:'🐓',prob:14},{name:'1 Empanizado',emoji:'🛡️',prob:13},{name:'1g Wax',emoji:'🥞',prob:12},{name:'1g Bubble Hash',emoji:'🧊',prob:12},{name:'1 Bonga',emoji:'💧',prob:11},{name:'1g DMT',emoji:'🌀',prob:10},{name:'3ml Terpenos',emoji:'💧',prob:10},{name:'1 Donut',emoji:'💍',prob:18}]},4:{cost:500,label:'Ruleta #4 VIP',prizes:[{name:'1 Oz Premium',emoji:'🏆',prob:9},{name:'1 Oz Exótica',emoji:'⚡',prob:9},{name:'Cartucho WAX',emoji:'💨',prob:10},{name:'5 Gallos Empanizados',emoji:'🛡️',prob:9},{name:'3 Gallos Empanizados',emoji:'🛡️',prob:11},{name:'1g Wax + Bubble Hash',emoji:'🥞',prob:11},{name:'1g DMT + Honguitos',emoji:'🌀',prob:10},{name:'3 Donut',emoji:'💍',prob:11},{name:'2 Donut',emoji:'💍',prob:11},{name:'3g Extracto',emoji:'🍯',prob:9}]}};
+const FLAPPY_LEVELS=[{name:'Canala',emoji:'🚬',prize:'Canalas',pasScore:5,speed:1.4,gap:200},{name:'King Size',emoji:'🐓',prize:'Gallo King Size',pasScore:7,speed:1.7,gap:188},{name:'Sobrinito',emoji:'🍃',prize:'Sobrinito Baby',pasScore:9,speed:2.0,gap:176},{name:'Empanizado',emoji:'🛡️',prize:'Gallo Empanizado',pasScore:11,speed:2.3,gap:164},{name:'Donut',emoji:'💍',prize:'1 Donut',pasScore:13,speed:2.6,gap:152},{name:'Porro 30cm',emoji:'🏛️',prize:'Porro 30cm',pasScore:15,speed:2.9,gap:140},{name:'30cm Empanizado',emoji:'👑',prize:'Porro 30cm Empanizado',pasScore:17,speed:3.2,gap:130}];
+const MEMORIA_PRIZES=[{name:'Canalas',emoji:'🚬'},{name:'Porro King Size',emoji:'🐓'},{name:'Sobrinito Baby',emoji:'🍃'},{name:'Empanizado',emoji:'🛡️'},{name:'1g Wax',emoji:'🥞'},{name:'Bubble Hash',emoji:'🧊'},{name:'1/2 Oz Premium',emoji:'🏆'},{name:'7g Exótica',emoji:'⚡'},{name:'1 Donut',emoji:'💍'}];
+
+let rSpinning={};
+const rAngles={1:0,2:0,3:0,4:0};
+function drawRuletaGame(n,rot){
+  var cv=document.getElementById('cvR'+n);if(!cv)return;
+  var ctx=cv.getContext('2d'),cx=140,cy=140,R=132;
+  var prizes=RULETA_DATA[n].prizes;
+  var sl=prizes.length,ang=Math.PI*2/sl;
+  ctx.clearRect(0,0,280,280);
+  var colors=['#7c3aed','#1d4ed8','#15803d','#b91c1c','#b45309','#0f766e','#9d174d','#4338ca','#065f46','#7f1d1d'];
+  
+  prizes.forEach(function(p,i){
+    var s=rot+i*ang-Math.PI/2;
+    // Draw segment
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,R,s,s+ang);
+    ctx.fillStyle=colors[i%colors.length];ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=1.5;ctx.stroke();
+    // Draw number in segment center - always readable
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(s+ang/2); // rotate to center of segment
+    ctx.translate(R*0.62,0); // move out from center
+    // Draw number upright relative to segment
+    ctx.fillStyle='white';
+    ctx.font='bold 15px sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(''+(i+1),0,0);
+    ctx.restore();
+  });
+  
+  // Center circle
+  ctx.beginPath();ctx.arc(cx,cy,14,0,Math.PI*2);
+  ctx.fillStyle='#c9a227';ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.stroke();
+  
+  // Arrow pointing DOWN into the wheel (at top)
+  ctx.beginPath();
+  ctx.moveTo(cx,cy-R+16);   // tip of arrow pointing INTO wheel
+  ctx.lineTo(cx-8,cy-R-4);  // left base
+  ctx.lineTo(cx+8,cy-R-4);  // right base
+  ctx.fillStyle='#c9a227';ctx.fill();
+  ctx.strokeStyle='white';ctx.lineWidth=1;ctx.stroke();
+  
+  // Build prize list once
+  var listEl=document.getElementById('rl'+n+'List');
+  if(listEl&&!listEl._built){
+    listEl._built=true;
+    listEl.innerHTML='<div style="font-family:Cinzel,serif;font-size:.6rem;color:var(--gold);margin-bottom:8px;letter-spacing:1px">PREMIOS</div>'+
+      prizes.map(function(p,i){
+        return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
+          '<div style="background:'+colors[i%colors.length]+';color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0">'+(i+1)+'</div>'+
+          '<div style="font-size:.65rem;color:var(--text);line-height:1.2">'+p.name+'</div></div>';
+      }).join('');
+  }
+}
+
+function spinRuleta(n){const data=RULETA_DATA[n];if(rSpinning[n])return;const coins=S.user?S.user.coins:S.coins;if(coins<data.cost){notif('🪙 Necesitas '+data.cost+' coins','var(--red)');return;}rSpinning[n]=true;const btn=document.getElementById('rl'+n+'Btn');if(btn)btn.disabled=true;const msg=document.getElementById('rl'+n+'Msg');if(msg){msg.textContent='';msg.className='wmsg';}const prizes=data.prizes;const totalW=prizes.reduce((s,p)=>s+p.prob,0);let r=Math.random()*totalW,wi=0;for(let i=0;i<prizes.length;i++){r-=prizes[i].prob;if(r<=0){wi=i;break;}}const sl=prizes.length,slAng=Math.PI*2/sl;const sAng=rAngles[n];const rawT=-wi*slAng-slAng/2-sAng;const normT=((rawT%(Math.PI*2))+Math.PI*2)%(Math.PI*2);const totalRot=Math.PI*2*(8+Math.floor(Math.random()*4))+normT;const start=performance.now(),dur=5500;
+if(S.user){sb.from('clientes').update({coins:(S.user.coins||0)-data.cost}).eq('id',S.user.id).select().single().then(({data:u})=>{if(u)S.user=u;updUI();});}else{S.coins-=data.cost;updUI();}
+function anim(now){const t=Math.min((now-start)/dur,1),ease=1-Math.pow(1-t,4);rAngles[n]=sAng+totalRot*ease;drawRuletaGame(n,rAngles[n]);if(t<1)requestAnimationFrame(anim);else{const prize=prizes[wi];addGift(prize.name,prize.emoji,data.label);if(msg){msg.textContent='🎉 ¡'+prize.name+'! → Carrito';msg.className='wmsg w';}notif('🎡 ¡Ganaste: '+prize.name+'!');rSpinning[n]=false;if(btn)btn.disabled=false;}}requestAnimationFrame(anim);}
+
+let fCtx2,fBird,fPipes=[],fFrm,fScore,fRun=false,fStart=false,fLp=0,fLevel=0,fPassed=false;
+
+// ── CHECKOUT EN CARRITO ──────────────────────
+var _ckMetodo = '';
+
+function updCkEnvio(){
+  var prods=S.cart.filter(function(x){return !x.isGift;});
+  var sub=prods.reduce(function(s,x){return s+x.price;},0);
+  var e1=document.getElementById('ck-subtotal');
+  var e3=document.getElementById('ck-total');
+  var e4=document.getElementById('cartTotal');
+  if(e1)e1.textContent=sub;
+  if(e3)e3.textContent=sub;
+  if(e4)e4.textContent=sub;
+  // Check minimum order
+  var btnConf=document.getElementById('btn-confirmar');
+  var minMsg=document.getElementById('min-order-msg');
+  var MINIMO=350;
+  if(btnConf){
+    if(sub>=MINIMO){
+      btnConf.disabled=false;btnConf.style.opacity='1';
+      btnConf.textContent='⚔️ Confirmar pedido';
+      if(minMsg)minMsg.style.display='none';
+    } else {
+      btnConf.disabled=true;btnConf.style.opacity='.5';
+      btnConf.textContent='⚔️ Confirmar pedido ($350 mínimo)';
+      if(minMsg&&sub>0)minMsg.style.display='block';
+    }
+  }
+}
+
+function selMetodoPago(metodo,btn){
+  _ckMetodo=metodo;
+  document.querySelectorAll('.btn-metodo').forEach(function(b){
+    b.style.background='var(--bg3)';b.style.borderColor='var(--border)';b.style.color='var(--text)';
+  });
+  btn.style.background='rgba(201,162,39,.15)';btn.style.borderColor='var(--gold)';btn.style.color='var(--gold)';
+  document.getElementById('ck-info-transferencia').style.display=metodo==='transferencia'?'block':'none';
+  document.getElementById('ck-info-deposito').style.display=metodo==='deposito'?'block':'none';
+  document.getElementById('ck-comp-wrap').style.display=(metodo==='transferencia'||metodo==='deposito')?'block':'none';
+  if(metodo==='coins'){
+    var prods=S.cart.filter(function(x){return !x.isGift;});
+    var total=prods.reduce(function(s,x){return s+x.price;},0);
+    var insuf=document.getElementById('ck-coins-insuf');
+    if((S.user?S.user.coins:0)<total){if(insuf)insuf.style.display='block';}
+    else{if(insuf)insuf.style.display='none';}
+  }
+}
+
+function prevComp(input){
+  if(!input.files||!input.files[0])return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=document.getElementById('ck-comp-img');
+    var prev=document.getElementById('ck-comp-preview');
+    if(img)img.src=e.target.result;if(prev)prev.style.display='block';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function usarGPS(inputId){
+  if(!navigator.geolocation){notif('GPS no disponible','var(--red)');return;}
+  notif('Obteniendo ubicación...');
+  navigator.geolocation.getCurrentPosition(function(pos){
+    fetch('https://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&key=AIzaSyDZBEWPVjQl2viizDl7KH1RTwtWWRmtrig&language=es')
+    .then(function(r){return r.json();}).then(function(d){
+      if(d.results&&d.results[0]){var el=document.getElementById(inputId);if(el)el.value=d.results[0].formatted_address;notif('Ubicación detectada!');}
+    }).catch(function(){notif('Error al obtener dirección','var(--red)');});
+  },function(){notif('No se pudo acceder al GPS','var(--red)');});
+}
+
+function initCkAutocomplete(){
+  if(!window.google||!window.google.maps||!window.google.maps.places)return;
+  var input=document.getElementById('ck-dir');
+  if(!input||input._ac)return;
+  input._ac=new google.maps.places.Autocomplete(input,{componentRestrictions:{country:'mx'},fields:['formatted_address'],types:['address']});
+  input._ac.addListener('place_changed',function(){var pl=input._ac.getPlace();if(pl.formatted_address)input.value=pl.formatted_address;});
+}
+
+function ckSelDir(btn,val){
+  var d=document.getElementById('ck-dir');if(d)d.value=val;
+  document.querySelectorAll('#ck-dir-opciones button').forEach(function(b){
+    b.style.background='var(--bg3)';b.style.borderColor='var(--border)';b.style.color='var(--muted)';
+  });
+  btn.style.background='rgba(201,162,39,.2)';btn.style.borderColor='var(--gold)';btn.style.color='var(--gold)';
+  if(!val&&d){d.value='';d.focus();}
+}
+function ckSelDirBtn(btn){
+  var val=btn.getAttribute('data-dir')||'';
+  ckSelDir(btn,val);
+}
+
+function mostrarError(msg){
+  var el=document.getElementById('ck-error');
+  if(!el)return;
+  el.textContent=msg;el.style.display='block';
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(function(){el.style.display='none';},4000);
+}
+
+function llenarCkDatos(){
+  var u=S.user;if(!u)return;
+  var nEl=document.getElementById('ck-nombre');
+  var tEl=document.getElementById('ck-tel');
+  var dEl=document.getElementById('ck-dir');
+  if(nEl&&!nEl._touched)nEl.value=u.nombre||'';
+  if(tEl&&!tEl._touched)tEl.value=u.telefono||'';
+  if(dEl&&!dEl._touched)dEl.value=u.direccion||'';
+  // Mark as prefilled so we don't overwrite user edits
+  [nEl,tEl,dEl].forEach(function(el){if(el&&!el._listener){el._listener=true;el.addEventListener('input',function(){el._touched=true;});}});
+  // Direction buttons
+  var dirOpts=document.getElementById('ck-dir-opciones');
+  if(dirOpts&&dirOpts.children.length===0){
+    var opts=[];
+    if(u.direccion)opts.push(['Principal',u.direccion]);
+    // no direccion2 in clientes
+    opts.push(['Otra','']);
+    dirOpts.innerHTML=opts.map(function(o,i){
+      var a=i===0;
+      var sv2=(o[1]||'').replace(/"/g,'&quot;');
+      return '<button data-dir="'+sv2+'" onclick="ckSelDirBtn(this)" style="background:'+(a?'rgba(201,162,39,.2)':'var(--bg3)')+';border:1px solid '+(a?'var(--gold)':'var(--border)')+';border-radius:7px;padding:4px 9px;font-size:.58rem;color:'+(a?'var(--gold)':'var(--muted)')+';cursor:pointer;white-space:nowrap">'+o[0]+'</button>';
+    }).join('');
+  }
+  var cSaldo=document.getElementById('ck-coins-saldo');
+  if(cSaldo)cSaldo.textContent='Tienes '+(u.coins||0).toLocaleString()+' coins';
+  updCkEnvio();
+  setTimeout(initCkAutocomplete,500);
+}
+
+async function confirmarPedido(){
+  var errEl=document.getElementById('ck-error');if(errEl)errEl.style.display='none';
+
+  // 1. Sesión
+  if(!S.user){notif('Regístrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}
+
+  // 2. Perfil completo
+  var u=S.user;
+  var faltantes=[];
+  if(!u.direccion||!u.direccion.trim())faltantes.push('dirección');
+  if(!u.password||!u.password.trim())faltantes.push('contraseña');
+  if(faltantes.length){
+    mostrarError('⚠️ Completa tu perfil antes de hacer un pedido: '+faltantes.join(', '));
+    setTimeout(function(){goPage('usuario');},1800);return;
+  }
+
+  // 3. Campos carrito
+  var nombre=(document.getElementById('ck-nombre')||{value:''}).value||'';
+  var tel=(document.getElementById('ck-tel')||{value:''}).value||'';
+  var dir=(document.getElementById('ck-dir')||{value:''}).value||'';
+  var horario=(document.getElementById('ck-horario')||{value:''}).value||'';
+  if(!nombre.trim()){mostrarError('⚠️ Escribe el nombre del receptor');document.getElementById('ck-nombre')&&document.getElementById('ck-nombre').focus();return;}
+  if(tel.replace(/\D/g,'').length<10){mostrarError('⚠️ Teléfono de 10 dígitos');return;}
+  if(!dir.trim()){mostrarError('⚠️ Escribe la dirección de entrega');return;}
+  if(!_ckMetodo){mostrarError('⚠️ Elige un método de pago');return;}
+
+  // 4. Validar comprobante si pago es transferencia o depósito
+  var fi=document.getElementById('ck-comp-file');
+  if((_ckMetodo==='transferencia'||_ckMetodo==='deposito')&&(!fi||!fi.files||!fi.files[0])){
+    mostrarError('⚠️ Adjunta el comprobante de pago para '+_ckMetodo);return;
+  }
+
+  // 5. Productos
+  var prods=S.cart.filter(function(x){return !x.isGift;});
+  var gifts=S.cart.filter(function(x){return x.isGift;});
+  var total=prods.reduce(function(s,x){return s+x.price;},0);
+  if(_ckMetodo==='coins'&&(S.user.coins||0)<total){mostrarError('⚠️ No tienes suficientes Tía Coins');return;}
+
+  var btn=document.getElementById('btn-confirmar');
+  if(btn){btn.disabled=true;btn.textContent='Enviando...';}
+
+  // 6. Subir comprobante a Supabase Storage → guardar URL pública
+  var comprobanteUrl=null;
+  if(fi&&fi.files&&fi.files[0]){
+    try{
+      var file=fi.files[0];
+      var ext=file.name.split('.').pop()||'jpg';
+      var path='comprobantes/'+Date.now()+'-'+Math.random().toString(36).slice(2)+'.'+ext;
+      var upRes=await sb.storage.from('comprobantes').upload(path,file,{contentType:file.type,upsert:false});
+      if(!upRes.error){
+        comprobanteUrl=sb.storage.from('comprobantes').getPublicUrl(path).data.publicUrl;
+      }else{
+        console.warn('Storage error:',upRes.error.message);
+      }
+    }catch(e){console.warn('Comprobante:',e);}
+  }
+
+  // 7. Guardar pedido — todos los campos de la tabla
+  var folio='TIA-'+Date.now().toString().slice(-6);
+  var pagado=_ckMetodo==='coins';
+  var hoy=new Date().toISOString().split('T')[0];
+
+  // Insertar en seguimientos (tabla que usa el ERP para Pedidos Tienda)
+  var segId = String(Date.now());
+  var res=await sb.from('seguimientos').insert({
+    id:              segId,
+    pedido_id:       'tia_'+segId,
+    cliente:         nombre.trim(),
+    nb:              nombre.trim(),
+    cliente_id:      S.user.id,
+    tel:             tel.replace(/\D/g,''),
+    dir:             dir.trim(),
+    items:           prods,
+    regalos:         gifts,
+    total,
+    pago:            _ckMetodo,
+    comprobante_url: comprobanteUrl,
+    captura:         comprobanteUrl,
+    estado:          'pendiente',
+    historial:       [{estado:'pendiente', fecha:hoy}],
+    origen:          'tienda',
+    fecha_creado:    hoy,
+    folio:           folio,
+    usuario_id:      S.user.id,
+    pagado:          pagado,
+    pagado_at:       pagado?new Date().toISOString():null,
+    costo_viaje:     null
+  }).select().single();
+
+  if(res.error){
+    mostrarError('Error: '+res.error.message);
+    if(btn){btn.disabled=false;btn.textContent='⚔️ Confirmar pedido';}
+    return;
+  }
+
+  // 8. Descontar coins si aplica
+  if(pagado){
+    var nc=(S.user.coins||0)-total;
+    var ur=await sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single();
+    if(ur.data)S.user=ur.data;
+    await sb.from('coins_transacciones').insert({usuario_id:S.user.id,tipo:'debito',cantidad:total,descripcion:'Pedido '+folio});
+  }
+
+  // 9. Actualizar gastado + pedidos_count
+  var ng=(S.user.gastado||0)+total;
+  var np=(S.user.pedidos_count||0)+1;
+  var uu=await sb.from('clientes').update({gastado:ng,pedidos_count:np}).eq('id',S.user.id).select().single();
+  if(uu.data)S.user=uu.data;
+
+  // 10. Guardar dirección en historial
+  guardarDirDesdePedido(dir.trim());
+
+  // 11. Verificar logros
+  await verificarLogros();
+
+  // 12. Mensaje WhatsApp
+  var ml={coins:'Tia Coins 🪙',transferencia:'Transferencia 🏦',deposito:'Depósito OXXO 🏪',efectivo:'Efectivo 💵'};
+  var nl='\n';
+  var msg='🌿 *NUEVO PEDIDO — La Tía Risueña*'+nl;
+  msg+='━━━━━━━━━━━━━━━━'+nl;
+  msg+='📋 Folio: *'+folio+'*'+nl;
+  msg+='📅 '+hoy+nl;
+  msg+='💳 Pago: '+(ml[_ckMetodo]||_ckMetodo)+(pagado?' ✅ *PAGADO*':' ⏳ Pendiente')+nl;
+  if(horario)msg+='🕐 Horario: '+horario+nl;
+  msg+=nl+'🛍 *PRODUCTOS:*'+nl;
+  msg+=prods.map(function(x){return '  • '+x.name+' x'+(x.qty||1)+' — $'+x.price;}).join(nl);
+  if(gifts.length)msg+=nl+'🎁 *Regalos:* '+gifts.map(function(x){return x.name;}).join(', ');
+  msg+=nl+nl+'💰 *TOTAL: $'+total+' MXN*';
+  msg+=nl+'━━━━━━━━━━━━━━━━'+nl;
+  msg+='👤 '+nombre.trim()+nl+'📱 '+tel+nl+'📍 '+dir.trim();
+  if(comprobanteUrl)msg+=nl+nl+'🧾 Comprobante: '+comprobanteUrl;
+  msg+=nl+nl+'[Costo de envío: el encargado lo asignará y notificará]';
+
+  // 13. Limpiar
+  S.cart=[];saveCart();_ckMetodo='';
+  ['ck-nombre','ck-tel','ck-dir'].forEach(function(id){var el=document.getElementById(id);if(el){el.value='';if(el._touched!==undefined)el._touched=false;}});
+  var dirOpts=document.getElementById('ck-dir-opciones');if(dirOpts)dirOpts.innerHTML='';
+  renderCart();updUI();
+
+  // 14. WhatsApp + ir a seguimiento
+  window.open('https://wa.me/523322740209?text='+encodeURIComponent(msg),'_blank');
+  notif('✅ Pedido enviado — Folio '+folio);
+  if(btn){btn.disabled=false;btn.textContent='⚔️ Confirmar pedido';}
+  setTimeout(function(){goPage('usuario');},1200);
+}
+
+
+function initFlappy(){
+  var cv=document.getElementById('cvFlappy');
+  if(!cv)return;
+  cv.width=400;cv.height=480;cv.style.height='auto';
+  fCtx2=cv.getContext('2d');
+  if(typeof fLevel==='undefined')fLevel=0;
+  fRun=false;fStart=false;
+  cv.onclick=null;cv.ontouchstart=null;
+  showFlappyLevelBanner(false);
+}
+
+function showFlappyLevelBanner(showChoices){
+  var prizeScreen=document.getElementById('flPrizeScreen');
+  var gameScreen=document.getElementById('flGameScreen');
+  if(!prizeScreen)return;
+  prizeScreen.style.display='flex';
+  if(gameScreen)gameScreen.style.display='none';
+
+  var lvl=FLAPPY_LEVELS[fLevel]||FLAPPY_LEVELS[0];
+  var colors=['#7c3aed','#1d4ed8','#15803d','#b91c1c','#b45309','#0f766e','#9d174d'];
+  var eEl=document.getElementById('flLvlEmoji');
+  var nEl=document.getElementById('flLvlName');
+  var sEl=document.getElementById('flLvlSub');
+  if(eEl)eEl.textContent=lvl.emoji;
+  if(nEl)nEl.textContent=lvl.name;
+  if(sEl)sEl.textContent='Premio: '+lvl.prize;
+
+  var listEl=document.getElementById('flPrizeList');
+  if(listEl){
+    listEl.innerHTML=FLAPPY_LEVELS.map(function(l,i){
+      var isCurrent=i===fLevel,isDone=i<fLevel;
+      var bg=isCurrent?'rgba(124,58,237,.35)':isDone?'rgba(22,163,74,.15)':'rgba(255,255,255,.03)';
+      var tc=isCurrent?'var(--gold)':isDone?'var(--green)':'var(--muted)';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;margin-bottom:3px;background:'+bg+';border:1px solid '+(isCurrent?'rgba(124,58,237,.5)':'transparent')+'">'+
+        '<div style="background:'+colors[i%colors.length]+';color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0">'+(i+1)+'</div>'+
+        '<div style="font-size:.85rem;flex-shrink:0">'+l.emoji+'</div>'+
+        '<div style="flex:1;font-size:.65rem;color:'+tc+';font-weight:'+(isCurrent?'700':'400')+'">'+
+        (isDone?'✓ ':'')+(isCurrent?'▶ ':'')+l.prize+'</div>'+
+        (isCurrent?'<div style="font-size:.5rem;color:var(--purple2);white-space:nowrap">← AQUÍ</div>':'')+
+        '</div>';
+    }).join('');
+  }
+  var btn=document.getElementById('flLvlBtn');
+  var kc=document.getElementById('flKeepOrContinue');
+  if(showChoices){
+    if(btn)btn.style.display='none';
+    if(kc)kc.style.display='flex';
+    var nb=document.getElementById('flNextBtn');
+    if(nb)nb.style.display=(fLevel<FLAPPY_LEVELS.length-1)?'block':'none';
+  } else {
+    if(btn)btn.style.display='block';
+    if(kc)kc.style.display='none';
+  }
+}
+
+function flStartLevel(){
+  var coins=S.user?(S.user.coins||0):(S.coins||0);
+  if(coins<25){notif('Necesitas 25 🪙 para jugar','var(--red)');return;}
+  if(S.user){var nc=coins-25;sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single().then(function(r){if(r.data){S.user=r.data;}updUI();});}
+  else{S.coins-=25;updUI();}
+  var ps=document.getElementById('flPrizeScreen');
+  var gs=document.getElementById('flGameScreen');
+  if(ps)ps.style.display='none';
+  if(gs)gs.style.display='flex';
+  fBird={x:80,y:240,vy:0,r:16};fPipes=[];fScore=0;fRun=true;fStart=true;fLp=0;fPassed=false;
+  var cv=document.getElementById('cvFlappy');
+  if(cv){
+    function flap(e){e.preventDefault();if(fRun){fBird.vy=-4.8;}else if(!fStart){fStart=true;fRun=true;fBird.vy=-4.8;fLoop();}}
+    cv.onclick=flap;cv.ontouchstart=flap;
+  }
+  requestAnimationFrame(fLoop);
+}
+
+function flKeepPrize(){const lvl=FLAPPY_LEVELS[fLevel];addGift(lvl.prize,lvl.emoji,'Flappy Joint Nivel '+(fLevel+1));document.getElementById('flappyLevelBanner').style.display='none';notif('🎁 '+lvl.prize+' agregado!');drawFIdle();}
+function flNextLevel(){if(fLevel<FLAPPY_LEVELS.length-1){fLevel++;showFlappyLevelBanner(false);}}
+function drawFIdle(){const lvl=FLAPPY_LEVELS[fLevel],c=fCtx2;c.fillStyle='#07051a';c.fillRect(0,0,400,480);c.font='bold 48px serif';c.textAlign='center';c.fillText(lvl.emoji,80,260);c.font='bold 14px Cinzel';c.fillStyle='#c9a227';c.fillText('Flappy Joint — '+lvl.name,200,180);c.font='11px Raleway';c.fillStyle='rgba(232,213,163,.7)';c.fillText('Premio: '+lvl.prize,200,210);c.fillStyle='rgba(255,255,255,.4)';c.font='10px Raleway';c.fillText('Pasa '+lvl.pasScore+' obstáculos para ganar',200,380);c.fillStyle='#a855f7';c.font='bold 12px Cinzel';c.fillText('Toca para comenzar',200,420);}
+function fTap(e){e.preventDefault();if(!fStart){fStart=true;fRun=true;fLoop();}fBird.vy=-4.8;}
+function fLoop(){if(!fRun)return;const lvl=FLAPPY_LEVELS[fLevel];fFrm=requestAnimationFrame(fLoop);fBird.vy+=0.25;fBird.y+=fBird.vy;fLp++;if(fLp%95===0){const gap=lvl.gap,gy=80+Math.random()*(480-160-gap);fPipes.push({x:400,topH:gy,gap,sc:false});}fPipes.forEach(p=>p.x-=lvl.speed);fPipes=fPipes.filter(p=>p.x>-60);fPipes.forEach(p=>{if(!p.sc&&p.x+40<fBird.x){p.sc=true;fScore++;}});if(fScore>=lvl.pasScore&&!fPassed){fPassed=true;fRun=false;cancelAnimationFrame(fFrm);showFlappyLevelBanner(true);return;}const dead=fBird.y-fBird.r<0||fBird.y+fBird.r>480||fPipes.some(p=>fBird.x+fBird.r>p.x&&fBird.x-fBird.r<p.x+40&&(fBird.y-fBird.r<p.topH||fBird.y+fBird.r>p.topH+p.gap));if(dead){fDead();return;}drawF(lvl);}
+function drawF(lvl){const c=fCtx2;c.fillStyle='#07051a';c.fillRect(0,0,400,480);c.fillStyle='#1e3a1e';fPipes.forEach(p=>{c.fillRect(p.x,0,40,p.topH);c.fillRect(p.x,p.topH+p.gap,40,480-p.topH-p.gap);c.fillStyle='#14532d';c.fillRect(p.x-3,p.topH-15,46,15);c.fillRect(p.x-3,p.topH+p.gap,46,15);c.fillStyle='#1e3a1e';});c.save();c.translate(fBird.x,fBird.y);c.rotate(Math.min(Math.max(fBird.vy*.05,-.5),.5));c.font='bold 32px serif';c.textAlign='center';c.fillText(lvl.emoji,0,10);c.restore();c.font='bold 16px Cinzel';c.fillStyle='#c9a227';c.textAlign='center';c.fillText(fScore+' / '+lvl.pasScore,200,34);c.font='10px Raleway';c.fillStyle='rgba(232,213,163,.5)';c.fillText('Premio: '+lvl.prize,200,52);}
+function fDead(){
+  fRun=false;cancelAnimationFrame(fFrm);
+  var cv=document.getElementById('cvFlappy');
+  if(cv){cv.onclick=null;cv.ontouchstart=null;}
+  var c=fCtx2;
+  c.fillStyle='rgba(0,0,0,.8)';c.fillRect(0,0,400,480);
+  c.font='bold 22px Cinzel,serif';c.fillStyle='#dc2626';c.textAlign='center';
+  c.fillText('¡Caído en batalla!',200,200);
+  c.font='12px Raleway,sans-serif';c.fillStyle='rgba(255,255,255,.7)';
+  c.fillText('Toca para volver a intentar — 🪙25',200,232);
+  c.textAlign='left';
+  setTimeout(function(){showFlappyLevelBanner(false);},1800);
+}
+
+function stopFlappy(){fRun=false;if(fFrm)cancelAnimationFrame(fFrm);}
+
+let rnCtx,rnRun=false,rnFrm,rnY,rnVY,rnObs=[],rnScore=0,rnLevel=0,rnFrame=0;
+const RW=400,RH=300;
+
+function showRunnerPrizeBanner(showChoices){
+  var banner = document.getElementById('runnerPrizeBanner');
+  if(!banner) return;
+  var listEl = document.getElementById('rnPrizeList');
+  var lvl = typeof rnLevel !== 'undefined' ? rnLevel : 0;
+  var lvls = window.RUNNER_LEVELS || [];
+  var colors = ['#7c3aed','#1d4ed8','#15803d','#b91c1c','#b45309','#0f766e','#9d174d','#4338ca','#065f46','#7f1d1d','#5b21b6','#1e40af','#065f46','#991b1b','#92400e','#134e4a'];
+
+  if(listEl){
+    listEl.innerHTML = lvls.map(function(l, i){
+      var isCurrent = i === lvl;
+      var isDone = i < lvl;
+      var bg = isCurrent ? 'rgba(124,58,237,.35)' : isDone ? 'rgba(22,163,74,.15)' : 'rgba(255,255,255,.03)';
+      var textColor = isCurrent ? 'var(--gold)' : isDone ? 'var(--green)' : 'var(--muted)';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;margin-bottom:3px;background:'+bg+';border:1px solid '+(isCurrent?'rgba(124,58,237,.5)':'transparent')+'">'+
+        '<div style="background:'+colors[i%colors.length]+';color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0">'+(i+1)+'</div>'+
+        (isCurrent ? '<div style="font-size:1.1rem">⚔️</div>' : '') +
+        '<div style="flex:1;font-size:.65rem;color:'+textColor+';font-weight:'+(isCurrent?'700':'400')+'">'+
+        (isDone?'✓ ':'')+(isCurrent?'▶ ':'')+l.prize+
+        '</div>'+
+        (isCurrent ? '<div style="font-size:.5rem;color:var(--purple2);font-family:Cinzel,serif;white-space:nowrap">← JUGANDO</div>' : '')+
+        '</div>';
+    }).join('');
+  }
+
+  var kc = document.getElementById('rnKeepOrContinue');
+  var startBtn = document.getElementById('rnStartBtn');
+  if(showChoices){
+    if(startBtn) startBtn.style.display = 'none';
+    if(kc) kc.style.display = 'flex';
+    var nb = document.getElementById('rnNextBtn');
+    if(nb) nb.style.display = (lvl < lvls.length - 1) ? 'block' : 'none';
+  } else {
+    if(startBtn) startBtn.style.display = 'block';
+    if(kc) kc.style.display = 'none';
+  }
+  banner.style.display = 'flex';
+}
+
+
+function rnKeepPrize(){
+  var lvls = window.RUNNER_LEVELS || [];
+  var lvl = typeof rnLevel !== 'undefined' ? rnLevel : 0;
+  var prize = lvls[lvl];
+  if(prize){ addGift(prize.prize, prize.emoji, 'Runner Nivel '+(lvl+1)); }
+  var banner = document.getElementById('runnerPrizeBanner');
+  if(banner) banner.style.display = 'none';
+}
+
+
+function rnNextLevel(){
+  var lvls = window.RUNNER_LEVELS || [];
+  if(typeof rnLevel !== 'undefined' && rnLevel < lvls.length - 1){
+    rnLevel++;
+    // Reset game state
+    rnObs = []; rnScore = 0; rnFrame = 0; rnVY = 0; rnY = RH - 60;
+    showRunnerPrizeBanner(false);
+    drawRnIdle();
+  }
+}
+
+
+function startRunner(){
+  var banner = document.getElementById('runnerPrizeBanner');
+  var cv = document.getElementById('cvRunner');
+  if(!cv) return;
+
+  // Check coins
+  var coins = S.user ? (S.user.coins||0) : (S.coins||0);
+  if(coins < 25){
+    notif('Necesitas 25 🪙 para jugar', 'var(--red)');
+    return;
+  }
+
+  // Deduct coins
+  if(S.user){
+    var nc = coins - 25;
+    sb.from('clientes').update({coins:nc}).eq('id',S.user.id).select().single()
+      .then(function(r){ if(r.data){S.user=r.data;} updUI(); });
+  } else {
+    S.coins -= 25; updUI();
+  }
+
+  // Hide banner, reset game state
+  if(banner) banner.style.display = 'none';
+  cancelAnimationFrame(rnFrm);
+  rnY = RH - 80; rnVY = 0; rnObs = []; rnScore = 0; rnFrame = 0; rnRun = false;
+
+  // Attach controls IMMEDIATELY so first tap starts the game
+  function handleInput(e){
+    e.preventDefault();
+    e.stopPropagation();
+    if(!rnRun){ rnRun = true; rnLoop(); }
+    rnJump();
+  }
+  cv.onclick = handleInput;
+  cv.ontouchstart = handleInput;
+  cv.ontouchend = function(e){ e.preventDefault(); };
+
+  // Draw idle frame so player sees the game
+  drawRnIdle();
+  notif('¡Toca la pantalla para saltar!');
+}
+
+
+function initRunner(){
+  if(typeof rnLevel === 'undefined') window.rnLevel = 0;
+  var cv = document.getElementById('cvRunner');
+  if(!cv) return;
+  cv.width = RW; cv.height = RH;
+  rnCtx = cv.getContext('2d');
+  rnY = RH - 60; rnVY = 0; rnObs = []; rnScore = 0; rnFrame = 0; rnRun = false;
+  cv.onclick = null; cv.ontouchstart = null;
+  // Always show prize banner first
+  showRunnerPrizeBanner(false);
+  drawRnIdle();
+}
+
+
+function drawRnIdle(){
+  var c = rnCtx; if(!c) return;
+  var lvls = window.RUNNER_LEVELS || [];
+  var lvl = lvls[typeof rnLevel!=='undefined'?rnLevel:0] || {name:'Canalas',emoji:'🚬'};
+  // Sky
+  c.fillStyle = '#0a0520'; c.fillRect(0,0,RW,RH);
+  // Ground
+  c.fillStyle = '#2d1b0e'; c.fillRect(0,RH-30,RW,30);
+  c.fillStyle = '#4a2c0f'; c.fillRect(0,RH-32,RW,2);
+  // Draw hero warrior
+  drawHero(c, 60, RH-60);
+}
+
+function drawHero(c, x, y){
+  c.save();
+  // Body armor
+  c.fillStyle = '#c9a227'; c.fillRect(x-8, y-24, 16, 18);
+  // Head
+  c.beginPath(); c.arc(x, y-30, 9, 0, Math.PI*2);
+  c.fillStyle = '#f0c070'; c.fill();
+  // Helmet
+  c.fillStyle = '#c9a227'; c.fillRect(x-10, y-42, 20, 14);
+  c.beginPath(); c.arc(x, y-42, 10, Math.PI, 0); c.fill();
+  // Helmet plume
+  c.fillStyle = '#dc2626';
+  c.fillRect(x-2, y-52, 4, 12);
+  // Sword
+  c.fillStyle = '#e2e8f0'; c.fillRect(x+14, y-34, 3, 24);
+  c.fillStyle = '#94a3b8'; c.fillRect(x+9, y-34, 12, 3);
+  // Shield
+  c.fillStyle = '#1d4ed8';
+  c.beginPath(); c.roundRect(x-18, y-28, 10, 18, 2); c.fill();
+  c.strokeStyle = '#c9a227'; c.lineWidth = 1.5; c.stroke();
+  // Cape
+  c.fillStyle = '#7c3aed';
+  c.beginPath(); c.moveTo(x-8, y-22); c.lineTo(x-18, y); c.lineTo(x-8, y); c.closePath(); c.fill();
+  // Legs
+  var legOff = Math.sin(rnFrame*0.25)*6;
+  c.fillStyle = '#4a2c0f';
+  c.fillRect(x-6, y-6, 5, 14+legOff);
+  c.fillRect(x+1, y-6, 5, 14-legOff);
+  // Boots
+  c.fillStyle = '#1a0a00';
+  c.fillRect(x-7, y+6+legOff, 6, 4);
+  c.fillRect(x, y+6-legOff, 6, 4);
+  c.restore();
+}
+
+
+function rnJump(){if(rnY>=RH-80){rnVY=-12;}}
+function rnLoop(){
+  if(!rnRun) return;
+  rnFrm = requestAnimationFrame(rnLoop);
+  rnFrame++;
+  var lvl = RUNNER_LEVELS[rnLevel];
+
+  // Gravity
+  rnVY += 0.6;
+  rnY = Math.min(rnY + rnVY, RH - 60);
+  if(rnY >= RH - 60) rnVY = 0;
+
+  // Spawn obstacles - wait 80 frames before first one
+  var spawnRate = Math.max(40, 70 - rnLevel*2);
+  if(rnFrame > 80 && rnFrame % spawnRate === 0){
+    var h = 28 + Math.random()*38;
+    rnObs.push({x:RW, h:h, w:20, sc:false});
+  }
+
+  // Move obstacles
+  rnObs.forEach(function(o){ o.x -= lvl.speed; });
+  rnObs = rnObs.filter(function(o){ return o.x > -30; });
+
+  // Score
+  rnObs.forEach(function(o){
+    if(!o.sc && o.x < 55){ o.sc = true; rnScore++; }
+  });
+
+  // Collision - match hero bounding box
+  var px=42, py=rnY-36, pw=22, ph=36;
+  var dead = rnObs.some(function(o){
+    return px+pw > o.x && px < o.x+o.w && py+ph > RH-30-o.h;
+  });
+  if(dead){ rnDead(); return; }
+
+  // Win check
+  if(rnScore >= lvl.pasScore){ rnWin(); return; }
+
+  drawRn(lvl);
+}
+
+
+function drawRn(lvl){
+  var c = rnCtx;
+  // Sky gradient
+  c.fillStyle = '#0a0520'; c.fillRect(0,0,RW,RH);
+  // Stars
+  if(rnFrame % 3 === 0){
+    c.fillStyle = 'rgba(255,255,255,.3)';
+    for(var s=0;s<3;s++){
+      c.fillRect(Math.random()*RW, Math.random()*(RH-60), 1, 1);
+    }
+  }
+  // Ground
+  c.fillStyle = '#2d1b0e'; c.fillRect(0,RH-30,RW,30);
+  c.fillStyle = '#4a2c0f'; c.fillRect(0,RH-32,RW,2);
+  // Obstacles with step effect
+  rnObs.forEach(function(o){
+    c.fillStyle = '#5c3317'; c.fillRect(o.x, RH-30-o.h, o.w, o.h);
+    c.fillStyle = '#7c3aed'; c.fillRect(o.x-1, RH-30-o.h-4, o.w+2, 4);
+    // Step highlight
+    c.fillStyle = 'rgba(201,162,39,.3)'; c.fillRect(o.x, RH-30-o.h, o.w, 2);
+  });
+  // Hero
+  drawHero(c, 60, rnY);
+  // HUD
+  c.font = 'bold 14px Cinzel, serif';
+  c.fillStyle = '#c9a227';
+  c.textAlign = 'center';
+  c.fillText(rnScore+'/'+lvl.pasScore, RW/2, 28);
+  c.font = '10px Raleway, sans-serif';
+  c.fillStyle = 'rgba(232,213,163,.6)';
+  c.fillText(lvl.prize, RW/2, 46);
+  c.textAlign = 'left';
+}
+
+
+function rnWin(){
+  rnRun = false;
+  cancelAnimationFrame(rnFrm);
+  var cv = document.getElementById('cvRunner');
+  if(cv){ cv.onclick = null; cv.ontouchstart = null; }
+  showRunnerPrizeBanner(true);
+}
+
+
+function rnDead(){
+  rnRun = false; cancelAnimationFrame(rnFrm);
+  var cv = document.getElementById('cvRunner'); if(!cv) return;
+  cv.onclick = null; cv.ontouchstart = null;
+  // Show death screen on canvas
+  var c = rnCtx;
+  c.fillStyle = 'rgba(0,0,0,.75)'; c.fillRect(0,0,RW,RH);
+  c.fillStyle = '#dc2626'; c.font = 'bold 16px Cinzel, serif';
+  c.textAlign = 'center'; c.fillText('¡Caíste!', RW/2, RH/2-20);
+  c.fillStyle = '#c9a227'; c.font = '11px Cinzel, serif';
+  c.fillText('Toca para intentar de nuevo', RW/2, RH/2+10);
+  c.textAlign = 'left';
+  // Tap to retry
+  function retry(e){
+    e.preventDefault();
+    cv.onclick = null; cv.ontouchstart = null;
+    showRunnerPrizeBanner(false);
+    drawRnIdle();
+  }
+  cv.onclick = retry;
+  cv.ontouchstart = retry;
+}
+
+
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+
+let memCards=[],memFlipped=[],memSolving=false,memPairsFound=0;
+function initMemoria(){memPairsFound=0;memFlipped=[];memSolving=false;const prizes=[...MEMORIA_PRIZES];const pairs=[...prizes,...prizes];for(let i=pairs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pairs[i],pairs[j]]=[pairs[j],pairs[i]];}memCards=pairs.map((p,i)=>({...p,id:i,flipped:false,matched:false}));document.getElementById('memPairs').textContent='0';document.getElementById('memMsg').textContent='';renderMemGrid();}
+function renderMemGrid(){const el=document.getElementById('memGrid');el.innerHTML=memCards.map((c,i)=>{let bg,border,shadow='none',show;if(c.matched){bg='rgba(22,163,74,.2)';border='2px solid #16a34a';show=c.emoji;}else if(c.flipped){bg='rgba(124,58,237,.45)';border='2px solid #a855f7';shadow='0 0 10px rgba(168,85,247,.6)';show=c.emoji;}else{bg='var(--bg3)';border='1px solid var(--border)';show='🔮';}return '<div onclick="flipCard('+i+')" style="aspect-ratio:1;background:'+bg+';border:'+border+';border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.3rem;transition:all .2s;box-shadow:'+shadow+'">'+show+'</div>';}).join('');}
+function flipCard(i){if(memSolving)return;const card=memCards[i];if(card.flipped||card.matched)return;if(memFlipped.length>=2)return;const coins=S.user?S.user.coins:S.coins;if(memFlipped.length===0&&coins<20){notif('🪙 Necesitas 10 coins','var(--red)');return;}if(memFlipped.length===0){if(S.user){sb.from('clientes').update({coins:coins-20}).eq('id',S.user.id).select().single().then(({data})=>{if(data)S.user=data;updUI();});}else{S.coins-=20;updUI();}}card.flipped=true;memFlipped.push(i);renderMemGrid();if(memFlipped.length===2){memSolving=true;const[a,b]=[memCards[memFlipped[0]],memCards[memFlipped[1]]];setTimeout(()=>{if(a.name===b.name){a.matched=b.matched=true;memPairsFound++;document.getElementById('memPairs').textContent=memPairsFound;addGift(a.name,a.emoji,'Juego de Memoria');notif('🎉 ¡Par! '+a.name+' → Carrito');document.getElementById('memMsg').textContent='🎁 ¡'+a.name+' ganado!';if(memPairsFound===9){setTimeout(()=>{notif('🏆 ¡Completaste el juego!');initMemoria();},2000);}}else{a.flipped=b.flipped=false;document.getElementById('memMsg').textContent='Sin par — intenta de nuevo';}memFlipped=[];memSolving=false;renderMemGrid();},900);}}
+
+function openGame(g){
+  // Runner handles its own coin deduction in startRunner
+  var skipCost = (g==='runner');
+  var costs={flappy:25,runner:0,memoria:0};
+  var cost=skipCost?0:(costs[g]||0);
+  var coins=S.user?S.user.coins:S.coins;
+  if(cost&&coins<cost){notif('Necesitas '+cost+' coins','var(--red)');return;}
+  if(cost&&S.user){sb.from('clientes').update({coins:coins-cost}).eq('id',S.user.id).select().single().then(function(r){if(r.data)S.user=r.data;updUI();});}
+  else if(cost){S.coins-=cost;updUI();}
+  var ids={flappy:'gFlappy',runner:'gRunner',memoria:'gMemoria',ruleta1:'gRuleta1',ruleta2:'gRuleta2',ruleta3:'gRuleta3',ruleta4:'gRuleta4'};
+  var el=document.getElementById(ids[g]);if(el)el.classList.add('on');
+  if(g==='flappy'){initFlappy();showFlappyLevelBanner(false);}
+  if(g==='runner'){rnLevel=0;initRunner();}
+  if(g==='memoria')initMemoria();
+  if(g.startsWith('ruleta')){var n=parseInt(g.replace('ruleta',''));drawRuletaGame(n,rAngles[n]);}
+  updUI();
+}
+function closeGame(id){const el=document.getElementById(id);if(el)el.classList.remove('on');stopFlappy();if(id==='gRunner'){rnRun=false;if(rnFrm)cancelAnimationFrame(rnFrm);}}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+// ── PLACES AUTOCOMPLETE ───────────────────
+var placesACs = {};
+
+function initPlacesAutocomplete(inputId){
+  if(!window.google || !window.google.maps) return;
+  if(placesACs[inputId]) return;
+  var input = document.getElementById(inputId);
+  if(!input) return;
+  var ac = new window.google.maps.places.Autocomplete(input, {
+    componentRestrictions: {country:'mx'},
+    fields:['formatted_address'],
+    types:['address']
+  });
+  ac.addListener('place_changed', function(){
+    var place = ac.getPlace();
+    if(place.formatted_address) input.value = place.formatted_address;
+  });
+  placesACs[inputId] = ac;
+}
+
+window.initAllAutocompletes = function initAllAutocompletes(){
+  ['rDir1','rDir2','eDir1','eDir2'].forEach(function(id){ initPlacesAutocomplete(id); });
+}
+
+function usarUbicacion(inputId){
+  if(!navigator.geolocation){ notif('GPS no disponible','var(--red)'); return; }
+  notif('Obteniendo ubicacion...');
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+pos.coords.latitude+','+pos.coords.longitude+'&key=AIzaSyDZBEWPVjQl2viizDl7KH1RTwtWWRmtrig&language=es';
+      fetch(url).then(function(r){return r.json();}).then(function(d){
+        if(d.results && d.results[0]){
+          var el=document.getElementById(inputId);
+          if(el) el.value=d.results[0].formatted_address;
+          notif('Ubicacion detectada!');
+        }
+      });
+    },
+    function(){ notif('No se pudo acceder al GPS','var(--red)'); }
+  );
+}
+
+async function init(){
+  loadCart();
+  try {
+    await cargarSesion();
+  } catch(e) { console.log('No session:', e); }
+  try{await cargarSesionERP();}catch(e){}
+  renderHeroes();
+  renderCoins();
+  updUI();
+  goPage('usuario');
+  // Init Places when Maps loads
+  if(window.google && window.google.maps){
+    initAllAutocompletes();
+  } else {
+    window.initMap = initAllAutocompletes;
+  }
+}
+
+// ── SUPABASE USER FUNCTIONS ──────────────
+function mostrarRegistro(){document.getElementById('view-registro').style.display='block';document.getElementById('view-login').style.display='none';document.getElementById('view-perfil').style.display='none';}
+function mostrarLogin(){document.getElementById('view-registro').style.display='none';document.getElementById('view-login').style.display='block';document.getElementById('view-perfil').style.display='none';}
+function mostrarPerfil(){document.getElementById('view-registro').style.display='none';document.getElementById('view-login').style.display='none';document.getElementById('view-perfil').style.display='block';}
+function renderUsuarioPage(){if(S.user){mostrarPerfil();llenarPerfil();}else{mostrarRegistro();}}
+function guardarSesionLocal(u){try{sessionStorage.setItem('tia_cid',u.id);}catch(e){}}
+async function cargarSesion(){try{if(!sb)return;var uid=sessionStorage.getItem('tia_cid');if(!uid)return;var res=await sb.from('clientes').select('*').eq('id',uid).single();if(res.data){S.user=res.data;updUI();}}catch(e){console.log('session:',e);}}
+async function registrarUsuario(){
+  var nombre=(document.getElementById('rNombre')||{}).value||'';
+  var apodo=(document.getElementById('rApodo')||{}).value||'';
+  var tel=((document.getElementById('rTel')||{}).value||'').replace(/\D/g,'');
+  var dir1=(document.getElementById('rDir1')||{}).value||'';
+  var dir2=(document.getElementById('rDir2')||{}).value||'';
+  var fb=(document.getElementById('rFb')||{}).value||'';
+  var email=(document.getElementById('rEmail')||{}).value||'';
+  var pass=(document.getElementById('rPass')||{}).value||'';
+  var msg=document.getElementById('regMsg');
+  if(!sb){if(msg){msg.textContent='Sin conexion';msg.style.color='var(--red)';}return;}
+  if(!nombre.trim()){if(msg){msg.textContent='Pon tu nombre';msg.style.color='var(--red)';}return;}
+  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
+  if(!dir1.trim()){if(msg){msg.textContent='Pon tu direccion';msg.style.color='var(--red)';}return;}
+  if(fb&&!fb.includes('facebook.com')){if(msg){msg.textContent='El link debe ser de facebook.com';msg.style.color='var(--red)';}return;}
+  if(msg){msg.textContent='Creando cuenta...';msg.style.color='var(--muted)';}
+  var btnR=document.getElementById('btnRegistrar');if(btnR)btnR.disabled=true;
+  var ex=await sb.from('clientes').select('id').eq('telefono',tel).single();
+  if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  S.cart=[];S.coins=0;
+  var coins=fb?200:100;
+  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0,fecha_registro:new Date().toISOString().split('T')[0]}).select().single();
+  if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
+  await sb.from('coins_transacciones').insert({usuario_id:res.data.id,tipo:'credito',cantidad:coins,descripcion:fb?'Bienvenida + Facebook':'Coins de bienvenida'});
+  S.user=res.data;guardarSesionLocal(res.data);
+  notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
+  mostrarPerfil();llenarPerfil();updUI();
+}
+async function loginUsuario(){
+  var tel=((document.getElementById('lTel')||{}).value||'').replace(/\D/g,'');
+  var msg=document.getElementById('loginMsg');
+  if(tel.length<10){if(msg){msg.textContent='Telefono de 10 digitos';msg.style.color='var(--red)';}return;}
+  if(msg){msg.textContent='Buscando...';msg.style.color='var(--muted)';}
+  var btnL=document.getElementById('btnLogin');if(btnL)btnL.disabled=true;
+  var res=await sb.from('clientes').select('*').eq('telefono',tel).single();
+  if(res.error||!res.data){if(msg){msg.textContent='No encontramos ese telefono';msg.style.color='var(--red)';}if(btnL)btnL.disabled=false;return;}
+  S.user=res.data;guardarSesionLocal(res.data);
+  notif('Bienvenido de vuelta '+(res.data.apodo||res.data.nombre)+'!');
+  mostrarPerfil();llenarPerfil();updUI();if(btnL)btnL.disabled=false;
+}
+function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
+async function llenarPerfil(){
+  var u=S.user;if(!u)return;
+  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+  var val=function(id,v){var e=document.getElementById(id);if(e)e.value=v||'';};
+  set('pNombre',u.nombre||'—');set('pApodo',u.apodo?'@'+u.apodo:u.telefono||'—');
+  set('pNumero','#'+String(u.numero_cliente||0).padStart(4,'0'));
+  var niv=getNivel(u.gastado||0);
+  var nivEl=document.getElementById('pNivel');
+  if(nivEl){nivEl.textContent=niv.lvl.nombre;nivEl.style.color=niv.lvl.color;}
+  set('pBal',(u.saldo_mxn||0).toLocaleString());set('pCoins',(u.coins||0).toLocaleString());
+  set('pGastado',(u.gastado||0).toLocaleString());set('pCompras',u.pedidos_count||0);
+  set('pNivelActual',niv.lvl.nombre);
+  var sigNiv=NIVELES[niv.idx+1];
+  if(sigNiv){set('pNivelSig',sigNiv.nombre);var prog=((u.gastado-niv.lvl.min)/(sigNiv.min-niv.lvl.min)*100).toFixed(0);var pb=document.getElementById('pProgBar');if(pb)pb.style.width=Math.min(prog,100)+'%';set('pProgTexto','$'+(u.gastado||0).toLocaleString()+' / $'+sigNiv.min.toLocaleString());}
+  else{set('pNivelSig','Maximo');var pb2=document.getElementById('pProgBar');if(pb2)pb2.style.width='100%';}
+  val('eTel',u.telefono);val('eDir1',u.direccion);// direccion2 not in clientes;val('eFb',u.facebook);val('eEmail',u.email);
+  await cargarSeguimientoPerfil();await cargarLogros();await cargarPedidosUsuario();
+  renderDirsGuardadas();
+  checkBannerPerfilIncompleto();
+  checkBannerPerfilIncompleto();
+}
+async function cargarLogros(){
+  var u=S.user;var r1=await sb.from('logros').select('*');var r2=await sb.from('usuario_logros').select('logro_id').eq('usuario_id',u.id);
+  var todos=r1.data||[];var misIds=(r2.data||[]).map(function(x){return x.logro_id;});
+  var el=document.getElementById('pLogros');if(!el)return;
+  el.innerHTML=todos.map(function(l){var ob=misIds.indexOf(l.id)>=0;
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid '+(ob?'rgba(74,222,128,.35)':'var(--border)')+';border-radius:10px;padding:10px 12px;'+(ob?'':'opacity:.5')+'">'+
+      '<div style="font-size:1.3rem;width:28px;text-align:center">'+l.emoji+'</div>'+
+      '<div style="flex:1"><div style="font-family:Cinzel,serif;font-size:.68rem;color:'+(ob?'var(--green)':'var(--text)')+'">'+l.nombre+'</div>'+
+      '<div style="font-size:.57rem;color:var(--muted)">'+l.descripcion+'</div></div>'+
+      '<div style="font-size:.52rem;padding:2px 8px;border-radius:6px;background:'+(ob?'rgba(74,222,128,.15)':'var(--bg3)')+';color:'+(ob?'var(--green)':'var(--muted)')+'">'+( ob?'✓ Obtenido':'Bloqueado')+'</div></div>';
+  }).join('');
+}
+async function cargarPedidosUsuario(){
+  var res=await sb.from('seguimientos').select('*').eq('usuario_id',S.user.id).order('created_at',{ascending:false}).limit(10);
+  var data=res.data;var el=document.getElementById('pPedidos');if(!el)return;
+  if(!data||!data.length){el.innerHTML='<div style="font-size:.65rem;color:var(--muted)">Aun no tienes pedidos</div>';return;}
+  var eLabel={'pendiente':'⏳ Pendiente','pagado':'💰 Pagado','concretado':'⚙️ En preparacion','en_camino':'🚚 En camino','entregado':'✓ Entregado'};
+  var eColor={'pendiente':'var(--coin)','pagado':'var(--purple2)','concretado':'#f59e0b','en_camino':'var(--purple2)','entregado':'var(--green)'};
+  el.innerHTML=data.map(function(p){
+    var est=p.status||'pendiente';
+    return '<div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px">'+
+      '<div style="display:flex;justify-content:space-between;margin-bottom:6px">'+
+      '<div><div style="font-family:Cinzel,serif;font-size:.68rem;color:var(--gold)">'+p.folio+'</div>'+
+      '<div style="font-size:.57rem;color:var(--muted)">'+new Date(p.created_at).toLocaleDateString('es-MX')+'</div></div>'+
+      '<div style="text-align:right"><div style="font-weight:700;font-size:.72rem">$'+p.total+'</div>'+
+      '<div style="font-size:.55rem;color:'+(eColor[est]||'var(--coin)')+'">'+( eLabel[est]||est)+'</div></div></div>'+
+      '<button data-xid="'+p.id+'" onclick="toggleDetalle(this)" style="width:100%;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:7px;padding:5px;font-size:.6rem;color:var(--gold);cursor:pointer">📋 Ver detalle</button>'+
+      '<div class="det-'+p.id+'" style="display:none;margin-top:6px;background:var(--bg3);border-radius:8px;padding:10px;font-size:.68rem">'+
+      '<div style="margin-bottom:4px"><b>Dirección:</b> '+(p.dir||'—')+'</div>'+
+      '<div style="margin-bottom:4px"><b>Pago:</b> '+(p.pago||'—')+'</div>'+
+      (p.items||[]).map(function(x){return '<div style="display:flex;justify-content:space-between"><span>'+x.name+'</span><span style="color:var(--gold)">$'+x.price+'</span></div>';}).join('')+
+      ((p.regalos||[]).length?'<div style="color:var(--green);margin-top:4px">'+( p.regalos||[]).map(function(r){return '🎁 '+r.name;}).join(' ')+'</div>':'')+
+      '</div>'+'</div>';
+  }).join('');
+}
+
+function mostrarPagoManualMP(coins,bonus,precio,desc){
+  var overlay=document.getElementById('mp-overlay');
+  var cnt=document.getElementById('mp-content');
+  if(!overlay||!cnt)return;
+  cnt.innerHTML=
+    '<div style="text-align:center;padding:10px 0 16px">'+
+    '<div style="font-size:.9rem;font-family:Cinzel,serif;color:var(--gold);margin-bottom:4px">Pago con tarjeta</div>'+
+    '<div style="font-size:.65rem;color:var(--muted);margin-bottom:16px">'+(desc||'')+'</div>'+
+    '<div style="font-family:Cinzel,serif;font-size:1.4rem;color:var(--text);margin-bottom:16px">$'+precio+' MXN</div>'+
+    '<button onclick="abrirWhatsAppPago('+precio+')" style="width:100%;background:#25d366;border:none;border-radius:10px;padding:12px;font-family:Cinzel,serif;font-size:.8rem;color:white;cursor:pointer;margin-bottom:8px">Confirmar por WhatsApp</button>'+
+    '<button onclick="cerrarMP()" style="width:100%;background:transparent;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:.72rem;color:var(--muted);cursor:pointer">Cancelar</button>'+
+    '</div>';
+  overlay.style.display='flex';
+}
+
+function abrirWhatsAppPago(precio){
+  var nl='\n';var u=S.user;
+  var msg='Quiero pagar con tarjeta'+nl+'Monto: $'+precio+' MXN'+nl;
+  if(u)msg+='Cliente: '+u.nombre+nl+'Tel: '+(u.telefono||'')+nl;
+  msg+=nl+'Adjunto comprobante de pago.';
+  cerrarMP();window.open('https://wa.me/523322740209?text='+encodeURIComponent(msg),'_blank');
+}
+function cerrarMP(){var el=document.getElementById('mp-overlay');if(el)el.style.display='none';}
+async function generarTicket(pedidoId){
+  var jsPDF=window.jspdf?window.jspdf.jsPDF:window.jsPDF;
+  if(!jsPDF){notif('Cargando PDF...','var(--muted)');return;}
+  var res=await sb.from('pedidos').select('*').eq('id',pedidoId).single();
+  var p=res.data;if(!p){notif('Pedido no encontrado','var(--red)');return;}
+  var doc=new jsPDF({unit:'mm',format:[58,200],orientation:'portrait'});
+  var x=4,y=6,w=50;
+  doc.setFontSize(10);doc.setFont('helvetica','bold');doc.text('La Tia Risuena',29,y,{align:'center'});y+=5;
+  doc.setFontSize(7);doc.setFont('helvetica','normal');doc.text('Dispensario Premium',29,y,{align:'center'});y+=4;
+  doc.text('WA: 33-2274-0209',29,y,{align:'center'});y+=5;
+  doc.line(x,y,x+w,y);y+=4;
+  doc.setFontSize(8);doc.setFont('helvetica','bold');doc.text('FOLIO: '+p.folio,29,y,{align:'center'});y+=4;
+  doc.setFont('helvetica','normal');doc.setFontSize(7);doc.text(new Date(p.created_at).toLocaleString('es-MX'),29,y,{align:'center'});y+=5;
+  doc.line(x,y,x+w,y);y+=3;
+  doc.setFont('helvetica','bold');doc.text('CLIENTE',x,y);y+=4;
+  doc.setFont('helvetica','normal');doc.text(p.nb||'',x,y);y+=3;
+  doc.text('Tel: '+(p.telefono||''),x,y);y+=3;
+  var dLines=doc.splitTextToSize('Dir: '+(p.dir||''),w);doc.text(dLines,x,y);y+=dLines.length*3+2;
+  doc.line(x,y,x+w,y);y+=3;
+  doc.setFont('helvetica','bold');doc.text('PRODUCTOS',x,y);y+=4;
+  doc.setFont('helvetica','normal');var total=0;
+  (p.items||[]).forEach(function(it){var nl2=doc.splitTextToSize(it.name+' ('+it.qty+')',34);doc.text(nl2,x,y);doc.text('$'+it.price,x+w,y,{align:'right'});y+=nl2.length*3;total+=it.price||0;});
+  (p.regalos||[]).forEach(function(r){doc.text(r.name,x,y);doc.text('GRATIS',x+w,y,{align:'right'});y+=3;});
+  doc.line(x,y,x+w,y);y+=4;
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.text('TOTAL: $'+total,29,y,{align:'center'});y+=4;
+  doc.setFont('helvetica','normal');doc.setFontSize(7);
+  var ml2={coins:'Tia Coins',transferencia:'Transferencia',deposito:'Deposito OXXO'};
+  doc.text('Pago: '+(ml2[p.pago]||p.pago||''),x,y);y+=3;
+  doc.text('Estado: '+(p.pagado?'PAGADO':'PENDIENTE'),x,y);y+=5;
+  doc.line(x,y,x+w,y);y+=4;
+  doc.setFont('helvetica','bold');doc.text('Gracias por tu compra!',29,y,{align:'center'});y+=3;
+  doc.setFont('helvetica','normal');doc.text('tiarisuena.netlify.app',29,y,{align:'center'});
+  doc.internal.pageSize.height=y+8;
+  doc.save('ticket-'+p.folio+'.pdf');
+  notif('Ticket generado!');
+}
+function buyCoins(coins,bonus,precio){if(!S.user){notif('Registrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}mostrarPagoCoins(coins,bonus,precio);}
+function buyCustom(){
+  if(!S.user){notif('Registrate primero','var(--coin)');setTimeout(function(){goPage('usuario');},1200);return;}
+  var amt=parseInt((document.getElementById('coinAmt')||{}).value)||0;
+  if(amt<1){notif('Ingresa una cantidad','var(--red)');return;}
+  mostrarPagoCoins(amt,0,amt);
+}
+
+function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('postgres_changes',{event:'INSERT',schema:'public',table:'pedidos'},function(payload){var p=payload.new;notif('Nuevo pedido: '+p.folio+' - '+p.nb);}).subscribe();}
+async function init(){
+  loadCart();
+  try{await cargarSesion();}catch(e){console.log('session:',e);}
+  try{await cargarSesionERP();}catch(e){}
+  renderHeroes();renderCoins();updUI();
+  // Arrancar en Usuario (no en Inicio/Reglas)
+  goPage('usuario');
+  if(S.user)initRealtime();
+}
+window.addEventListener('load',init);
+
+// ══════════════════════════════════════════════════════════════
+// MENÚ DINÁMICO — productos desde Supabase con stock real
+// ══════════════════════════════════════════════════════════════
+var _menuProds=[], _menuInv={}, _menuCombos=[];
+
+async function cargarMenuDinamico(){
+  if(!sb)return;
   try{
     var r1=await sb.from('productos').select('*').eq('visible_tienda',true);
     _menuProds=r1.data||[];
@@ -3428,9 +4670,9 @@ function renderMenuDinamico(){
   renderHeroesDin();
   renderSeccion('forjados',['Gallos','Forjados','Porros'],['forjados-container']);
   renderSeccion('edibles',['Edibles','Comestibles'],['edibles-container']);
-  renderSeccion('extractos',['Extractos','Concentrados'],['extractos-dyn-container']);
-  renderSeccion('medicina',['Medicina'],['medicina-dyn-container']);
-  renderSeccion('herramientas',['Accesorios','Herramientas'],['accesorios-dyn-container']);
+  renderSeccion('extractos',['Extractos','Concentrados'],['extractos-container']);
+  renderSeccion('medicina',['Medicina'],['medicina-container']);
+  renderSeccion('herramientas',['Accesorios','Herramientas'],['herramientas-container']);
   renderCombosDin();
   renderCofreDin();
 }
