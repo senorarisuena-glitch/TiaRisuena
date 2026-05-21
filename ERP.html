@@ -847,7 +847,7 @@ function rPedidos(el){
           }).then(function(){
             // Crear movimiento en tesorería si hay monto
             var movProm=monto>0?sPOST("movimientos",{
-              fecha:hoy(),cuenta:cuenta,tipo_pago:tipo,
+              fecha:hoy(),cuenta:cuenta,cuenta_id:{"Caja Chica":1,"Mercado Pago":2,"Kiyoshi":3}[cuenta]||1,tipo_pago:tipo,
               movimiento:"Venta",egreso:false,monto:monto,
               concepto:"Venta Ticket #"+ticket+" — "+(ped.cliente||ped.nb||""),
               gasto_ticket:"Ticket #"+ticket+": "+fmt(monto)
@@ -925,9 +925,11 @@ function rPedidos(el){
       var totalCoins=cr.cantidad;
 
       // 2. Crear movimiento en tesorería
+      var cuentasMap={"Caja Chica":1,"Mercado Pago":2,"Kiyoshi":3};
       sPOST("movimientos",{
         fecha:hoy(),
         cuenta:cuenta,
+        cuenta_id:cuentasMap[cuenta]||1,
         tipo_pago:tipo,
         movimiento:"Compra Coins",
         concepto:"Compra de Tía Coins — cliente #"+(clienteId||""),
