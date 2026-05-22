@@ -449,9 +449,23 @@ function bdg(txt,col){return '<span class="badge" style="background:'+col+'20;bo
 function selHtml(id,opts,val){return '<select id="'+id+'"><option value="">— seleccionar —</option>'+opts.map(function(o){return'<option value="'+o.v+'"'+(String(o.v)===String(val)?' selected':'')+'>'+o.l+'</option>'}).join("")+'</select>'}
 
 var MESES=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
-var CUENTAS=[{id:1,n:"Caja Chica"},{id:2,n:"Mercado Pago"},{id:3,n:"Kiyoshi"}];
+var CUENTAS=[{id:1,n:"Caja Chica"},{id:2,n:"Mercado Pago"},{id:3,n:"Kiyoshi"},{id:4,n:"Spin Oxxo"}];
 var PROVS=[{id:1,n:"Buenadela"},{id:2,n:"420 Gdl"},{id:3,n:"Mercado Libre"},{id:4,n:"Joinet"},{id:5,n:"Envases Velazco"}];
-var REPS=[{id:"r1",n:"Repartidor 1"},{id:"r2",n:"Repartidor 2"},{id:"r3",n:"Repartidor 3"},{id:"r4",n:"Repartidor 4"},{id:"r5",n:"Repartidor 5"}];
+var REPS=[{id:"r1",n:"Uber"},{id:"r2",n:"Didi"},{id:"r3",n:"Indrive"},{id:"r4",n:"Repartidor 1"},{id:"r5",n:"Repartidor 2"}];
+
+// Cargar bancos y repartidores desde Supabase al iniciar
+function cargarCatalogos(){
+  sGET("bancos","activo=eq.true&order=id").then(function(rows){
+    if(rows&&rows.length){
+      CUENTAS=rows.map(function(r){return{id:r.id,n:r.nombre,tipo:r.tipo};});
+    }
+  });
+  sGET("repartidores","activo=eq.true&order=id").then(function(rows){
+    if(rows&&rows.length){
+      REPS=rows.map(function(r){return{id:r.id,n:r.nombre};});
+    }
+  });
+}
 var CAT=["Desechable 2g — Mango","Desechable 2g — Fresa","Desechable 2g — Uva","Desechable 2g — Sandía","Desechable 2g — Melocotón","Cartucho 1g — Original","Cartucho 1g — Premium","Cartucho 0.5g — Mini","Gummies 10pk","Concentrado Wax 1g"];
 
 var USUARIOS=[
@@ -573,7 +587,7 @@ function rPedidos(el){
         h+='<div style="background:#21262D;border-radius:3px;padding:10px;margin-top:8px">';
         h+='<div style="font-size:10px;color:#8B949E;letter-spacing:.05em;margin-bottom:8px;font-weight:700">REGISTRAR PAGO</div>';
         h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">';
-        h+='<select id="pp_cuenta_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Caja Chica">Caja Chica</option><option value="Mercado Pago">Mercado Pago</option><option value="Kiyoshi">Kiyoshi</option></select>';
+        h+='<select id="pp_cuenta_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3">'+CUENTAS.map(function(c){return'<option value="'+c.n+'">'+c.n+'</option>';}).join("")+'</select>';
         h+='<select id="pp_tipo_'+p.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Transferencia">Transferencia</option><option value="Deposito">Depósito</option><option value="Efectivo">Efectivo</option></select>';
         h+='<input id="pp_monto_'+p.id+'" type="number" placeholder="Monto" value="'+(p.total||0)+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3;text-align:right">';
         h+='</div>';
@@ -692,7 +706,7 @@ function rPedidos(el){
           html+='<div style="background:#21262D;border-radius:3px;padding:12px;margin-bottom:8px">';
           html+='<div style="font-size:10px;color:#8B949E;letter-spacing:.05em;margin-bottom:8px;font-weight:700">REGISTRAR INGRESO EN TESORERÍA</div>';
           html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px">';
-          html+='<select id="cr_cuenta_'+cr.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Caja Chica">Caja Chica</option><option value="Mercado Pago">Mercado Pago</option><option value="Kiyoshi">Kiyoshi</option></select>';
+          html+='<select id="cr_cuenta_'+cr.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3">'+CUENTAS.map(function(c){return'<option value="'+c.n+'">'+c.n+'</option>';}).join("")+'</select>';
           html+='<select id="cr_tipo_'+cr.id+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3"><option value="Transferencia">Transferencia</option><option value="Deposito">Depósito</option><option value="Efectivo">Efectivo</option></select>';
           html+='<input id="cr_monto_'+cr.id+'" type="number" value="'+parseFloat(cr.precio_mxn||0).toFixed(2)+'" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:6px;font-size:11px;color:#E6EDF3;text-align:right">';
           html+='</div>';
@@ -878,7 +892,7 @@ function actualizarStatsCliente(cliId, monto){
             Promise.all(lotesVenta).then(function(){
             // Crear movimiento en tesorería si hay monto
             var movProm=monto>0?sPOST("movimientos",{
-              fecha:hoy(),cuenta:cuenta,cuenta_id:{"Caja Chica":1,"Mercado Pago":2,"Kiyoshi":3}[cuenta]||1,tipo_pago:tipo,
+              fecha:hoy(),cuenta:cuenta,cuenta_id:(CUENTAS.find(function(x){return x.n===cuenta;})||{id:1}).id,tipo_pago:tipo,
               movimiento:"Venta",egreso:false,monto:monto,
               concepto:"Venta Ticket #"+ticket+" — "+(ped.cliente||ped.nb||""),
               gasto_ticket:"Ticket #"+ticket+": "+fmt(monto)
@@ -963,7 +977,7 @@ function actualizarStatsCliente(cliId, monto){
       var totalCoins=cr.cantidad;
 
       // 2. Crear movimiento en tesorería
-      var cuentasMap={"Caja Chica":1,"Mercado Pago":2,"Kiyoshi":3};
+      var cuentasMap={};CUENTAS.forEach(function(x){cuentasMap[x.n]=x.id;});
       sPOST("movimientos",{
         fecha:hoy(),
         cuenta:cuenta,
