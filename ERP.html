@@ -3772,10 +3772,15 @@ function rReportes(el){
         }
       }
     });
-    var deudaProv=comprasRep.filter(function(co){return co.tipo_inv!=="servicio";}).reduce(function(a,co){
-      var ad=Math.max(0,parseFloat(co.total||0)-(pagosMapP[co.num_compra]||0));
-      return a+(ad>0.01?ad:0);
-    },0);
+    console.log("=== PAGOS MAP P ===", JSON.stringify(pagosMapP));
+    var deudaProv=0;
+    comprasRep.filter(function(co){return co.tipo_inv!=="servicio";}).forEach(function(co){
+      var pagado=pagosMapP[co.num_compra]||0;
+      var ad=Math.max(0,parseFloat(co.total||0)-pagado);
+      console.log("Compra #"+co.num_compra+" total="+co.total+" pagado="+pagado+" adeudo="+ad.toFixed(2)+" tipo="+co.tipo_inv);
+      if(ad>0.01)deudaProv+=ad;
+    });
+    console.log("=== DEUDA PROV TOTAL ===", deudaProv);
 
     // Deuda repartidores — desde envios directamente
     var pagosRepMovs=movs.filter(function(m){return m.movimiento==="Pago Repartidores"&&m.egreso;});
