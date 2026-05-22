@@ -1715,9 +1715,15 @@ function rBancos(el){
     // Parsear refs existentes si estamos editando
     var linkedMap={};
     if(meEdit&&meEdit.gasto_ticket){
-      (meEdit.gasto_ticket||"").split(/,\s*/).forEach(function(ref){
-        var m=ref.match(/Compra #(\d+)[^$]*\$([\d,.]+)/);
-        if(m)linkedMap[parseInt(m[1])]=parseFloat(m[2].replace(/,/g,""))||0;
+      // Split por "Compra #" para no confundir comas en números con separadores
+      var partes=(meEdit.gasto_ticket||"").split(/(?=Compra #)/);
+      partes.forEach(function(ref){
+        var m=ref.match(/Compra #(\d+)/);
+        var a=ref.match(/\$([\d,]+\.?\d*)/);
+        if(m&&a){
+          var monto=parseFloat(a[1].replace(/,/g,""))||0;
+          linkedMap[parseInt(m[1])]=monto;
+        }
       });
     }
     var wrap=document.createElement("div");
