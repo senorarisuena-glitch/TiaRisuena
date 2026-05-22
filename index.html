@@ -1869,11 +1869,18 @@ function renderCart(){
   if(prods.length){
     html+='<div class="stitle" style="font-size:.7rem;padding:10px 12px 6px">🛒 PRODUCTOS</div>';
     html+=prods.map(function(it,i){
+      var cant=it.cantidad||1;
+      var subtotal=it.price*cant;
       return '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.05)">'+
         '<span style="font-size:1.4rem">'+it.emoji+'</span>'+
         '<div style="flex:1"><div style="font-size:.72rem;color:var(--text)">'+it.name+'</div>'+
         '<div style="font-size:.6rem;color:var(--muted)">'+it.qty+'</div></div>'+
-        '<div style="font-size:.78rem;font-weight:700;color:var(--gold)">$'+it.price+'</div>'+
+        '<div style="display:flex;align-items:center;gap:6px">'+
+        '<button onclick="cartDec('+i+')" style="background:#21262D;border:1px solid #30363D;border-radius:4px;color:var(--text);cursor:pointer;width:22px;height:22px;font-size:.9rem;line-height:1">−</button>'+
+        '<span style="font-size:.75rem;font-weight:700;min-width:16px;text-align:center">'+cant+'</span>'+
+        '<button onclick="cartInc('+i+')" style="background:#21262D;border:1px solid #30363D;border-radius:4px;color:var(--text);cursor:pointer;width:22px;height:22px;font-size:.9rem;line-height:1">+</button>'+
+        '</div>'+
+        '<div style="font-size:.78rem;font-weight:700;color:var(--gold);min-width:50px;text-align:right">$'+subtotal+'</div>'+
         '<button onclick="rmCart('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;padding:0 4px">✕</button>'+
         '</div>';
     }).join('');
@@ -1892,7 +1899,7 @@ function renderCart(){
     }).join('');
   }
 
-  var total=prods.reduce(function(s,x){return s+x.price;},0);
+  var total=prods.reduce(function(s,x){return s+x.price*(x.cantidad||1);},0);
   el.innerHTML=html;
   var ct=document.getElementById('cartTotal');
   if(ct)ct.textContent=total;
@@ -2063,6 +2070,20 @@ async function cargarPedidosActivos(){
 
 
 function rmCart(i){S.cart.splice(i,1);saveCart();renderCart();updUI();}
+function cartInc(i){
+  var prods=S.cart.filter(function(x){return !x.isGift;});
+  var item=prods[i];if(!item)return;
+  item.cantidad=(item.cantidad||1)+1;item.qty=item.cantidad+'x';
+  saveCart();renderCart();updUI();
+}
+function cartDec(i){
+  var prods=S.cart.filter(function(x){return !x.isGift;});
+  var item=prods[i];if(!item)return;
+  item.cantidad=(item.cantidad||1)-1;
+  if(item.cantidad<=0){var idx=S.cart.indexOf(item);if(idx>=0)S.cart.splice(idx,1);}
+  else{item.qty=item.cantidad+'x';}
+  saveCart();renderCart();updUI();
+}
 
 function addSimple(name,emoji,qty,price,sku){
   S.cart.push({name,emoji,qty,price,sku:sku||'',isGift:false});
@@ -2111,7 +2132,7 @@ async function confirmarYEnviar(metodo){
 
   const prods=S.cart.filter(x=>!x.isGift);
   const gifts=S.cart.filter(x=>x.isGift);
-  const total=prods.reduce((s,x)=>s+x.price,0);
+  const total=prods.reduce((s,x)=>s+x.price*(x.cantidad||1),0);
   const folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
   const pagado = metodo==='coins';
 
@@ -2598,8 +2619,26 @@ function renderSeccion(cat,categoria,containerIds){
 }
 
 function menuAddProd(sku,nombre,precio,emoji){
-  S.cart.push({name:nombre,sku:sku,emoji:emoji,qty:'1x',price:precio,isGift:false});
+  var existing=S.cart.find(function(x){return x.sku===sku&&!x.isGift;});
+  if(existing){
+    existing.qty=(parseInt(existing.qty)||1)+1+'x';
+    existing.cantidad=(parseInt(existing.cantidad)||1)+1;
+  } else {
+    S.cart.push({name:nombre,sku:sku,emoji:emoji,qty:'1x',price:precio,cantidad:1,isGift:false});
+  }
   updUI();notif(emoji+' '+nombre+' agregado');
+}
+
+function menuAddFlor(sku,label,precio,cepa){
+  var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
+  var existing=S.cart.find(function(x){return x.sku===sku&&!x.isGift;});
+  if(existing){
+    existing.cantidad=(parseInt(existing.cantidad)||1)+1;
+    existing.qty=existing.cantidad+'x';
+  } else {
+    S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,cantidad:1,isGift:false});
+  }
+  updUI();notif('⚔️ '+cepa+' ('+label+') agregado');
 }
 
 function renderCombosDin(){
@@ -2787,7 +2826,7 @@ var _ckMetodo = '';
 
 function updCkEnvio(){
   var prods=S.cart.filter(function(x){return !x.isGift;});
-  var sub=prods.reduce(function(s,x){return s+x.price;},0);
+  var sub=prods.reduce(function(s,x){return s+x.price*(x.cantidad||1);},0);
   var e1=document.getElementById('ck-subtotal');
   var e3=document.getElementById('ck-total');
   var e4=document.getElementById('cartTotal');
@@ -2822,7 +2861,7 @@ function selMetodoPago(metodo,btn){
   document.getElementById('ck-comp-wrap').style.display=(metodo==='transferencia'||metodo==='deposito')?'block':'none';
   if(metodo==='coins'){
     var prods=S.cart.filter(function(x){return !x.isGift;});
-    var total=prods.reduce(function(s,x){return s+x.price;},0);
+    var total=prods.reduce(function(s,x){return s+x.price*(x.cantidad||1);},0);
     var insuf=document.getElementById('ck-coins-insuf');
     if((S.user?S.user.coins:0)<total){if(insuf)insuf.style.display='block';}
     else{if(insuf)insuf.style.display='none';}
@@ -2925,7 +2964,7 @@ async function confirmarPedido(){
   if(!_ckMetodo){mostrarError('⚠️ Elige un método de pago');return;}
   var prods=S.cart.filter(function(x){return !x.isGift;});
   var gifts=S.cart.filter(function(x){return x.isGift;});
-  var total=prods.reduce(function(s,x){return s+x.price;},0);
+  var total=prods.reduce(function(s,x){return s+x.price*(x.cantidad||1);},0);
   if(_ckMetodo==='coins'&&(S.user.coins||0)<total){mostrarError('⚠️ No tienes suficientes Tía Coins');return;}
   var compBase64=null;
   var fi=document.getElementById('ck-comp-file');
