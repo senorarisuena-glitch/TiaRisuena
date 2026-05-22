@@ -2608,7 +2608,12 @@ function showQtyPicker(opts){
   window._qtyVal=1;
 }
 function qtyChange(d){
-  window._qtyVal=Math.max(1,(_qtyVal||1)+d);
+  var opts=window._qtyOpts||{};
+  var stock=getStock(opts.sku||'');
+  var enCarrito=0;
+  (S.cart||[]).forEach(function(x){if(x.sku===opts.sku&&!x.isGift)enCarrito+=(x.cantidad||1);});
+  var max=Math.max(1,stock-enCarrito);
+  window._qtyVal=Math.min(max,Math.max(1,(_qtyVal||1)+d));
   var el=document.getElementById('qty-val');
   if(el)el.textContent=window._qtyVal;
 }
@@ -2620,6 +2625,13 @@ function confirmQtyPicker(){
   var opts=window._qtyOpts;
   var qty=window._qtyVal||1;
   if(!opts)return;
+  // Validar stock
+  var stock=getStock(opts.sku);
+  var enCarrito=0;
+  S.cart.forEach(function(x){if(x.sku===opts.sku&&!x.isGift)enCarrito+=(x.cantidad||1);});
+  var disponible=Math.max(0,stock-enCarrito);
+  if(disponible<=0){notif('⚠️ Sin stock disponible','var(--red)');closeQtyPicker();return;}
+  if(qty>disponible){qty=disponible;notif('⚠️ Solo hay '+disponible+' disponibles','var(--coin)');}
   if(opts.isFlor){
     var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===opts.cepa;})||{emoji:'🌿'};
     var existing=S.cart.find(function(x){return x.sku===opts.sku&&!x.isGift;});
@@ -2635,11 +2647,7 @@ function confirmQtyPicker(){
   closeQtyPicker();
   updUI();
 }
-function menuAddFlor(sku,label,precio,cepa){
-  var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
-  S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,isGift:false});
-  updUI();notif('⚔️ '+cepa+' ('+label+') agregado');
-}
+
 
 function renderSeccion(cat,categoria,containerIds){
   var catMap={
@@ -2685,15 +2693,10 @@ function menuAddProd(sku,nombre,precio,emoji){
 
 function menuAddFlor(sku,label,precio,cepa){
   var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
-  var existing=S.cart.find(function(x){return x.sku===sku&&!x.isGift;});
-  if(existing){
-    existing.cantidad=(parseInt(existing.cantidad)||1)+1;
-    existing.qty=existing.cantidad+'x';
-  } else {
-    S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,cantidad:1,isGift:false});
-  }
-  updUI();notif('⚔️ '+cepa+' ('+label+') agregado');
+  showQtyPicker({sku:sku,name:cepa,emoji:rep.emoji||'🌿',price:precio,label:label,cepa:cepa,isFlor:true});
 }
+
+
 
 function renderCombosDin(){
   var el=document.getElementById('combos-container');if(!el)return;
