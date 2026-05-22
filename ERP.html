@@ -379,7 +379,7 @@ function sGET(t,q){
 }
 function sPOST(t,b){
   if(IS_PROD){
-    return fetch(SU+"/rest/v1/"+t,{method:"POST",headers:{"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(d){if(r.ok)return d;console.error("POST "+t+" error:",d);toast("Error al guardar: "+(d.message||d.hint||JSON.stringify(d)),"err");return{};});}).catch(function(e){console.error(e);return{};});
+    return fetch(SU+"/rest/v1/"+t,{method:"POST",headers:{"apikey":SK,"Authorization":"Bearer "+SK,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(d){if(r.ok)return d;console.error("POST "+t+" error:",d);toast("❌ Error: "+(d.message||d.hint||d.details||JSON.stringify(d)),"err");console.error("DB Error:",d);return{};});}).catch(function(e){console.error(e);return{};});
   }
   var rows=dbg(t);
   // Dedup: for movimientos, check same fecha+monto+movimiento+cuenta within 2 seconds
@@ -806,6 +806,16 @@ function rPedidos(el){
       });
     }
   };
+
+function actualizarStatsCliente(cliId, monto){
+  if(!cliId)return Promise.resolve();
+  return sGET("clientes","id=eq."+cliId).then(function(rows){
+    var cli=rows&&rows[0];if(!cli)return Promise.resolve();
+    var nuevoGastado=parseFloat(cli.gastado||0)+parseFloat(monto||0);
+    var nuevoPedidos=parseInt(cli.pedidos_count||0)+1;
+    return sPATCH("clientes","id=eq."+cliId,{gastado:nuevoGastado,pedidos_count:nuevoPedidos});
+  });
+}
   window.pedConc=function(id,sinPago){
     // Leer formulario de pago (solo si no es coins)
     var cuenta=sinPago?null:($("pp_cuenta_"+id)||{}).value||"Caja Chica";
@@ -877,16 +887,18 @@ function rPedidos(el){
                 }):Promise.resolve();
               coinsLinkProm.then(function(){
                 var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy()}]);
-                sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
-                  toast("✓ Ticket #"+ticket+" creado");load();
+                actualizarStatsCliente(cliId, montoVenta).then(function(){
+                  sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
+                    toast("✓ Ticket #"+ticket+" creado");load();
+                  });
                 });
-              });
+              }); // end cashbackProm
+              }); // end coinsLinkProm
             }); // end movProm
           }); // end sPOST ventas
           }); // end montoRealProm
         }); // end buscarCli
       });
-    });
   };
 
   window.pedConcCredito=function(id){
@@ -914,8 +926,10 @@ function rPedidos(el){
           dir_entrega:ped.dir||"",metodo_pago:"credito",lineas:lineasEnriq
         }).then(function(){
           var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy(),nota:"A crédito"}]);
-          sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
-            toast("✓ Ticket #"+ticket+" — a crédito");load();
+          actualizarStatsCliente(ped.cliente_id||0, totalMonto).then(function(){
+            sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
+              toast("✓ Ticket #"+ticket+" — a crédito");load();
+            });
           });
         });
       });
@@ -1426,6 +1440,17 @@ function rVentas(el){
       var t=calcTotals();
       var monto=parseFloat(($("vmonto")||{}).value)||t.tv;
       if(!cliNom.trim()){alert("Escribe el nombre del cliente");return}
+      // Validar stock
+      var sinStock=lineas.filter(function(l){
+        var sku=l.sku||l.inv_id||"";
+        if(!sku||!l.cant)return false;
+        var stock=inv.find(function(x){return x.sku===sku;});
+        return stock&&(parseFloat(stock.stock||0)<parseFloat(l.cant||0));
+      });
+      if(sinStock.length){
+        var names=sinStock.map(function(l){return l.sku||l.desc;}).join(", ");
+        if(!confirm("⚠️ Stock insuficiente para: "+names+"\n¿Continuar de todas formas?"))return;
+      }
       var util=monto-t.tc;
       // Enriquecer lineas con precio_venta, costo_unit y utilidad_unit proporcional
       var totalCosto=t.tc||0;
