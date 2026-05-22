@@ -3424,6 +3424,7 @@ function rReportes(el){
   var ventas=[],movs=[],inv=[];
   var tabActual=0;
   var hoyDate=new Date(),anio=String(hoyDate.getFullYear()),mes=String(hoyDate.getMonth()+1),dia="";
+  var fechaDesde="",fechaHasta="",modoFiltro="mes"; // mes|semana|dia|rango
   var comprasRep=[], movsRep=[];
   var enviosRep=[], prodRepLotes=[], lotesRep=[];
   function load(){
@@ -3463,20 +3464,73 @@ function rReportes(el){
   var TABS=["Estado de Resultados","Balance General","Flujo de Efectivo","KPIs","Clientes Deudores","Pasivos"];
 
   var diasEnMes=new Date(parseInt(anio),parseInt(mes),0).getDate();
-  var diasOpts='<option value="">Mes completo</option>';
-  for(var d=1;d<=diasEnMes;d++){diasOpts+='<option value="'+d+'"'+(String(d)===dia?' selected':'')+'>'+d+'</option>';}
-  el.innerHTML='<div class="mod"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h1 style="font-size:18px;font-weight:700">Reportes</h1><div style="display:flex;gap:8px;flex-wrap:wrap"><select id="ranio" onchange="setAnio(this.value)" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:8px 10px;font-size:12px;color:#E6EDF3"><option value="2026"'+(anio==="2026"?" selected":"")+'>2026</option><option value="2025"'+(anio==="2025"?" selected":"")+'>2025</option><option value="2027"'+(anio==="2027"?" selected":"")+'>2027</option></select><select id="rmes" onchange="setMes(this.value)" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:8px 10px;font-size:12px;color:#E6EDF3"><option value="">Año completo</option>'+MESES.map(function(m,i){return'<option value="'+(i+1)+'"'+(String(i+1)===mes?" selected":"")+'>'+m+'</option>'}).join("")+'</select><select id="rdia" onchange="setDia(this.value)" style="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:8px 10px;font-size:12px;color:#E6EDF3">'+diasOpts+'</select></div></div><div class="tab-nav" id="rtabs"></div><div id="rcont"><div class="spin">Cargando...</div></div></div>';
+  var si="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:8px 10px;font-size:12px;color:#E6EDF3";
+
+  function getWeekRange(){
+    var d=new Date();var day=d.getDay()||7;
+    var mon=new Date(d);mon.setDate(d.getDate()-day+1);
+    var sun=new Date(mon);sun.setDate(mon.getDate()+6);
+    return{desde:mon.toISOString().slice(0,10),hasta:sun.toISOString().slice(0,10)};
+  }
+
+  function buildFilterUI(){
+    var w=getWeekRange();
+    return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+
+      '<select id="ranio" onchange="setAnio(this.value)" style="'+si+'">'+
+        ['2025','2026','2027'].map(function(y){return'<option value="'+y+'"'+(anio===y?' selected':'')+'>'+y+'</option>'}).join('')+
+      '</select>'+
+      '<select id="rmes" onchange="setMes(this.value)" style="'+si+'">'+
+        '<option value="">Año completo</option>'+
+        MESES.map(function(m,i){return'<option value="'+(i+1)+'"'+(String(i+1)===mes?' selected':'')+'>'+m+'</option>'}).join('')+
+      '</select>'+
+      '<select id="rmodo" onchange="setModo(this.value)" style="'+si+'">'+
+        '<option value="mes"'+(modoFiltro==='mes'?' selected':'')+'>Mes completo</option>'+
+        '<option value="semana"'+(modoFiltro==='semana'?' selected':'')+'>Esta semana</option>'+
+        '<option value="dia"'+(modoFiltro==='dia'?' selected':'')+'>Día específico</option>'+
+        '<option value="rango"'+(modoFiltro==='rango'?' selected':'')+'>Rango de fechas</option>'+
+      '</select>'+
+      (modoFiltro==='dia'?'<input type="date" id="rfechaD" value="'+(fechaDesde||new Date().toISOString().slice(0,10))+'" onchange="setFechaD(this.value)" style="'+si+'">':'')+
+      (modoFiltro==='rango'?
+        '<input type="date" id="rfechaDesde" value="'+(fechaDesde||'')+'" onchange="setDesde(this.value)" style="'+si+'"> <span style="color:#8B949E">→</span> <input type="date" id="rfechaHasta" value="'+(fechaHasta||'')+'" onchange="setHasta(this.value)" style="'+si+'">':'')+
+      (modoFiltro==='semana'?'<span style="font-size:11px;color:#8B949E">'+w.desde+' — '+w.hasta+'</span>':'')+
+      '</div>';
+  }
+
+  el.innerHTML='<div class="mod"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><h1 style="font-size:18px;font-weight:700">Reportes</h1><div id="filtros-rep">'+buildFilterUI()+'</div></div><div class="tab-nav" id="rtabs"></div><div id="rcont"><div class="spin">Cargando...</div></div></div>';
+
   var rtabs=$("rtabs");
-  rtabs.innerHTML=TABS.map(function(t,i){return'<button class="tab-btn'+(i===0?" on":"")+'" onclick="rTab('+i+')">'+t+'</button>'}).join("");
-  window.rTab=function(i){tabActual=i;document.querySelectorAll(".tab-btn").forEach(function(b,j){b.className="tab-btn"+(j===i?" on":"")});renderRep()};
-  window.setAnio=function(v){anio=v;dia='';renderRep();};
-  window.setMes=function(v){mes=v;dia='';renderRep();};
+  rtabs.innerHTML=TABS.map(function(t,i){return'<button class="tab-btn"'+(i===0?' class="tab-btn on"':'')+' onclick="rTab('+i+')">'+t+'</button>'}).join("");
+  document.querySelectorAll(".tab-btn")[0].classList.add("on");
+
+  window.rTab=function(i){tabActual=i;document.querySelectorAll(".tab-btn").forEach(function(b,j){b.className="tab-btn"+(j===i?" on":"")});renderRep();};
+  window.setAnio=function(v){anio=v;renderRep();};
+  window.setMes=function(v){mes=v;renderRep();};
+  window.setModo=function(v){
+    modoFiltro=v;
+    if(v==='semana'){var w=getWeekRange();fechaDesde=w.desde;fechaHasta=w.hasta;}
+    document.getElementById('filtros-rep').innerHTML=buildFilterUI();
+    renderRep();
+  };
+  window.setFechaD=function(v){fechaDesde=v;fechaHasta=v;dia=v.slice(8,10);anio=v.slice(0,4);mes=v.slice(5,7);renderRep();};
+  window.setDesde=function(v){fechaDesde=v;renderRep();};
+  window.setHasta=function(v){fechaHasta=v;renderRep();};
   window.setDia=function(v){dia=v;renderRep();};
 
   function calc(){
     var ai=parseInt(anio),mi=parseInt(mes)||0,di=parseInt(dia)||0;
-    var vF=ventas.filter(function(v){var a=parseInt((v.fecha||"").slice(0,4)),m2=parseInt((v.fecha||"").slice(5,7)),d2=parseInt((v.fecha||"").slice(8,10));return a===ai&&(!mi||m2===mi)&&(!di||d2===di);});
-    var mF=movs.filter(function(m){var a=parseInt((m.fecha||"").slice(0,4)),m2=parseInt((m.fecha||"").slice(5,7)),d2=parseInt((m.fecha||"").slice(8,10));return a===ai&&(!mi||m2===mi)&&(!di||d2===di);});
+    function inRango(fecha){
+      if(!fecha)return false;
+      if(modoFiltro==='rango'||modoFiltro==='semana'){
+        if(fechaDesde&&fecha<fechaDesde)return false;
+        if(fechaHasta&&fecha>fechaHasta)return false;
+        return true;
+      }
+      if(modoFiltro==='dia')return fecha===fechaDesde;
+      var a=parseInt(fecha.slice(0,4)),m2=parseInt(fecha.slice(5,7)),d2=parseInt(fecha.slice(8,10));
+      return a===ai&&(!mi||m2===mi)&&(!di||d2===di);
+    }
+    var vF=ventas.filter(function(v){return inRango(v.fecha);});
+    var mF=movs.filter(function(m){return inRango(m.fecha);});
 
     // ── ESTADO DE RESULTADOS ──────────────────────────────────────────
     var vTot=vF.reduce(function(a,v){return a+parseFloat(v.monto_venta||0);},0);
