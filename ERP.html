@@ -1705,7 +1705,7 @@ function rBancos(el){
       var ts=document.getElementById("btotalsel");if(ts)ts.textContent=fmt(tot);
       if($("bmonto"))$("bmonto").value=tot.toFixed(2);
       var refs=[];
-      conAdeudo.forEach(function(co){var c2=document.getElementById("chk_c"+co.num_compra);var a2=document.getElementById("amt_c"+co.num_compra);if(c2&&c2.checked&&a2&&parseFloat(a2.value)>0)refs.push("Compra #"+co.num_compra+": "+fmt(parseFloat(a2.value)));});
+      conAdeudo.forEach(function(co){var c2=document.getElementById("chk_c"+co.num_compra);var a2=document.getElementById("amt_c"+co.num_compra);if(c2&&c2.checked&&a2&&parseFloat(a2.value)>0)refs.push("Compra #"+co.num_compra+": $"+parseFloat(a2.value).toFixed(2));});
       bref._refs=refs;
     }
   }
@@ -1752,7 +1752,7 @@ function rBancos(el){
       var ts=document.getElementById("btotalsel");if(ts)ts.textContent=fmt(tot);
       if($("bmonto"))$("bmonto").value=tot.toFixed(2);
       var refs=[];
-      conAdeudo.forEach(function(co){var c2=document.getElementById("chk_c"+co.num_compra);var a2=document.getElementById("amt_c"+co.num_compra);if(c2&&c2.checked&&a2&&parseFloat(a2.value)>0)refs.push("Compra #"+co.num_compra+": "+fmt(parseFloat(a2.value)));});
+      conAdeudo.forEach(function(co){var c2=document.getElementById("chk_c"+co.num_compra);var a2=document.getElementById("amt_c"+co.num_compra);if(c2&&c2.checked&&a2&&parseFloat(a2.value)>0)refs.push("Compra #"+co.num_compra+": $"+parseFloat(a2.value).toFixed(2));});
       bref._refs=refs;
     }
   }
@@ -1935,7 +1935,7 @@ function rBancos(el){
             vs.forEach(function(v){
               var ck=document.getElementById("chk_v"+v.id);
               var am=document.getElementById("amt_v"+v.id);
-              if(ck&&ck.checked&&am&&parseFloat(am.value)>0)refs2.push("Ticket #"+v.ticket+": "+fmt(parseFloat(am.value)));
+              if(ck&&ck.checked&&am&&parseFloat(am.value)>0)refs2.push("Ticket #"+v.ticket+": $"+parseFloat(am.value).toFixed(2));
             });
             bref._refs=refs2;
             bref._ventasMap=vs.reduce(function(a,v){
