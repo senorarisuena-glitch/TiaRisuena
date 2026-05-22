@@ -1710,18 +1710,28 @@ function rBancos(el){
     }
   }
 
-  function renderComprasCheck(bref,conAdeudo,pagosMap,color,title){
+  function renderComprasCheck(bref,conAdeudo,pagosMap,color,title,meEdit){
     if(!conAdeudo.length){bref.innerHTML='<div style="font-size:11px;color:#8B949E;padding:6px 0">Sin adeudos pendientes.</div>';return;}
+    // Parsear refs existentes si estamos editando
+    var linkedMap={};
+    if(meEdit&&meEdit.gasto_ticket){
+      (meEdit.gasto_ticket||"").split(/,\s*/).forEach(function(ref){
+        var m=ref.match(/Compra #(\d+)[^$]*\$([\d,.]+)/);
+        if(m)linkedMap[parseInt(m[1])]=parseFloat(m[2].replace(/,/g,""))||0;
+      });
+    }
     var wrap=document.createElement("div");
     wrap.innerHTML='<div style="font-size:10px;color:#8B949E;letter-spacing:.08em;margin-bottom:8px">'+title+'</div>';
     conAdeudo.forEach(function(co){
       var adeudo=parseFloat((co.total-(pagosMap[co.num_compra]||0)).toFixed(2));
+      var preloadMonto=linkedMap[co.num_compra]||adeudo;
+      var preloadChecked=!!linkedMap[co.num_compra];
       var row=document.createElement("div");
-      row.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#21262D;border:1px solid #30363D;border-radius:2px;margin-bottom:4px;font-size:12px;cursor:pointer";
-      row.innerHTML='<input type="checkbox" id="chk_c'+co.num_compra+'" style="cursor:pointer;width:14px;height:14px;accent-color:'+color+'">'+
+      row.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 10px;background:"+(preloadChecked?"rgba(74,158,255,.06)":"#21262D")+";border:1px solid "+(preloadChecked?color:"#30363D")+";border-radius:2px;margin-bottom:4px;font-size:12px;cursor:pointer";
+      row.innerHTML='<input type="checkbox" id="chk_c'+co.num_compra+'" '+(preloadChecked?"checked":"")+' style="cursor:pointer;width:14px;height:14px;accent-color:'+color+'">'+
         '<div style="flex:1"><span style="color:'+color+';font-weight:700">Compra #'+co.num_compra+'</span><span style="color:#8B949E;margin-left:8px">'+co.proveedor+(co.desc?' · '+co.desc:'')+'</span></div>'+
         '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:10px;color:#8B949E">Adeudo '+fmt(adeudo)+'</span><span style="color:#8B949E;font-size:11px">$</span>'+
-        '<input type="number" id="amt_c'+co.num_compra+'" value="'+adeudo+'" min="0" max="'+adeudo+'" step="0.01" style="width:90px;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:4px 6px;font-size:12px;color:#E6EDF3;text-align:right" onclick="event.stopPropagation()">'+
+        '<input type="number" id="amt_c'+co.num_compra+'" value="'+preloadMonto+'" min="0" max="'+(Math.max(adeudo,preloadMonto))+'" step="0.01" style="width:90px;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:4px 6px;font-size:12px;color:#E6EDF3;text-align:right" onclick="event.stopPropagation()">'+
         '</div>';
       var chk=row.querySelector("input[type=checkbox]");
       var amt=row.querySelector("input[type=number]");
@@ -1735,6 +1745,7 @@ function rBancos(el){
     tr.innerHTML='<span style="color:#8B949E">Total:</span><span id="btotalsel" style="color:'+color+'">$0.00</span>';
     wrap.appendChild(tr);
     bref.innerHTML="";bref.appendChild(wrap);
+    if(meEdit)setTimeout(rTC,50);
     function rTC(){
       var tot=0;
       conAdeudo.forEach(function(co){var c2=document.getElementById("chk_c"+co.num_compra);var a2=document.getElementById("amt_c"+co.num_compra);if(c2&&c2.checked&&a2)tot+=parseFloat(a2.value)||0;});
@@ -1750,7 +1761,7 @@ function rBancos(el){
     var esEd=!!me;
     var egreso=esEd?me.egreso:false;
     var html='<div class="mod">';
-    html+='<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h1 style="font-size:18px;font-weight:700">'+(esEd?"Editar":"Nuevo")+' Movimiento</h1><button class="btn btn-g" onclick="goMod(\'bancos\')">← Cancelar</button></div>';
+    html+='<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h1 style="font-size:18px;font-weight:700">'+(esEd?"Editar":"Nuevo")+' Movimiento'+(esEd?' <span style="color:#8B949E;font-size:13px;font-weight:400">#'+me.id+'</span>':'')+'</h1><button class="btn btn-g" onclick="goMod(\'bancos\')">← Cancelar</button></div>';
     html+='<div class="grid2">';
     html+='<div class="card">';
     html+=fi("FECHA",'<input id="bfecha" type="date" value="'+(esEd?me.fecha:hoy())+'">');
@@ -1811,7 +1822,7 @@ function rBancos(el){
             var conAdeudo=(Array.isArray(compras)?compras:[]).filter(function(co){
               return co.tipo_inv!=="servicio"&&(co.total-(pagosMap[co.num_compra]||0))>0.01;
             });
-            renderComprasCheck(bref,conAdeudo,pagosMap,"#FB923C","PROVEEDORES CON ADEUDO:");
+            renderComprasCheck(bref,conAdeudo,pagosMap,"#FB923C","PROVEEDORES CON ADEUDO:",esEd?me:null);
           });
         });
       } else if(mov==="Pago Repartidores" && egreso){
@@ -1827,7 +1838,7 @@ function rBancos(el){
             var conAdeudo=(Array.isArray(compras)?compras:[]).filter(function(co){
               return co.tipo_inv==="servicio"&&(co.total-(pagosMap[co.num_compra]||0))>0.01;
             });
-            renderComprasCheck(bref,conAdeudo,pagosMap,"#4A9EFF","RUTAS CON ADEUDO:");
+            renderComprasCheck(bref,conAdeudo,pagosMap,"#4A9EFF","RUTAS CON ADEUDO:",esEd?me:null);
           });
         });
       } else if(mov==="Venta"){
