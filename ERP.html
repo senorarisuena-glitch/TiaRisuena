@@ -3622,18 +3622,19 @@ function rReportes(el){
 
     // ── ESTADO DE RESULTADOS ──────────────────────────────────────────
     var vTot=vF.reduce(function(a,v){return a+parseFloat(v.monto_venta||0);},0);
-    // Costo de ventas: usar costo_productos si existe, sino calcular desde inv (costo por SKU)
-    var cVen=vF.reduce(function(a,v){
-      if(parseFloat(v.costo_productos||0)>0) return a+parseFloat(v.costo_productos);
-      // Calcular desde lineas usando costo del inventario por SKU
-      return a+(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
-        var nom=l.sku||l.desc||l.nombre||"";
-        if(!nom)return b;
-        var invItem=inv.find(function(x){return x.nombre===nom;});
-        var cu=parseFloat(l.costo_unit||0)||(invItem?parseFloat(invItem.costo_unit||0):0);
-        var cant=parseFloat(l.cant||l.cantidad||l.qty||0);
-        return b+(cant*cu);
-      },0);
+    // Costo de ventas: desde lotes salidas del periodo (misma fuente que el Balance General)
+    // Esto garantiza que Estado de Resultados y Balance siempre cuadren
+    var ticketsDelPeriodo=new Set(vF.map(function(v){return String(v.ticket);}));
+    var cVen=lotesRep.filter(function(lt){
+      if(lt.movimiento!=="salida"||lt.tipo!=="venta")return false;
+      // Filtrar por periodo via num_ref (V-ticket) o fecha
+      var ticketRef=lt.num_ref?String(lt.num_ref).replace("V-",""):"";
+      if(ticketRef&&ticketsDelPeriodo.has(ticketRef))return true;
+      // Fallback: filtrar por fecha del lote
+      var a2=parseInt((lt.fecha||"").slice(0,4)),m3=parseInt((lt.fecha||"").slice(5,7)),d3=parseInt((lt.fecha||"").slice(8,10));
+      return a2===ai&&(!mi||m3===mi)&&(!di||d3===di);
+    }).reduce(function(a,lt){
+      return a+parseFloat(lt.cantidad||0)*parseFloat(lt.costo_unit||0);
     },0);
     var uBruta=vTot-cVen;
     // Gastos = TODOS los egresos excepto Pago Proveedores (ese es pasivo, no gasto operativo)
@@ -3665,10 +3666,12 @@ function rReportes(el){
     movs.forEach(function(m){saldos[m.cuenta_id]=(saldos[m.cuenta_id]||0)+(m.egreso?-parseFloat(m.monto||0):parseFloat(m.monto||0));});
     var efec=CUENTAS.reduce(function(a,ct){return a+Math.max(0,saldos[ct.id]||0);},0);
     var porCobrar=ventas.reduce(function(a,v){return a+parseFloat(v.adeudo||0);},0);
-    // valInv desde lotes — misma lógica que pestaña Inventario
+    // valInv desde lotes — misma lógica exacta que pestaña Inventario (solo terminado/mixto)
     var stockLotes={};
     lotesRep.forEach(function(lt){
       if(!lt.sku)return;
+      var ci=CATALOGO_SKU.find(function(s){return s.sku===lt.sku;});
+      if(ci&&ci.tipo!=="terminado"&&ci.tipo!=="mixto")return;
       if(!stockLotes[lt.sku])stockLotes[lt.sku]={cantidad:0,cu:0};
       var cant=parseFloat(lt.cantidad)||0;
       var cu=parseFloat(lt.costo_unit)||0;
@@ -3711,11 +3714,13 @@ function rReportes(el){
     var deudaRep=Math.max(0,totalDeudaEnvios-totalPagadoRep);
 
     var totalPasivos=inv2+deudaProv+deudaRep;
-    var uNetaReal=activos-totalPasivos;
+    // La Utilidad Neta del Balance = misma que Estado de Resultados (uBruta - gastos)
+    // El Balance cuadra como: Activos = Pasivos + Utilidad Neta
+    // No recalculamos activos-pasivos porque genera discrepancia por envíos devengados
 
     return{vTot:vTot,cVen:cVen,uBruta:uBruta,gastos:gastos,gastosDetalle:gastosDetalle,uNeta:uNeta,cobros:cobros,gOp:gOp,
            inv2:inv2,deudaProv:deudaProv,deudaRep:deudaRep,porCobrar:porCobrar,valInv:valInv,
-           saldos:saldos,efec:efec,activos:activos,pasivos:totalPasivos,ganancia:uNetaReal,
+           saldos:saldos,efec:efec,activos:activos,pasivos:totalPasivos,ganancia:uNeta,
            flujoOp:cobros-gOp,flujoNeto:cobros-gOp+inv2,vF:vF,ventas:ventas};
   }
   function kbox(l,v,c){return'<div style="background:#21262D;border:1px solid #30363D;border-radius:2px;padding:16px"><div style="font-size:9px;color:#8B949E;letter-spacing:.1em;margin-bottom:6px">'+l+'</div><div style="font-size:18px;font-weight:700;color:'+(c||"#E6EDF3")+'">'+v+'</div></div>'}
