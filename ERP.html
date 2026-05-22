@@ -2149,21 +2149,18 @@ function rCompras(el){
             });
           });
           Promise.all(lotesPromises).then(function(){
+            _cGuardando=false;
             load();goMod("compras");toast("Compra #"+ncFinal+" registrada — "+validLines.length+" producto(s)");
           });
         } else {
           // Al editar grupo: borrar TODAS las filas del grupo y recrear
           var numCompra=body.num_compra;
-          // Obtener todos los IDs del grupo
           sGET("compras","num_compra=eq."+numCompra).then(function(allRows){
             var allIds=(allRows||[]).map(function(r){return r.id;});
-            // Borrar lotes de todas las filas
             var delLotesProms=allIds.map(function(rid){return sDEL("lotes","tipo=eq.compra&ref_id=eq."+rid);});
-            // Borrar todas las filas del grupo
             var delRowsProms=allIds.map(function(rid){return sDEL("compras","id=eq."+rid);});
             Promise.all(delLotesProms.concat(delRowsProms)).then(function(){
               var fecha=body.fecha||hoy();
-              // Insertar una fila por línea
               var insertProms=validLines.map(function(l){
                 var sku=l.nombre||l.sku||"";
                 var cant=parseFloat(l.cantidad)||0;
@@ -2181,11 +2178,14 @@ function rCompras(el){
                   return sPostLote({sku:sku,tipo:"compra",movimiento:"entrada",ref_id:newId,fecha:fecha,cantidad:cant,costo_unit:pu,concepto:"Compra #"+numCompra+" — "+(l.desc||sku),num_ref:"C-"+numCompra});
                 });
               });
-              Promise.all(insertProms).then(function(){load();goMod("compras");toast("Compra #"+numCompra+" actualizada");});
+              Promise.all(insertProms).then(function(){
+                _cGuardando=false;
+                load();goMod("compras");toast("Compra #"+numCompra+" actualizada");
+              });
             });
           });
         }
-      }); // end ncProm
+      }); // end save.then
       }); // end ncProm.then
     };
     renderLineas();
