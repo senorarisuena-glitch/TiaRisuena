@@ -2280,34 +2280,63 @@ function rProduccion(el){
       html+='<td style="color:#E3B341;font-weight:700">'+n+'</td>';
       html+='<td style="color:#8B949E">'+rep.fecha+'</td>';
       html+='<td>'+bdg(ml,mc)+'</td>';
-      html+='<td style="font-size:11px;color:#8B949E">'+items.length+' producto(s) · <span style="color:#4A9EFF;cursor:pointer" onclick="togglePRow(\''+rowId+'\')">ver detalle ▾</span></td>';
+      html+='<td style="font-size:11px;color:#8B949E">'+items.length+' producto(s) · <span style="color:#4A9EFF;cursor:pointer" onclick="togglePRow(\''+rowId+'\','+n+')">ver detalle ▾</span></td>';
       html+='<td style="text-align:right">'+totalCant+'</td>';
       html+='<td style="text-align:right;color:#FB923C">'+fmt(totalCosto)+'</td>';
-      html+='<td><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="pDelGrupo('+n+')">✕</button></td>';
+      html+='<td><div style="display:flex;gap:6px">'+
+        '<button class="btn btn-o btn-s" style="border-color:#4A9EFF;color:#4A9EFF" onclick="pEditGrupo('+n+')">editar</button>'+
+        '<button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="pDelGrupo('+n+')">✕</button>'+
+        '</div></td>';
       html+='</tr>';
-
-      // Fila expandible
+      // Fila expandible dinámica
       html+='<tr id="'+rowId+'" style="display:none"><td colspan="7" style="padding:0">';
-      html+='<table style="width:100%;background:#0D1117;border-top:1px solid #21262D"><tbody>';
-      items.forEach(function(p){
-        html+='<tr>';
-        html+='<td style="padding:5px 16px;font-size:11px;color:#C084FC;font-weight:700">'+p.producto_nombre+'</td>';
-        html+='<td style="padding:5px;font-size:11px;color:#8B949E">'+p.responsable+'</td>';
-        html+='<td style="padding:5px;text-align:right;font-size:11px">'+p.piezas+'</td>';
-        html+='<td style="padding:5px;text-align:right;font-size:11px;color:#FB923C">'+fmt(p.costo_unitario)+'/u</td>';
-        html+='<td style="padding:5px;text-align:right;font-size:11px;font-weight:700">'+fmt(p.costo_total)+'</td>';
-        html+='<td style="padding:5px"><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149;font-size:10px" onclick="pDel('+p.id+')">✕</button></td>';
-        html+='</tr>';
-      });
-      html+='</tbody></table></td></tr>';
+      html+='<div id="'+rowId+'_content" style="background:#0D1117;border-top:1px solid #21262D;padding:8px 16px">';
+      html+='<div style="font-size:11px;color:#8B949E">Cargando...</div>';
+      html+='</div></td></tr>';
     });
 
     html+='</tbody></table></div>';
     el.innerHTML=html;
 
-    window.togglePRow=function(id){
-      var row=document.getElementById(id);
-      if(row)row.style.display=row.style.display==='none'?'table-row':'none';
+    window.togglePRow=function(rowId,n){
+      var row=document.getElementById(rowId);
+      if(!row)return;
+      if(row.style.display!=='none'){row.style.display='none';return;}
+      row.style.display='table-row';
+      sGET("lotes","tipo=eq.produccion&ref_id=eq."+n+"&order=movimiento.desc").then(function(lotes){
+        var content=document.getElementById(rowId+'_content');
+        if(!content)return;
+        var entradas=(lotes||[]).filter(function(l){return l.movimiento==='entrada';});
+        var salidas=(lotes||[]).filter(function(l){return l.movimiento==='salida';});
+        var h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+        h+='<div><div style="font-size:10px;color:#00C896;font-weight:700;margin-bottom:6px">📦 PRODUCIDOS</div><table style="width:100%"><tbody>';
+        entradas.forEach(function(l){
+          h+='<tr><td style="font-size:11px;color:#C084FC;font-weight:700;padding:3px 0">'+l.sku+'</td>';
+          h+='<td style="font-size:11px;text-align:right;padding:3px 0">'+l.cantidad+'</td>';
+          h+='<td style="font-size:11px;text-align:right;color:#8B949E;padding:3px 0">'+fmt(l.costo_unit)+'/u</td>';
+          h+='<td style="font-size:11px;text-align:right;font-weight:700;color:#00C896;padding:3px 0">'+fmt(l.cantidad*l.costo_unit)+'</td></tr>';
+        });
+        h+='</tbody></table></div>';
+        h+='<div><div style="font-size:10px;color:#FB923C;font-weight:700;margin-bottom:6px">⚗️ INSUMOS USADOS</div>';
+        if(!salidas.length){h+='<div style="font-size:11px;color:#8B949E">Sin insumos</div>';}
+        else{
+          h+='<table style="width:100%"><tbody>';
+          salidas.forEach(function(l){
+            h+='<tr><td style="font-size:11px;color:#C084FC;font-weight:700;padding:3px 0">'+l.sku+'</td>';
+            h+='<td style="font-size:11px;text-align:right;padding:3px 0">'+l.cantidad+'</td>';
+            h+='<td style="font-size:11px;text-align:right;color:#8B949E;padding:3px 0">'+fmt(l.costo_unit)+'/u</td>';
+            h+='<td style="font-size:11px;text-align:right;font-weight:700;color:#FB923C;padding:3px 0">-'+fmt(l.cantidad*l.costo_unit)+'</td></tr>';
+          });
+          h+='</tbody></table>';
+        }
+        h+='</div></div>';
+        content.innerHTML=h;
+      });
+    };
+    window.pEditGrupo=function(n){
+      var items=grupos[n];
+      if(!items||!items.length)return;
+      toast("Editar lote — próximamente");
     };
     window.pDelGrupo=function(n){
       if(!confirm("¿Eliminar Lote #"+n+" completo?"))return;
