@@ -2094,8 +2094,15 @@ function rCompras(el){
       var validLines=lineas.filter(function(l){return (l.nombre||l.sku||'').trim()&&parseFloat(l.cantidad)>0;});
       if(!validLines.length){alert("Agrega al menos un producto");_cGuardando=false;return}
       var total=calcTotal();
+
+      // Siempre consultar el max actual desde DB para evitar saltos
+      var ncProm=cid?Promise.resolve(autoNC):sGET("compras","order=num_compra.desc&limit=1").then(function(rows){
+        return rows&&rows[0]?rows[0].num_compra+1:1;
+      });
+
+      ncProm.then(function(ncFinal){
       var body={
-        num_compra:autoNC,
+        num_compra:ncFinal,
         fecha:($("cfecha")||{}).value||hoy(),
         proveedor:prov,
         proveedor_id:0,
@@ -2138,27 +2145,48 @@ function rCompras(el){
               fecha:fecha,
               cantidad:cant,
               costo_unit:pu,
-              concepto:"Compra #"+autoNC+" — "+(l.descripcion||sku),num_ref:"C-"+autoNC
+              concepto:"Compra #"+ncFinal+" — "+(l.descripcion||sku),num_ref:"C-"+ncFinal
             });
           });
           Promise.all(lotesPromises).then(function(){
-            load();goMod("compras");toast("Compra #"+autoNC+" registrada — "+validLines.length+" producto(s)");
+            load();goMod("compras");toast("Compra #"+ncFinal+" registrada — "+validLines.length+" producto(s)");
           });
         } else {
-          // Al editar: borrar lotes viejos de esta compra y recrear
-          sDEL("lotes","tipo=eq.compra&ref_id=eq."+cid).then(function(){
-            var fecha=body.fecha||hoy();
-            var lotesUpd=validLines.map(function(l){
-              var sku=l.nombre||l.sku||"";
-              var cant=parseFloat(l.cantidad)||0;
-              var pu=parseFloat(l.pu)||0;
-              if(!sku||!cant)return Promise.resolve();
-              return sPostLote({sku:sku,tipo:"compra",movimiento:"entrada",ref_id:cid,fecha:fecha,cantidad:cant,costo_unit:pu,concepto:"Compra #"+autoNC+" — "+(l.descripcion||sku),num_ref:"C-"+autoNC});
+          // Al editar grupo: borrar TODAS las filas del grupo y recrear
+          var numCompra=body.num_compra;
+          // Obtener todos los IDs del grupo
+          sGET("compras","num_compra=eq."+numCompra).then(function(allRows){
+            var allIds=(allRows||[]).map(function(r){return r.id;});
+            // Borrar lotes de todas las filas
+            var delLotesProms=allIds.map(function(rid){return sDEL("lotes","tipo=eq.compra&ref_id=eq."+rid);});
+            // Borrar todas las filas del grupo
+            var delRowsProms=allIds.map(function(rid){return sDEL("compras","id=eq."+rid);});
+            Promise.all(delLotesProms.concat(delRowsProms)).then(function(){
+              var fecha=body.fecha||hoy();
+              // Insertar una fila por línea
+              var insertProms=validLines.map(function(l){
+                var sku=l.nombre||l.sku||"";
+                var cant=parseFloat(l.cantidad)||0;
+                var pu=parseFloat(l.pu)||0;
+                var tot=cant*pu;
+                return sPOST("compras",{
+                  num_compra:numCompra,fecha:fecha,
+                  proveedor:body.proveedor,proveedor_id:0,
+                  producto_nombre:sku,descripcion:l.desc||sku,
+                  tipo_inv:l.tipo_inv||"insumo",cantidad:cant,pu:pu,total:tot,
+                  responsable:body.responsable
+                }).then(function(res){
+                  var newId=Array.isArray(res)&&res[0]?res[0].id:null;
+                  if(!sku||!cant||!newId)return Promise.resolve();
+                  return sPostLote({sku:sku,tipo:"compra",movimiento:"entrada",ref_id:newId,fecha:fecha,cantidad:cant,costo_unit:pu,concepto:"Compra #"+numCompra+" — "+(l.desc||sku),num_ref:"C-"+numCompra});
+                });
+              });
+              Promise.all(insertProms).then(function(){load();goMod("compras");toast("Compra #"+numCompra+" actualizada");});
             });
-            Promise.all(lotesUpd).then(function(){load();goMod("compras");toast("Compra actualizada");});
           });
         }
-      });
+      }); // end ncProm
+      }); // end ncProm.then
     };
     renderLineas();
   }
@@ -2227,17 +2255,70 @@ function rProduccion(el){
     html+='<h1 style="font-size:18px;font-weight:700">Producción</h1>';
     html+='<button class="btn btn-p" onclick="pNuevo()">+ Nuevo Lote</button></div>';
     if(!prod.length){html+='<div class="empty">Sin lotes registrados.</div></div>';el.innerHTML=html;return;}
-    html+='<table><thead><tr><th>Lote #</th><th>Fecha</th><th>Modo</th><th>Producto</th><th style="text-align:right">Cant</th><th style="text-align:right">Costo Unit.</th><th></th></tr></thead><tbody>';
+
+    // Agrupar por num_lote
+    var grupos={};
     prod.forEach(function(p){
-      var mc={kilos:"#00C896",otro:"#4A9EFF"}[p.modo_prod]||"#8B949E";
-      var ml={kilos:"Kilos",otro:"Otro"}[p.modo_prod]||"Lote";
-      html+='<tr><td style="color:#E3B341;font-weight:700">'+p.num_lote+'</td><td style="color:#8B949E">'+p.fecha+'</td>';
-      html+='<td>'+bdg(ml,mc)+'</td><td style="font-size:11px">'+p.producto_nombre+'</td>';
-      html+='<td style="text-align:right">'+p.piezas+'</td><td style="text-align:right;color:#FB923C">'+fmt(p.costo_unitario)+'</td>';
-      html+='<td><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="pDel('+p.id+')">✕</button></td></tr>';
+      var n=p.num_lote;
+      if(!grupos[n])grupos[n]=[];
+      grupos[n].push(p);
     });
+    var numsSorted=Object.keys(grupos).map(Number).sort(function(a,b){return b-a;});
+
+    html+='<table><thead><tr><th>Lote #</th><th>Fecha</th><th>Modo</th><th>Productos</th><th style="text-align:right">Total Cant</th><th style="text-align:right">Costo Total</th><th></th></tr></thead><tbody>';
+
+    numsSorted.forEach(function(n){
+      var items=grupos[n];
+      var rep=items[0];
+      var mc={kilos:"#00C896",otro:"#4A9EFF"}[rep.modo_prod]||"#8B949E";
+      var ml={kilos:"Kilos",otro:"Otro"}[rep.modo_prod]||"Lote";
+      var totalCant=items.reduce(function(a,p){return a+parseFloat(p.piezas||0);},0);
+      var totalCosto=items.reduce(function(a,p){return a+parseFloat(p.costo_total||0);},0);
+      var rowId='pg_'+n;
+
+      html+='<tr>';
+      html+='<td style="color:#E3B341;font-weight:700">'+n+'</td>';
+      html+='<td style="color:#8B949E">'+rep.fecha+'</td>';
+      html+='<td>'+bdg(ml,mc)+'</td>';
+      html+='<td style="font-size:11px;color:#8B949E">'+items.length+' producto(s) · <span style="color:#4A9EFF;cursor:pointer" onclick="togglePRow(\''+rowId+'\')">ver detalle ▾</span></td>';
+      html+='<td style="text-align:right">'+totalCant+'</td>';
+      html+='<td style="text-align:right;color:#FB923C">'+fmt(totalCosto)+'</td>';
+      html+='<td><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149" onclick="pDelGrupo('+n+')">✕</button></td>';
+      html+='</tr>';
+
+      // Fila expandible
+      html+='<tr id="'+rowId+'" style="display:none"><td colspan="7" style="padding:0">';
+      html+='<table style="width:100%;background:#0D1117;border-top:1px solid #21262D"><tbody>';
+      items.forEach(function(p){
+        html+='<tr>';
+        html+='<td style="padding:5px 16px;font-size:11px;color:#C084FC;font-weight:700">'+p.producto_nombre+'</td>';
+        html+='<td style="padding:5px;font-size:11px;color:#8B949E">'+p.responsable+'</td>';
+        html+='<td style="padding:5px;text-align:right;font-size:11px">'+p.piezas+'</td>';
+        html+='<td style="padding:5px;text-align:right;font-size:11px;color:#FB923C">'+fmt(p.costo_unitario)+'/u</td>';
+        html+='<td style="padding:5px;text-align:right;font-size:11px;font-weight:700">'+fmt(p.costo_total)+'</td>';
+        html+='<td style="padding:5px"><button class="btn btn-o btn-s" style="border-color:#F85149;color:#F85149;font-size:10px" onclick="pDel('+p.id+')">✕</button></td>';
+        html+='</tr>';
+      });
+      html+='</tbody></table></td></tr>';
+    });
+
     html+='</tbody></table></div>';
     el.innerHTML=html;
+
+    window.togglePRow=function(id){
+      var row=document.getElementById(id);
+      if(row)row.style.display=row.style.display==='none'?'table-row':'none';
+    };
+    window.pDelGrupo=function(n){
+      if(!confirm("¿Eliminar Lote #"+n+" completo?"))return;
+      var items=grupos[n]||[];
+      var proms=items.map(function(p){
+        return sDEL("produccion","id=eq."+p.id).then(function(){
+          return sDEL("lotes","tipo=eq.produccion&ref_id=eq."+p.num_lote);
+        });
+      });
+      Promise.all(proms).then(function(){load();toast("Lote #"+n+" eliminado","err");});
+    };
   }
 
   window.pNuevo=function(){pForm();};
@@ -3223,7 +3304,7 @@ function rClientes(el){
       } else {
         var maxCod=0;clientes.forEach(function(x){var n=parseInt((x.codigo||"CLI000").replace("CLI",""));if(n>maxCod)maxCod=n});
         var num=maxCod+1;var codigo="CLI"+(num<10?"00":num<100?"0":"")+num;
-        body={codigo:codigo,nombre:nom.trim(),apodo:($("clap")||{}).value||"",telefono:tel.trim().replace(/\D/g,"").slice(-10),direccion:($("cldir")||{}).value||"",facebook:($("clfb")||{}).value||"",password:($("clpw")||{}).value||"",coins:0,saldo_mxn:0,gastado:0,pedidos_count:0};
+        body={codigo:codigo,nombre:nom.trim(),apodo:($("clap")||{}).value||"",telefono:tel.trim().replace(/\D/g,"").slice(-10),direccion:($("cldir")||{}).value||"",facebook:($("clfb")||{}).value||"",password:($("clpw")||{}).value||"",coins:0,gastado:0,pedidos_count:0};
         sPOST("clientes",body).then(function(){load();goMod("clientes");toast("Cliente "+codigo+" registrado")});
       }
     };
