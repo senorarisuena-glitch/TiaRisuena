@@ -865,6 +865,17 @@ function actualizarStatsCliente(cliId, monto){
             metodo_pago:sinPago?"coins":tipo,
             lineas:lineasEnriq
           }).then(function(){
+            // Crear lotes de salida por cada línea
+            var lotesVenta=lineasEnriq.map(function(l){
+              if(!l.sku||!l.cant)return Promise.resolve();
+              return sPostLote({
+                sku:l.sku,tipo:"venta",movimiento:"salida",
+                ref_id:ticket,fecha:hoy(),
+                cantidad:l.cant,costo_unit:l.costo_unit||0,
+                concepto:"Venta ticket #"+ticket,num_ref:"V-"+ticket
+              });
+            });
+            Promise.all(lotesVenta).then(function(){
             // Crear movimiento en tesorería si hay monto
             var movProm=monto>0?sPOST("movimientos",{
               fecha:hoy(),cuenta:cuenta,cuenta_id:{"Caja Chica":1,"Mercado Pago":2,"Kiyoshi":3}[cuenta]||1,tipo_pago:tipo,
@@ -895,6 +906,7 @@ function actualizarStatsCliente(cliId, monto){
               }); // end cashbackProm
               }); // end coinsLinkProm
             }); // end movProm
+            }); // end lotesVenta
           }); // end sPOST ventas
           }); // end montoRealProm
         }); // end buscarCli
