@@ -2685,14 +2685,17 @@ function rProduccion(el){
           var isHGPLine=isHGP(l.sku);
           var gr=isHGPLine?1:grPorSKU(l.sku);
           var grLinea=(parseFloat(l.cantidad)||0)*gr;
-          var cuLinea=grTotal>0?(costoTotal*(grLinea/grTotal)/(parseFloat(l.cantidad)||1)):0;
+          var cuFlor=grTotal>0?(costoTotal*(grLinea/grTotal)/(parseFloat(l.cantidad)||1)):0;
+          var envCU=l.envase&&invStock[l.envase]?invStock[l.envase].cu:0;
+          var cuLinea=cuFlor+envCU;
+          var costoLinea=cuLinea*(parseFloat(l.cantidad)||1);
           return sPOST("produccion",{
             num_lote:autoL,fecha:fecha,responsable:resp,
             producto_sku_id:0,producto_nombre:l.sku,
             piezas:parseFloat(l.cantidad),
             mano_obra_unit:0,
             costo_unitario:parseFloat(cuLinea.toFixed(4)),
-            costo_total:parseFloat((cuLinea*(parseFloat(l.cantidad)||1)).toFixed(2)),
+            costo_total:parseFloat(costoLinea.toFixed(2)),
             tipo_inv:"terminado",modo_prod:"kilos",
             insumos:[{sku:florSKU,nombre:invStock[florSKU]?invStock[florSKU].desc:florSKU,cant:grLinea,costo_unit:cu}].concat(l.envase?[{sku:l.envase,nombre:l.envase,cant:parseFloat(l.cantidad)||0,costo_unit:0}]:[])
           });
@@ -2711,11 +2714,13 @@ function rProduccion(el){
               lotesP.push(sPostLote({sku:l.envase,tipo:"produccion",movimiento:"salida",ref_id:autoL,fecha:fecha,cantidad:parseFloat(l.cantidad),costo_unit:envCU,concepto:"Envase prod lote #"+autoL,num_ref:"P-"+autoL}));
             }
           });
-          // ENTRADA: terminados producidos
+          // ENTRADA: terminados producidos (costo flor + envase)
           validas.forEach(function(l){
             var gr=isHGP(l.sku)?1:grPorSKU(l.sku);
             var grLinea=(parseFloat(l.cantidad)||0)*gr;
-            var cuLinea=grTotal>0?(costoTotal*(grLinea/grTotal)/(parseFloat(l.cantidad)||1)):0;
+            var cuFlor=grTotal>0?(costoTotal*(grLinea/grTotal)/(parseFloat(l.cantidad)||1)):0;
+            var envCU=l.envase&&invStock[l.envase]?invStock[l.envase].cu:0;
+            var cuLinea=cuFlor+envCU; // costo flor + costo envase por unidad
             lotesP.push(sPostLote({sku:l.sku,tipo:"produccion",movimiento:"entrada",ref_id:autoL,fecha:fecha,cantidad:parseFloat(l.cantidad),costo_unit:parseFloat(cuLinea.toFixed(4)),concepto:"Produccion lote #"+autoL,num_ref:"P-"+autoL}));
           });
           Promise.all(lotesP).then(function(){load();goMod("produccion");toast("Lote #"+autoL+" — "+validas.length+" salidas");});
