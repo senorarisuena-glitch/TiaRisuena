@@ -1831,17 +1831,36 @@ function rBancos(el){
           });
         });
       } else if(mov==="Venta"){
-        sGET("ventas","order=ticket.desc").then(function(vsAll){var vs=(Array.isArray(vsAll)?vsAll:[]).filter(function(v){return parseFloat(v.adeudo||0)>0});{
+        sGET("ventas","order=ticket.desc").then(function(vsAll){
+          // Al editar: incluir tickets vinculados aunque adeudo sea 0
+          var linkedTickets=[];
+          if(esEd&&me.gasto_ticket){
+            (me.gasto_ticket||"").split(/,\s*/).forEach(function(ref){
+              var m=ref.match(/Ticket #(\d+)/);
+              if(m)linkedTickets.push(parseInt(m[1]));
+            });
+          }
+          var vs=(Array.isArray(vsAll)?vsAll:[]).filter(function(v){
+            return parseFloat(v.adeudo||0)>0||linkedTickets.indexOf(v.ticket)>=0;
+          });
           if(!Array.isArray(vs)||!vs.length){bref.innerHTML='<div style="font-size:11px;color:#8B949E;padding:6px 0">Sin ventas con adeudo pendiente.</div>';return}
           var wrap2=document.createElement("div");
           wrap2.innerHTML='<div style="font-size:10px;color:#8B949E;letter-spacing:.08em;margin-bottom:8px">DISTRIBUIR COBRO ENTRE VENTAS CON ADEUDO:</div>';
           vs.forEach(function(v){
+            // Monto preloaded si está en gasto_ticket
+            var preloadMonto=parseFloat(v.adeudo||0);
+            var preloadChecked=false;
+            if(esEd&&me.gasto_ticket){
+              var regex=new RegExp("Ticket #"+v.ticket+":[^,]*\\$([\\d,]+\\.?\\d*)");
+              var match=me.gasto_ticket.match(regex);
+              if(match){preloadMonto=parseFloat(match[1].replace(/,/g,""))||preloadMonto;preloadChecked=true;}
+            }
             var row2=document.createElement("div");
-            row2.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#21262D;border:1px solid #30363D;border-radius:2px;margin-bottom:4px;font-size:12px;cursor:pointer";
-            row2.innerHTML='<input type="checkbox" id="chk_v'+v.id+'" style="cursor:pointer;width:14px;height:14px;accent-color:#00C896">'+
+            row2.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 10px;background:"+(preloadChecked?"rgba(0,200,150,.08)":"#21262D")+";border:1px solid "+(preloadChecked?"#00C896":"#30363D")+";border-radius:2px;margin-bottom:4px;font-size:12px;cursor:pointer";
+            row2.innerHTML='<input type="checkbox" id="chk_v'+v.id+'" '+(preloadChecked?"checked":"")+' style="cursor:pointer;width:14px;height:14px;accent-color:#00C896">'+
               '<div style="flex:1"><span style="color:#4A9EFF;font-weight:700">#'+v.ticket+'</span><span style="color:#8B949E;margin-left:8px">'+v.cliente_nombre+'</span></div>'+
               '<div style="display:flex;align-items:center;gap:4px"><span style="font-size:10px;color:#8B949E">Adeudo '+fmt(v.adeudo)+'</span><span style="color:#8B949E;font-size:11px">$</span>'+
-              '<input type="number" id="amt_v'+v.id+'" value="'+parseFloat(v.adeudo).toFixed(2)+'" min="0" max="'+v.adeudo+'" step="0.01" style="width:90px;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:4px 6px;font-size:12px;color:#E6EDF3;text-align:right" onclick="event.stopPropagation()">'+
+              '<input type="number" id="amt_v'+v.id+'" value="'+preloadMonto.toFixed(2)+'" min="0" max="'+(Math.max(v.adeudo,preloadMonto))+'" step="0.01" style="width:90px;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:4px 6px;font-size:12px;color:#E6EDF3;text-align:right" onclick="event.stopPropagation()">'+
               '</div>';
             var chk2=row2.querySelector("input[type=checkbox]");
             var amt2=row2.querySelector("input[type=number]");
@@ -1861,10 +1880,11 @@ function rBancos(el){
           wrap2.appendChild(totalRow2);
           bref.innerHTML="";bref.appendChild(wrap2);
           // Auto-select if only one ticket
-          if(vs.length===1){
+          if(vs.length===1&&!esEd){
             var ck0=document.getElementById("chk_v"+vs[0].id);
             if(ck0){ck0.checked=true;ck0.dispatchEvent(new Event("change"));}
           }
+          recalcTotal2();
           function recalcTotal2(){
             var tot2=0;
             vs.forEach(function(v){
@@ -1888,7 +1908,6 @@ function rBancos(el){
               return a;
             },{});
           }
-        };
         });
       } else {
         bref.innerHTML="";
@@ -1925,7 +1944,18 @@ function rBancos(el){
       var body={fecha:($("bfecha")||{}).value||hoy(),cuenta:cta.n,cuenta_id:ctaId,tipo_pago:($("btp")||{}).value||"Efectivo",movimiento:mov,gasto_ticket:gasto_ticket,concepto:($("bconc")||{}).value||"",monto:monto,egreso:egreso};
       var p=bid?sPATCH("movimientos","id=eq."+bid,body):sPOST("movimientos",body);
       p.then(function(){
-        recalcularAdeudos(function(){_bGuardando=false;load();goMod("bancos");toast(bid?"Movimiento actualizado":"Movimiento registrado");});
+        // Si es venta, actualizar adeudos de las ventas vinculadas
+        var brefEl3=document.getElementById("brefextra");
+        var ventasMap=brefEl3&&brefEl3._ventasMap?brefEl3._ventasMap:{};
+        var ventaProms=Object.keys(ventasMap).map(function(vid){
+          var vm=ventasMap[vid];
+          var nuevoCobrado=vm.cobrar||0;
+          var nuevoAdeudo=Math.max(0,parseFloat(vm.adeudo||0)-nuevoCobrado);
+          return sPATCH("ventas","id=eq."+vid,{cobrado:nuevoCobrado,adeudo:nuevoAdeudo});
+        });
+        Promise.all(ventaProms).then(function(){
+          recalcularAdeudos(function(){_bGuardando=false;load();goMod("bancos");toast(bid?"Movimiento actualizado":"Movimiento registrado");});
+        });
       });
     };
   }
@@ -2207,9 +2237,10 @@ function rCompras(el){
           var numCompra=body.num_compra;
           sGET("compras","num_compra=eq."+numCompra).then(function(allRows){
             var allIds=(allRows||[]).map(function(r){return r.id;});
-            var delLotesProms=allIds.map(function(rid){return sDEL("lotes","tipo=eq.compra&ref_id=eq."+rid);});
-            var delRowsProms=allIds.map(function(rid){return sDEL("compras","id=eq."+rid);});
-            Promise.all(delLotesProms.concat(delRowsProms)).then(function(){
+            // Borrar lotes por num_ref C-XX (más confiable que ref_id)
+            var delLotes=sDEL("lotes","tipo=eq.compra&num_ref=eq.C-"+numCompra);
+            var delRows=Promise.all(allIds.map(function(rid){return sDEL("compras","id=eq."+rid);}));
+            Promise.all([delLotes,delRows]).then(function(){
               var fecha=body.fecha||hoy();
               var insertProms=validLines.map(function(l){
                 var sku=l.nombre||l.sku||"";
