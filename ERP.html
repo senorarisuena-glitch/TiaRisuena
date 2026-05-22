@@ -2335,7 +2335,32 @@ function rProduccion(el){
     window.pEditGrupo=function(n){
       var items=grupos[n];
       if(!items||!items.length)return;
-      toast("Editar lote — próximamente");
+      var rep=items[0];
+      // Cargar lotes del grupo para obtener insumos
+      sGET("lotes","tipo=eq.produccion&ref_id=eq."+n+"&order=movimiento.desc").then(function(lotes){
+        var entradas=(lotes||[]).filter(function(l){return l.movimiento==='entrada';});
+        var salidas=(lotes||[]).filter(function(l){return l.movimiento==='salida';});
+        // Construir objeto para pForm
+        var ceVirtual={
+          num_lote:n,
+          fecha:rep.fecha,
+          responsable:rep.responsable,
+          modo_prod:rep.modo_prod,
+          // Para modo kilos: florSKU es la primera salida no envase
+          florSKU:salidas.filter(function(l){return !l.sku.match(/^(BP|BV|POMADE)/i);})[0]||null,
+          // Líneas terminadas
+          lineas:entradas.map(function(l){
+            // Buscar envase correspondiente en salidas
+            var envase=salidas.find(function(s){return s.cantidad===l.cantidad&&s.sku.match(/^(BP|BV)/i);})||null;
+            return {sku:l.sku,cantidad:l.cantidad,envase:envase?envase.sku:''};
+          }),
+          // Para modo otro: insumos
+          otroSKU:rep.modo_prod==='otro'?entradas[0]&&entradas[0].sku:'',
+          otroCant:rep.modo_prod==='otro'?entradas[0]&&entradas[0].cantidad:0,
+          otroInsumos:rep.modo_prod==='otro'?salidas.map(function(l){return{sku:l.sku,cantidad:l.cantidad};}):[]
+        };
+        pForm(ceVirtual);
+      });
     };
     window.pDelGrupo=function(n){
       if(!confirm("¿Eliminar Lote #"+n+" completo?"))return;
@@ -2366,15 +2391,14 @@ function rProduccion(el){
     });
   };
 
-  function pForm(){
-    var autoL=prod.length?Math.max.apply(null,prod.map(function(x){return x.num_lote||0}))+1:1;
-    var modo="";
-    var florSKU="";
-    // Líneas de salida — cada línea es un SKU terminado + cantidad
-    // Para flor terminada: gr = grPorSKU(sku) * cantidad
-    // Para HGP: gr = cantidad (son gramos directos)
-    var lineas=[{sku:"",cantidad:0}];
-    var otroSKU="",otroCant=1;
+  function pForm(ce){
+    var esEd=!!ce;
+    var autoL=esEd?ce.num_lote:(prod.length?Math.max.apply(null,prod.map(function(x){return x.num_lote||0}))+1:1);
+    var modo=esEd?ce.modo_prod:"";
+    var florSKU=esEd&&ce.florSKU?ce.florSKU.sku:"";
+    var lineas=esEd&&ce.lineas&&ce.lineas.length?ce.lineas:[{sku:"",cantidad:0}];
+    var otroSKU=esEd?ce.otroSKU||"":"",otroCant=esEd?ce.otroCant||1:1;
+    var otroInsumos=esEd&&ce.otroInsumos?ce.otroInsumos:[];
 
     function calcGrTotal(){
       return lineas.reduce(function(a,l){
@@ -2387,11 +2411,11 @@ function rProduccion(el){
     function render(){
       var si="background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:7px 10px;font-size:12px;color:#E6EDF3;width:100%";
       var html='<div class="mod"><div style="display:flex;justify-content:space-between;margin-bottom:20px">';
-      html+='<h1 style="font-size:18px;font-weight:700">Nuevo Lote #'+autoL+'</h1>';
+      html+='<h1 style="font-size:18px;font-weight:700">'+(esEd?'Editar':'Nuevo')+' Lote #'+autoL+'</h1>';
       html+='<button class="btn btn-g" onclick="goMod(&apos;produccion&apos;)">← Cancelar</button></div>';
       html+='<div class="card" style="max-width:760px">';
-      html+=fi("FECHA",'<input id="pfecha" type="date" value="'+hoy()+'">');
-      html+=fi("RESPONSABLE",'<input id="presp" type="text" placeholder="Nombre del responsable">');
+      html+=fi("FECHA",'<input id="pfecha" type="date" value="'+(esEd?ce.fecha:hoy())+'">');
+      html+=fi("RESPONSABLE",'<input id="presp" type="text" value="'+(esEd?ce.responsable||'':'')+'" placeholder="Nombre del responsable">');
 
       // Toggle
       html+='<div class="fi"><label>¿INGRESAR EN KILOS?</label><div style="display:flex;gap:8px">';
@@ -2638,6 +2662,18 @@ function rProduccion(el){
       var resp=($("presp")||{}).value||"";
       if(!modo){alert("Elige el tipo de producción");return;}
 
+      // Si es edición, borrar registros viejos primero
+      var deleteProm=esEd?
+        sGET("produccion","num_lote=eq."+autoL).then(function(rows){
+          var ids=(rows||[]).map(function(r){return r.id;});
+          return Promise.all([
+            ...ids.map(function(id){return sDEL("produccion","id=eq."+id);}),
+            sDEL("lotes","tipo=eq.produccion&ref_id=eq."+autoL)
+          ]);
+        }):Promise.resolve();
+
+      deleteProm.then(function(){
+
       if(modo==="kilos"){
         if(!florSKU){alert("Selecciona la flor utilizada");return;}
         var validas=lineas.filter(function(l){return l.sku&&parseFloat(l.cantidad)>0;});
@@ -2707,9 +2743,10 @@ function rProduccion(el){
           });
           // ENTRADA: terminado producido
           lotesO.push(sPostLote({sku:sku2,tipo:"produccion",movimiento:"entrada",ref_id:autoL,fecha:fecha,cantidad:cant2,costo_unit:parseFloat(cuUnit.toFixed(4)),concepto:"Produccion lote #"+autoL,num_ref:"P-"+autoL}));
-          Promise.all(lotesO).then(function(){load();goMod("produccion");toast("Lote #"+autoL+" registrado");});
+          Promise.all(lotesO).then(function(){load();goMod("produccion");toast("Lote #"+autoL+(esEd?" actualizado":" registrado"));});
         });
       }
+      }); // end deleteProm.then
     };
 
     render();
