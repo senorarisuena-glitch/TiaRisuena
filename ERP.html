@@ -845,12 +845,23 @@ function actualizarStatsCliente(cliId, monto){
         buscarCli.then(function(cliId){
           var items=Array.isArray(ped.items)?ped.items:[];
           var totalMonto=parseFloat(ped.total)||0;
+
+          // Obtener costos actuales del inventario para enriquecer líneas
+          sGET("lotes","order=fecha,id").then(function(lotes){
+            lotes=Array.isArray(lotes)?lotes:[];
+            var stockCosto={};
+            lotes.forEach(function(lt){
+              if(!lt.sku||lt.movimiento!=="entrada")return;
+              if(parseFloat(lt.costo_unit||0)>0)stockCosto[lt.sku]=parseFloat(lt.costo_unit);
+            });
+
           var lineasEnriq=items.map(function(l){
             var qty=parseFloat(l.qty||l.quantity||l.cant||1);
             var price=parseFloat(l.price||l.unit_price||l.precio||l.precio_venta||0);
             var skuVal=l.sku||l.inv_id||"";
             var nomVal=l.nombre||l.name||l.desc||l.nb||skuVal||"";
-            return Object.assign({},l,{sku:skuVal,nombre:nomVal,cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
+            var cu=parseFloat(l.costo_unit||l.cu||0)||stockCosto[skuVal]||0;
+            return Object.assign({},l,{sku:skuVal,nombre:nomVal,cant:qty,precio_venta:price,costo_unit:cu,utilidad_unit:price-cu});
           });
 
           // Si es coins, buscar el precio_mxn real de la transacción de coins
@@ -923,6 +934,7 @@ function actualizarStatsCliente(cliId, monto){
             }); // end lotesVenta
           }); // end sPOST ventas
           }); // end montoRealProm
+          }); // end sGET lotes
         }); // end buscarCli
       });
   };
@@ -935,29 +947,44 @@ function actualizarStatsCliente(cliId, monto){
       sGET("seguimientos","id=eq."+id).then(function(pr){
         var ped=pr&&pr[0];if(!ped)return;
         var totalMonto=parseFloat(ped.total)||0;
-        var lineasEnriq=(Array.isArray(ped.items)?ped.items:[]).map(function(l){
-          var qty=parseFloat(l.qty||l.quantity||l.cant||1);
-          var price=parseFloat(l.price||l.unit_price||l.precio||l.precio_venta||0);
-          var skuVal=l.sku||l.inv_id||"";
-          var nomVal=l.nombre||l.name||l.desc||l.nb||skuVal||"";
-          return Object.assign({},l,{sku:skuVal,nombre:nomVal,cant:qty,precio_venta:price,costo_unit:0,utilidad_unit:price});
-        });
-        sPOST("ventas",{
-          ticket:ticket,fecha:hoy(),
-          cliente_id:ped.cliente_id||0,
-          cliente_nombre:ped.cliente||ped.nb||"",
-          monto_venta:totalMonto,adeudo:totalMonto,cobrado:0,
-          costo_productos:0,utilidad:totalMonto,pct_util:0,
-          origen:"tienda",pedido_id:String(ped.id),folio_tienda:ped.folio||"",
-          dir_entrega:ped.dir||"",metodo_pago:"credito",lineas:lineasEnriq
-        }).then(function(){
-          var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy(),nota:"A crédito"}]);
-          actualizarStatsCliente(ped.cliente_id||0, totalMonto).then(function(){
-            sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
-              toast("✓ Ticket #"+ticket+" — a crédito");load();
+        sGET("lotes","order=fecha,id").then(function(lotes){
+          lotes=Array.isArray(lotes)?lotes:[];
+          var stockCosto={};
+          lotes.forEach(function(lt){
+            if(!lt.sku||lt.movimiento!=="entrada")return;
+            if(parseFloat(lt.costo_unit||0)>0)stockCosto[lt.sku]=parseFloat(lt.costo_unit);
+          });
+          var lineasEnriq=(Array.isArray(ped.items)?ped.items:[]).map(function(l){
+            var qty=parseFloat(l.qty||l.quantity||l.cant||1);
+            var price=parseFloat(l.price||l.unit_price||l.precio||l.precio_venta||0);
+            var skuVal=l.sku||l.inv_id||"";
+            var nomVal=l.nombre||l.name||l.desc||l.nb||skuVal||"";
+            var cu=parseFloat(l.costo_unit||l.cu||0)||stockCosto[skuVal]||0;
+            return Object.assign({},l,{sku:skuVal,nombre:nomVal,cant:qty,precio_venta:price,costo_unit:cu,utilidad_unit:price-cu});
+          });
+          sPOST("ventas",{
+            ticket:ticket,fecha:hoy(),
+            cliente_id:ped.cliente_id||0,
+            cliente_nombre:ped.cliente||ped.nb||"",
+            monto_venta:totalMonto,adeudo:totalMonto,cobrado:0,
+            costo_productos:0,utilidad:totalMonto,pct_util:0,
+            origen:"tienda",pedido_id:String(ped.id),folio_tienda:ped.folio||"",
+            dir_entrega:ped.dir||"",metodo_pago:"credito",lineas:lineasEnriq
+          }).then(function(){
+            var lotesVenta=lineasEnriq.map(function(l){
+              if(!l.sku||!l.cant)return Promise.resolve();
+              return sPostLote({sku:l.sku,tipo:"venta",movimiento:"salida",ref_id:ticket,fecha:hoy(),cantidad:l.cant,costo_unit:l.costo_unit||0,concepto:"Venta ticket #"+ticket,num_ref:"V-"+ticket});
+            });
+            Promise.all(lotesVenta).then(function(){
+              var hist=(ped.historial||[]).concat([{estado:"preparando",fecha:hoy(),nota:"A crédito"}]);
+              actualizarStatsCliente(ped.cliente_id||0, totalMonto).then(function(){
+                sPATCH("seguimientos","id=eq."+id,{pedido_ticket:ticket,estado:"preparando",historial:hist}).then(function(){
+                  toast("✓ Ticket #"+ticket+" — a crédito");load();
+                });
+              });
             });
           });
-        });
+        }); // end sGET lotes
       });
     });
   };
@@ -3654,19 +3681,18 @@ function rReportes(el){
 
     // ── ESTADO DE RESULTADOS ──────────────────────────────────────────
     var vTot=vF.reduce(function(a,v){return a+parseFloat(v.monto_venta||0);},0);
-    // Costo de ventas: desde lotes salidas del periodo (misma fuente que el Balance General)
-    // Esto garantiza que Estado de Resultados y Balance siempre cuadren
-    var ticketsDelPeriodo=new Set(vF.map(function(v){return String(v.ticket);}));
-    var cVen=lotesRep.filter(function(lt){
-      if(lt.movimiento!=="salida"||lt.tipo!=="venta")return false;
-      // Filtrar por periodo via num_ref (V-ticket) o fecha
-      var ticketRef=lt.num_ref?String(lt.num_ref).replace("V-",""):"";
-      if(ticketRef&&ticketsDelPeriodo.has(ticketRef))return true;
-      // Fallback: filtrar por fecha del lote
-      var a2=parseInt((lt.fecha||"").slice(0,4)),m3=parseInt((lt.fecha||"").slice(5,7)),d3=parseInt((lt.fecha||"").slice(8,10));
-      return a2===ai&&(!mi||m3===mi)&&(!di||d3===di);
-    }).reduce(function(a,lt){
-      return a+parseFloat(lt.cantidad||0)*parseFloat(lt.costo_unit||0);
+    // Costo de ventas: desde lineas.costo_unit de cada venta
+    // Misma fuente que la tabla de ventas para que siempre cuadren
+    var cVen=vF.reduce(function(a,v){
+      var costoV=parseFloat(v.costo_productos||0);
+      if(costoV===0){
+        costoV=(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
+          var cu=parseFloat(l.costo_unit||l.cu||0);
+          var cant=parseFloat(l.cant||l.cantidad||l.qty||0);
+          return b+cant*cu;
+        },0);
+      }
+      return a+costoV;
     },0);
     var uBruta=vTot-cVen;
     // Gastos = TODOS los egresos excepto Pago Proveedores (ese es pasivo, no gasto operativo)
@@ -3747,13 +3773,14 @@ function rReportes(el){
     var deudaRep=Math.max(0,totalDeudaEnvios-totalPagadoRep);
 
     var totalPasivos=inv2+deudaProv+deudaRep;
-    // La Utilidad Neta del Balance = misma que Estado de Resultados (uBruta - gastos)
-    // El Balance cuadra como: Activos = Pasivos + Utilidad Neta
-    // No recalculamos activos-pasivos porque genera discrepancia por envíos devengados
+    // ganancia del Balance = Activos - Pasivos (ecuación contable)
+    // uNeta del Estado de Resultados = uBruta - gastos del periodo
+    // Pueden diferir si hay gastos fuera del periodo — ambos son correctos en su contexto
+    var gananciaBalance=activos-totalPasivos;
 
     return{vTot:vTot,cVen:cVen,uBruta:uBruta,gastos:gastos,gastosDetalle:gastosDetalle,uNeta:uNeta,cobros:cobros,gOp:gOp,
            inv2:inv2,deudaProv:deudaProv,deudaRep:deudaRep,porCobrar:porCobrar,valInv:valInv,
-           saldos:saldos,efec:efec,activos:activos,pasivos:totalPasivos,ganancia:uNeta,
+           saldos:saldos,efec:efec,activos:activos,pasivos:totalPasivos,ganancia:gananciaBalance,
            flujoOp:cobros-gOp,flujoNeto:cobros-gOp+inv2,vF:vF,ventas:ventas};
   }
   function kbox(l,v,c){return'<div style="background:#21262D;border:1px solid #30363D;border-radius:2px;padding:16px"><div style="font-size:9px;color:#8B949E;letter-spacing:.1em;margin-bottom:6px">'+l+'</div><div style="font-size:18px;font-weight:700;color:'+(c||"#E6EDF3")+'">'+v+'</div></div>'}
@@ -3766,7 +3793,21 @@ function rReportes(el){
     if(tabActual===0){
       html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'+kbox("VENTAS",fmt(d.vTot))+kbox("UTIL. BRUTA",fmt(d.uBruta),"#00C896")+kbox("UTIL. NETA",fmt(d.uNeta),d.uNeta>=0?"#00C896":"#F85149")+'</div>';
       html+='<div class="card"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em;margin-bottom:12px">ESTADO DE RESULTADOS — '+pLabel+'</div>';
-      html+=srow("Ventas",fmt(d.vTot))+srow("(-) Costo de Ventas",fmt(d.cVen),"#8B949E")+'<div style="height:1px;background:#30363D;margin:8px 0"></div>';
+      html+=srow("Ventas",fmt(d.vTot));
+      html+=srow("(-) Costo de Ventas",fmt(d.cVen),"#8B949E");
+      html+='<div style="margin:4px 0 8px 12px">';
+      d.vF.forEach(function(v){
+        var costoV=parseFloat(v.costo_productos||0);
+        var fuente=costoV>0?"costo_prod":"lineas";
+        if(costoV===0){
+          costoV=(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
+            return b+parseFloat(l.cant||l.cantidad||l.qty||0)*parseFloat(l.costo_unit||l.cu||0);
+          },0);
+        }
+        html+=srow("  #"+v.ticket+" "+( v.cliente_nombre||"")+" ["+fuente+"]",fmt(costoV),"#4A9EFF");
+      });
+      html+='</div>';
+      html+='<div style="height:1px;background:#30363D;margin:8px 0"></div>';
       html+=srow("UTILIDAD BRUTA",fmt(d.uBruta),d.uBruta>=0?"#00C896":"#F85149",true);
       // Detalle de gastos
       if(d.gastosDetalle&&d.gastosDetalle.length){
@@ -3777,7 +3818,8 @@ function rReportes(el){
       html+=srow("UTILIDAD NETA",fmt(d.uNeta),d.uNeta>=0?"#00C896":"#F85149",true)+'<div style="font-size:11px;color:#8B949E;margin-top:8px">Margen: '+(d.vTot>0?(d.uNeta/d.vTot*100).toFixed(1)+"%":"—")+'</div></div>';
       rc.innerHTML=html;
     } else if(tabActual===1){
-      html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'+kbox("ACTIVOS",fmt(d.activos),"#4A9EFF")+kbox("PASIVOS",fmt(d.pasivos),"#FB923C")+kbox("GANANCIA",fmt(d.ganancia),d.ganancia>=0?"#00C896":"#F85149")+'</div>';
+      var patrimonio=d.activos-d.pasivos;
+      html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'+kbox("ACTIVOS",fmt(d.activos),"#4A9EFF")+kbox("PASIVOS",fmt(d.pasivos),"#FB923C")+kbox("PATRIMONIO",fmt(patrimonio),patrimonio>=0?"#00C896":"#F85149")+'</div>';
       html+='<div class="grid2">';
       html+='<div class="card"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em;margin-bottom:12px">ACTIVOS</div>';
       CUENTAS.forEach(function(c){html+=srow(c.n,fmt(Math.max(0,d.saldos[c.id]||0)))});
@@ -3786,7 +3828,15 @@ function rReportes(el){
       html+=srow("Inversión socios",fmt(d.inv2),"#FB923C");
       html+=srow("Deuda proveedores",fmt(d.deudaProv),d.deudaProv>0?"#F85149":"#8B949E");
       html+=srow("Deuda repartidores",fmt(d.deudaRep),d.deudaRep>0?"#F85149":"#8B949E");
-      html+='<div style="height:1px;background:#30363D;margin:8px 0"></div>'+srow("TOTAL PASIVOS",fmt(d.pasivos),"#F85149",true)+'<div style="height:1px;background:#30363D;margin:8px 0"></div>'+srow("UTILIDAD NETA",fmt(d.ganancia),d.ganancia>=0?"#00C896":"#F85149",true)+'</div></div>';
+      html+='<div style="height:1px;background:#30363D;margin:8px 0"></div>'+srow("TOTAL PASIVOS",fmt(d.pasivos),"#F85149",true);
+      html+='<div style="height:1px;background:#30363D;margin:8px 0"></div>';
+      html+=srow("PATRIMONIO (Activos − Pasivos)",fmt(patrimonio),patrimonio>=0?"#00C896":"#F85149",true);
+      html+=srow("UTIL. NETA P&L (periodo)",fmt(d.uNeta),d.uNeta>=0?"#00C896":"#F85149",true);
+      var diff=patrimonio-d.uNeta;
+      if(Math.abs(diff)>0.5){
+        html+=srow("Diferencia (gastos otros periodos)",fmt(diff),"#E3B341",false);
+      }
+      html+='</div></div>';
       rc.innerHTML=html;
     } else if(tabActual===2){
       html='<div class="card"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em;margin-bottom:12px">FLUJO DE EFECTIVO — '+pLabel+'</div>';
