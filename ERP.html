@@ -2112,8 +2112,7 @@ function rCompras(el){
         cantidad:validLines.reduce(function(a,l){return a+parseFloat(l.cantidad||0)},0),
         pu:validLines.length===1?parseFloat(validLines[0].pu||0):total,
         total:total,
-        responsable:($("cresp")||{}).value||"",
-        lineas:validLines
+        responsable:($("cresp")||{}).value||""
       };
       var save=cid?sPATCH("compras","id=eq."+cid,body):sPOST("compras",body);
       save.then(function(saveRes){
