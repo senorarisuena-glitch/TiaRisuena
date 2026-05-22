@@ -2575,6 +2575,66 @@ function openHeroDin(cepa){
   document.getElementById('overlay').classList.add('on');
 }
 
+
+// ── QUANTITY PICKER ──────────────────────────────────────────────
+function showQtyPicker(opts){
+  // opts: {sku, name, emoji, price, label, cepa, isFlor}
+  var existing=document.getElementById('qty-picker-overlay');
+  if(existing)existing.remove();
+  var overlay=document.createElement('div');
+  overlay.id='qty-picker-overlay';
+  overlay.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center';
+  overlay.innerHTML=
+    '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px 16px 0 0;padding:20px 20px 28px;width:100%;max-width:480px;box-shadow:0 -8px 32px rgba(0,0,0,.4)">'+
+    '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">'+
+      '<span style="font-size:2rem">'+opts.emoji+'</span>'+
+      '<div><div style="font-family:Cinzel,serif;font-size:.85rem;color:var(--text)">'+opts.name+'</div>'+
+      (opts.label?'<div style="font-size:.65rem;color:var(--muted)">'+opts.label+'</div>':'')+
+      '</div>'+
+      '<div style="margin-left:auto;font-family:Cinzel,serif;font-size:1rem;color:var(--gold);font-weight:700">$'+opts.price+'</div>'+
+    '</div>'+
+    '<div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:20px">'+
+      '<button onclick="qtyChange(-1)" style="width:44px;height:44px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>'+
+      '<span id="qty-val" style="font-size:2rem;font-weight:700;font-family:Cinzel,serif;min-width:40px;text-align:center">1</span>'+
+      '<button onclick="qtyChange(1)" style="width:44px;height:44px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:10px">'+
+      '<button onclick="closeQtyPicker()" style="flex:1;padding:12px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:.8rem">Cancelar</button>'+
+      '<button onclick="confirmQtyPicker()" style="flex:2;padding:12px;border-radius:10px;background:rgba(201,162,39,.2);border:1px solid var(--gold);color:var(--gold);cursor:pointer;font-family:Cinzel,serif;font-size:.8rem;font-weight:700">⚔️ Agregar al carrito</button>'+
+    '</div></div>';
+  overlay.onclick=function(e){if(e.target===overlay)closeQtyPicker();};
+  document.body.appendChild(overlay);
+  window._qtyOpts=opts;
+  window._qtyVal=1;
+}
+function qtyChange(d){
+  window._qtyVal=Math.max(1,(_qtyVal||1)+d);
+  var el=document.getElementById('qty-val');
+  if(el)el.textContent=window._qtyVal;
+}
+function closeQtyPicker(){
+  var el=document.getElementById('qty-picker-overlay');
+  if(el)el.remove();
+}
+function confirmQtyPicker(){
+  var opts=window._qtyOpts;
+  var qty=window._qtyVal||1;
+  if(!opts)return;
+  if(opts.isFlor){
+    var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===opts.cepa;})||{emoji:'🌿'};
+    var existing=S.cart.find(function(x){return x.sku===opts.sku&&!x.isGift;});
+    if(existing){existing.cantidad=(existing.cantidad||1)+qty;existing.qty=existing.cantidad+'x';}
+    else{S.cart.push({name:opts.cepa,sku:opts.sku,emoji:rep.emoji||'🌿',qty:opts.label,price:opts.price,cantidad:qty,isGift:false});}
+    notif('⚔️ '+opts.cepa+' ('+opts.label+') x'+qty+' agregado');
+  } else {
+    var existing=S.cart.find(function(x){return x.sku===opts.sku&&!x.isGift;});
+    if(existing){existing.cantidad=(existing.cantidad||1)+qty;existing.qty=existing.cantidad+'x';}
+    else{S.cart.push({name:opts.name,sku:opts.sku,emoji:opts.emoji,qty:'1x',price:opts.price,cantidad:qty,isGift:false});}
+    notif(opts.emoji+' '+opts.name+' x'+qty+' agregado');
+  }
+  closeQtyPicker();
+  updUI();
+}
 function menuAddFlor(sku,label,precio,cepa){
   var rep=_menuProds.find(function(p){return(p.nombre_tienda||p.sku)===cepa;})||{emoji:'🌿'};
   S.cart.push({name:cepa,sku:sku,emoji:rep.emoji||'🌿',qty:label,price:precio,isGift:false});
@@ -2620,14 +2680,7 @@ function renderSeccion(cat,categoria,containerIds){
 }
 
 function menuAddProd(sku,nombre,precio,emoji){
-  var existing=S.cart.find(function(x){return x.sku===sku&&!x.isGift;});
-  if(existing){
-    existing.qty=(parseInt(existing.qty)||1)+1+'x';
-    existing.cantidad=(parseInt(existing.cantidad)||1)+1;
-  } else {
-    S.cart.push({name:nombre,sku:sku,emoji:emoji,qty:'1x',price:precio,cantidad:1,isGift:false});
-  }
-  updUI();notif(emoji+' '+nombre+' agregado');
+  showQtyPicker({sku:sku,name:nombre,emoji:emoji,price:precio,isFlor:false});
 }
 
 function menuAddFlor(sku,label,precio,cepa){

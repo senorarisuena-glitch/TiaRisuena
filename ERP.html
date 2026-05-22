@@ -1819,8 +1819,22 @@ function rBancos(el){
                 if(m){var n=parseInt(m[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(p.monto||0));}
               });
             });
-            var conAdeudo=(Array.isArray(compras)?compras:[]).filter(function(co){
-              return co.tipo_inv!=="servicio"&&(co.total-(pagosMap[co.num_compra]||0))>0.01;
+            // Al editar: incluir compras ya vinculadas aunque adeudo sea 0
+            var linkedNums=[];
+            if(esEd&&me.gasto_ticket){
+              (me.gasto_ticket||"").split(/,\s*/).forEach(function(ref){
+                var m=ref.match(/Compra #(\d+)/);
+                if(m)linkedNums.push(parseInt(m[1]));
+              });
+            }
+            // Agrupar compras por num_compra
+            var grupos={};
+            (Array.isArray(compras)?compras:[]).forEach(function(co){
+              if(!grupos[co.num_compra])grupos[co.num_compra]={num_compra:co.num_compra,proveedor:co.proveedor,total:0,tipo_inv:co.tipo_inv};
+              grupos[co.num_compra].total+=parseFloat(co.total||0);
+            });
+            var conAdeudo=Object.values(grupos).filter(function(co){
+              return co.tipo_inv!=="servicio"&&((co.total-(pagosMap[co.num_compra]||0))>0.01||linkedNums.indexOf(co.num_compra)>=0);
             });
             renderComprasCheck(bref,conAdeudo,pagosMap,"#FB923C","PROVEEDORES CON ADEUDO:",esEd?me:null);
           });
@@ -1835,10 +1849,22 @@ function rBancos(el){
                 if(m){var n=parseInt(m[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(p.monto||0));}
               });
             });
-            var conAdeudo=(Array.isArray(compras)?compras:[]).filter(function(co){
-              return co.tipo_inv==="servicio"&&(co.total-(pagosMap[co.num_compra]||0))>0.01;
+            var linkedNums2=[];
+            if(esEd&&me.gasto_ticket){
+              (me.gasto_ticket||"").split(/,\s*/).forEach(function(ref){
+                var m=ref.match(/Compra #(\d+)/);
+                if(m)linkedNums2.push(parseInt(m[1]));
+              });
+            }
+            var grupos2={};
+            (Array.isArray(compras)?compras:[]).forEach(function(co){
+              if(!grupos2[co.num_compra])grupos2[co.num_compra]={num_compra:co.num_compra,proveedor:co.proveedor,total:0,tipo_inv:co.tipo_inv};
+              grupos2[co.num_compra].total+=parseFloat(co.total||0);
             });
-            renderComprasCheck(bref,conAdeudo,pagosMap,"#4A9EFF","RUTAS CON ADEUDO:",esEd?me:null);
+            var conAdeudo2=Object.values(grupos2).filter(function(co){
+              return co.tipo_inv==="servicio"&&((co.total-(pagosMap[co.num_compra]||0))>0.01||linkedNums2.indexOf(co.num_compra)>=0);
+            });
+            renderComprasCheck(bref,conAdeudo2,pagosMap,"#4A9EFF","RUTAS CON ADEUDO:",esEd?me:null);
           });
         });
       } else if(mov==="Venta"){
