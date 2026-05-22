@@ -2146,13 +2146,14 @@ async function confirmarYEnviar(metodo){
 
   // Mapear items al formato que lee el ERP
   const itemsMapped = prods.map(function(x){
+    var skuReal=x.sku&&x.sku!==x.name?x.sku:'';
     return {
-      sku: x.sku||x.name||'',
+      sku: skuReal||x.sku||'',
       nombre: x.name||'',
       desc: x.name+(x.qty?' — '+x.qty:''),
-      qty: 1,
-      cant: 1,
-      quantity: 1,
+      qty: x.cantidad||1,
+      cant: x.cantidad||1,
+      quantity: x.cantidad||1,
       price: x.price||0,
       unit_price: x.price||0,
       precio: x.price||0,
@@ -2975,7 +2976,7 @@ async function confirmarPedido(){
   if(btn){btn.disabled=true;btn.textContent='Enviando...';}
   var folio='TIA-'+String((S.user.pedidos_count||0)+1).padStart(4,'0');
   var pagado=_ckMetodo==='coins';
-  var itemsMapped2=prods.map(function(x){return{sku:x.sku||x.name||'',nombre:x.name||'',desc:x.name+(x.qty?' — '+x.qty:''),cant:1,qty:1,price:x.price||0,unit_price:x.price||0,precio:x.price||0,qty_label:x.qty||'1x',emoji:x.emoji||''};});
+  var itemsMapped2=prods.map(function(x){var skuR=x.sku&&x.sku!==x.name?x.sku:'';return{sku:skuR||x.sku||'',nombre:x.name||'',desc:x.name+(x.qty?' — '+x.qty:''),cant:x.cantidad||1,qty:x.cantidad||1,price:x.price||0,unit_price:x.price||0,precio:x.price||0,qty_label:x.qty||'1x',emoji:x.emoji||''};});
   var tidId2='tid_'+Date.now();
   var res=await sb.from('seguimientos').insert({
     id:tidId2,
