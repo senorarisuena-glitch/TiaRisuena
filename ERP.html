@@ -1879,10 +1879,8 @@ function rBancos(el){
           sGET("movimientos","movimiento=eq.Pago Proveedores&egreso=eq.true").then(function(pagos){
             var pagosMap={};
             (Array.isArray(pagos)?pagos:[]).forEach(function(p){
-              (p.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-                var m=ref.trim().match(/Compra #(\d+)/);
-                if(m){var n=parseInt(m[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(p.monto||0));}
-              });
+              var _re=/Compra #(\d+)[^$]*\$([\d,]+\.?\d*)/g,_m;
+              while((_m=_re.exec(p.gasto_ticket||""))!==null){var n=parseInt(_m[1]);var monto=parseFloat(_m[2].replace(/,/g,""))||0;pagosMap[n]=(pagosMap[n]||0)+monto;}
             });
             // Al editar: incluir compras ya vinculadas aunque adeudo sea 0
             var linkedNums=[];
@@ -1909,10 +1907,8 @@ function rBancos(el){
           sGET("movimientos","movimiento=eq.Pago Repartidores&egreso=eq.true").then(function(pagos){
             var pagosMap={};
             (Array.isArray(pagos)?pagos:[]).forEach(function(p){
-              (p.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-                var m=ref.trim().match(/Compra #(\d+)/);
-                if(m){var n=parseInt(m[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(p.monto||0));}
-              });
+              var _re=/Compra #(\d+)[^$]*\$([\d,]+\.?\d*)/g,_m;
+              while((_m=_re.exec(p.gasto_ticket||""))!==null){var n=parseInt(_m[1]);var monto=parseFloat(_m[2].replace(/,/g,""))||0;pagosMap[n]=(pagosMap[n]||0)+monto;}
             });
             var linkedNums2=[];
             if(esEd&&me.gasto_ticket){
@@ -2078,10 +2074,8 @@ function rCompras(el){
     sGET("movimientos","movimiento=eq.Pago Proveedores&egreso=eq.true").then(function(pagos){
       var pagosMap={};
       (Array.isArray(pagos)?pagos:[]).forEach(function(p){
-        (p.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-          var m=ref.trim().match(/Compra #(\d+)/);
-          if(m){var n=parseInt(m[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(p.monto||0));}
-        });
+        var _re=/Compra #(\d+)[^$]*\$([\d,]+\.?\d*)/g,_m;
+        while((_m=_re.exec(p.gasto_ticket||""))!==null){var n=parseInt(_m[1]);var monto=parseFloat(_m[2].replace(/,/g,""))||0;pagosMap[n]=(pagosMap[n]||0)+monto;}
       });
 
       // Agrupar por num_compra
@@ -3755,10 +3749,27 @@ function rReportes(el){
     var pagosMapP={};
     movs.forEach(function(m){
       if(m.movimiento==="Pago Proveedores"&&m.egreso){
-        (m.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-          var mt=ref.trim().match(/Compra #(\d+)/);
-          if(mt){var n=parseInt(mt[1]);var am=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMapP[n]=(pagosMapP[n]||0)+(am?parseFloat(am[1]):parseFloat(m.monto||0));}
-        });
+        var txt=m.gasto_ticket||"";
+        // Extraer todos los "Compra #N: $X" del texto
+        var re=/Compra #(\d+)[^$]*\$([\d,]+\.?\d*)/g;
+        var match;
+        var encontrados=false;
+        while((match=re.exec(txt))!==null){
+          var n=parseInt(match[1]);
+          var monto=parseFloat(match[2].replace(/,/g,""))||0;
+          pagosMapP[n]=(pagosMapP[n]||0)+monto;
+          encontrados=true;
+        }
+        // Si no encontró referencias específicas, aplicar monto total al movimiento
+        if(!encontrados){
+          // Intentar encontrar cualquier número de compra mencionado
+          var reNum=/Compra #(\d+)/g;
+          var nums=[];
+          while((match=reNum.exec(txt))!==null) nums.push(parseInt(match[1]));
+          if(nums.length===1){
+            pagosMapP[nums[0]]=(pagosMapP[nums[0]]||0)+parseFloat(m.monto||0);
+          }
+        }
       }
     });
     var deudaProv=comprasRep.filter(function(co){return co.tipo_inv!=="servicio";}).reduce(function(a,co){
@@ -3864,20 +3875,16 @@ function rReportes(el){
       var pagosMap={};
       movs.forEach(function(m){
         if(m.movimiento==="Pago Proveedores"&&m.egreso){
-          (m.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-            var mt=ref.trim().match(/Compra #(\d+)/);
-            if(mt){var n=parseInt(mt[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosMap[n]=(pagosMap[n]||0)+(a?parseFloat(a[1]):parseFloat(m.monto||0));}
-          });
+          var _re=/Compra #(\d+)[^$]*\$([\d,]+\.?\d*)/g,_mt;
+          while((_mt=_re.exec(m.gasto_ticket||""))!==null){var n=parseInt(_mt[1]);var monto=parseFloat(_mt[2].replace(/,/g,""))||0;pagosMap[n]=(pagosMap[n]||0)+monto;}
         }
       });
       // Pagos a repartidores (compras tipo servicio)
       var pagosRepMap={};
       movs.forEach(function(m){
         if(m.movimiento==="Pago Repartidores"&&m.egreso){
-          (m.gasto_ticket||"").split(/, (?=[A-Za-z])/).forEach(function(ref){
-            var mt=ref.trim().match(/Compra #(\d+)/);
-            if(mt){var n=parseInt(mt[1]);var a=ref.replace(/,/g,"").match(/\$([\d.]+)/);pagosRepMap[n]=(pagosRepMap[n]||0)+(a?parseFloat(a[1]):parseFloat(m.monto||0));}
-          });
+          var _re=/Compra #(\d+)[^$]*\$([\d,]+\.?\d*)/g,_mt;
+          while((_mt=_re.exec(m.gasto_ticket||""))!==null){var n=parseInt(_mt[1]);var monto=parseFloat(_mt[2].replace(/,/g,""))||0;pagosRepMap[n]=(pagosRepMap[n]||0)+monto;}
         }
       });
       // Build repartidor debt from envios directly (si se borra envio desaparece)
