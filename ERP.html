@@ -3031,9 +3031,21 @@ function rEnvios(el){
     html+='<div class="grid2"><div class="card">';
     html+='<div class="fi"><label>RUTA #</label><div class="fi-ro">'+autoE+' 🔒 (reinicia cada día)</div></div>';
     html+=fi("FECHA",'<input id="efecha" type="date" value="'+(esEd?ee.fecha:hoy())+'">');
-    html+='<div class="fi"><label>REPARTIDOR</label><select id="erep" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="">— Seleccionar —</option>';
-    REPS.forEach(function(r){html+='<option value="'+r.n+'"'+(esEd&&ee.repartidor===r.n?" selected":"")+'>'+r.n+'</option>'});
-    html+='</select></div>';
+    // Recargar REPS frescos de Supabase antes de renderizar
+    sGET("repartidores","activo=eq.true&order=id").then(function(freshReps){
+      if(freshReps&&freshReps.length) REPS=freshReps.map(function(r){return{id:r.id,n:r.nombre};});
+      var repSel=document.getElementById("erep");
+      if(repSel){
+        repSel.innerHTML='<option value="">— Seleccionar —</option>';
+        REPS.forEach(function(r){
+          var opt=document.createElement("option");
+          opt.value=r.n;opt.textContent=r.n;
+          if(esEd&&ee.repartidor===r.n)opt.selected=true;
+          repSel.appendChild(opt);
+        });
+      }
+    });
+    html+='<div class="fi"><label>REPARTIDOR</label><select id="erep" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="">Cargando...</option></select></div>';
     html+=fi("COSTO TOTAL ($)",'<input id="ecosto" type="number" value="'+(esEd?ee.costo_total:0)+'" oninput="eRecalc()">');
     html+='<div id="epro" style="font-size:11px;color:#E3B341;margin-top:4px"></div>';
     html+='</div><div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em">PEDIDOS EN ESTA RUTA</div><button class="btn btn-o btn-s" style="border-color:#FB923C;color:#FB923C" onclick="eAddPed()">+ Agregar</button></div><div id="epedrows"></div></div></div>';
@@ -3511,25 +3523,15 @@ function rClientes(el){
       var nuevo=op==="add"?actual+cant:Math.max(0,actual-cant);
       var hist2=[];try{hist2=JSON.parse(ce.coins_historial||"[]")}catch(e){}
       hist2.push({op:op,cant:cant,conc:conc,saldo:nuevo,fecha:new Date().toLocaleDateString("es-MX")});
-      // 1. Actualizar saldo en tabla clientes
-      sPATCH("clientes","id=eq."+ce.id,{coins:nuevo,coins_historial:JSON.stringify(hist2)}).then(function(ok){
-        if(!ok){toast("Error actualizando saldo","err");return;}
+      sPATCH("clientes","id=eq."+ce.id,{coins:nuevo,coins_historial:JSON.stringify(hist2)}).then(function(){
         ce.coins=nuevo;ce.coins_historial=JSON.stringify(hist2);
+        // Update in local clientes array too
         if(typeof clientes!=="undefined"){
           var idx=clientes.findIndex(function(x){return x.id===ce.id});
           if(idx>=0){clientes[idx].coins=nuevo;clientes[idx].coins_historial=JSON.stringify(hist2)}
         }
-        // 2. Insertar en coins_transacciones para que la tienda lo vea
-        sPOST("coins_transacciones",{
-          cliente_id:ce.id,
-          tipo:op==="add"?"credito":"debito",
-          cantidad:cant,
-          descripcion:conc,
-          estado:"aprobado"
-        }).then(function(){
-          toast((op==="add"?"+":"-")+cant+" coins → saldo: "+nuevo);
-          clCoins(ce);
-        });
+        toast((op==="add"?"+":"-")+cant+" coins → saldo: "+nuevo);
+        clCoins(ce);
       });
     }
     wireCoins();
