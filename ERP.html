@@ -2383,7 +2383,7 @@ function rProduccion(el){
     return 1;
   }
 
-  var FLOR_INSUMO_SKUS=["R1","RP1","P1","P2","P3","P4","P5","EX1","EX2","G1","G2","I1","I2"];
+  var FLOR_INSUMO_SKUS=["R1","RP1","P1","P2","P3","P4","P5","EX1","EX2","EX3","G1","G2","I1","I2"];
   var HGP_PREFIXES=["HONGO","GUARUMO","PRERROL"];
   var FLOR_TERM_CATS=["Flor Regular","Flor Regular Plus","Flor Premium","Flor Exotica","Flor Green House","Flor Indoor"];
   var OTRO_CATS=["Extractos","Extractos Granel","Gallos","Medicina"];
@@ -3031,21 +3031,9 @@ function rEnvios(el){
     html+='<div class="grid2"><div class="card">';
     html+='<div class="fi"><label>RUTA #</label><div class="fi-ro">'+autoE+' 🔒 (reinicia cada día)</div></div>';
     html+=fi("FECHA",'<input id="efecha" type="date" value="'+(esEd?ee.fecha:hoy())+'">');
-    // Recargar REPS frescos de Supabase antes de renderizar
-    sGET("repartidores","activo=eq.true&order=id").then(function(freshReps){
-      if(freshReps&&freshReps.length) REPS=freshReps.map(function(r){return{id:r.id,n:r.nombre};});
-      var repSel=document.getElementById("erep");
-      if(repSel){
-        repSel.innerHTML='<option value="">— Seleccionar —</option>';
-        REPS.forEach(function(r){
-          var opt=document.createElement("option");
-          opt.value=r.n;opt.textContent=r.n;
-          if(esEd&&ee.repartidor===r.n)opt.selected=true;
-          repSel.appendChild(opt);
-        });
-      }
-    });
-    html+='<div class="fi"><label>REPARTIDOR</label><select id="erep" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="">Cargando...</option></select></div>';
+    html+='<div class="fi"><label>REPARTIDOR</label><select id="erep" style="width:100%;background:#0D1117;border:1px solid #30363D;border-radius:2px;padding:9px 11px;font-size:13px;color:#E6EDF3"><option value="">— Seleccionar —</option>';
+    REPS.forEach(function(r){html+='<option value="'+r.n+'"'+(esEd&&ee.repartidor===r.n?" selected":"")+'>'+r.n+'</option>'});
+    html+='</select></div>';
     html+=fi("COSTO TOTAL ($)",'<input id="ecosto" type="number" value="'+(esEd?ee.costo_total:0)+'" oninput="eRecalc()">');
     html+='<div id="epro" style="font-size:11px;color:#E3B341;margin-top:4px"></div>';
     html+='</div><div class="card"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em">PEDIDOS EN ESTA RUTA</div><button class="btn btn-o btn-s" style="border-color:#FB923C;color:#FB923C" onclick="eAddPed()">+ Agregar</button></div><div id="epedrows"></div></div></div>';
