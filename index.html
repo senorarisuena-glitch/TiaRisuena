@@ -1101,20 +1101,20 @@ async function loginUsuario(){
 function cerrarSesion(){
   S.user = null;
   S.cart = [];
-  sessionStorage.removeItem('tia_cid');
+  localStorage.removeItem('tia_cid');
   updUI();
   mostrarRegistro();
   notif('👋 Sesión cerrada');
 }
 
 function guardarSesionLocal(user){
-  try{ sessionStorage.setItem('tia_cid', String(user.id)); }catch(e){}
+  try{ localStorage.setItem('tia_cid', String(user.id)); }catch(e){}
 }
 
 async function cargarSesion(){
   try{
     if(!sb)return;
-    var cid=sessionStorage.getItem('tia_cid');
+    var cid=localStorage.getItem('tia_cid');
     if(!cid)return;
     var res=await sb.from('clientes').select('*').eq('id',cid).single();
     if(res.data){S.user=res.data;updUI();}
@@ -1153,7 +1153,7 @@ async function registrarUsuario(){
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
 }
-function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
+function cerrarSesion(){S.user=null;S.cart=[];localStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
   var u=S.user;if(!u)return;
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
@@ -1548,20 +1548,20 @@ async function loginUsuario(){
 function cerrarSesion(){
   S.user = null;
   S.cart = [];
-  sessionStorage.removeItem('tia_cid');
+  localStorage.removeItem('tia_cid');
   updUI();
   mostrarRegistro();
   notif('👋 Sesión cerrada');
 }
 
 function guardarSesionLocal(user){
-  try{ sessionStorage.setItem('tia_cid', String(user.id)); }catch(e){}
+  try{ localStorage.setItem('tia_cid', String(user.id)); }catch(e){}
 }
 
 async function cargarSesion(){
   try{
     if(!sb) return;
-    const uid = sessionStorage.getItem('tia_cid');
+    const uid = localStorage.getItem('tia_cid');
     if(!uid) return;
     const {data} = await sb.from('clientes').select('*').eq('id',uid).single();
     if(data){ S.user=data; updUI(); }
@@ -3548,8 +3548,8 @@ function mostrarRegistro(){document.getElementById('view-registro').style.displa
 function mostrarLogin(){document.getElementById('view-registro').style.display='none';document.getElementById('view-login').style.display='block';document.getElementById('view-perfil').style.display='none';}
 function mostrarPerfil(){document.getElementById('view-registro').style.display='none';document.getElementById('view-login').style.display='none';document.getElementById('view-perfil').style.display='block';}
 function renderUsuarioPage(){if(S.user){mostrarPerfil();llenarPerfil();}else{mostrarRegistro();}}
-function guardarSesionLocal(u){try{sessionStorage.setItem('tia_cid',u.id);}catch(e){}}
-async function cargarSesion(){try{if(!sb)return;var uid=sessionStorage.getItem('tia_cid');if(!uid)return;var res=await sb.from('clientes').select('*').eq('id',uid).single();if(res.data){S.user=res.data;updUI();}}catch(e){console.log('session:',e);}}
+function guardarSesionLocal(u){try{localStorage.setItem('tia_cid',u.id);}catch(e){}}
+async function cargarSesion(){try{if(!sb)return;var uid=localStorage.getItem('tia_cid');if(!uid)return;var res=await sb.from('clientes').select('*').eq('id',uid).single();if(res.data){S.user=res.data;updUI();}}catch(e){console.log('session:',e);}}
 async function registrarUsuario(){
   var nombre=(document.getElementById('rNombre')||{}).value||'';
   var apodo=(document.getElementById('rApodo')||{}).value||'';
@@ -3581,7 +3581,7 @@ async function registrarUsuario(){
   notif('Bienvenido '+nombre+'! 🪙'+coins+' coins');
   mostrarPerfil();llenarPerfil();updUI();
 }
-function cerrarSesion(){S.user=null;S.cart=[];sessionStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
+function cerrarSesion(){S.user=null;S.cart=[];localStorage.removeItem('tia_cid');updUI();mostrarRegistro();notif('Sesion cerrada');}
 async function llenarPerfil(){
   var u=S.user;if(!u)return;
   var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};

@@ -3511,15 +3511,25 @@ function rClientes(el){
       var nuevo=op==="add"?actual+cant:Math.max(0,actual-cant);
       var hist2=[];try{hist2=JSON.parse(ce.coins_historial||"[]")}catch(e){}
       hist2.push({op:op,cant:cant,conc:conc,saldo:nuevo,fecha:new Date().toLocaleDateString("es-MX")});
-      sPATCH("clientes","id=eq."+ce.id,{coins:nuevo,coins_historial:JSON.stringify(hist2)}).then(function(){
+      // 1. Actualizar saldo en tabla clientes
+      sPATCH("clientes","id=eq."+ce.id,{coins:nuevo,coins_historial:JSON.stringify(hist2)}).then(function(ok){
+        if(!ok){toast("Error actualizando saldo","err");return;}
         ce.coins=nuevo;ce.coins_historial=JSON.stringify(hist2);
-        // Update in local clientes array too
         if(typeof clientes!=="undefined"){
           var idx=clientes.findIndex(function(x){return x.id===ce.id});
           if(idx>=0){clientes[idx].coins=nuevo;clientes[idx].coins_historial=JSON.stringify(hist2)}
         }
-        toast((op==="add"?"+":"-")+cant+" coins → saldo: "+nuevo);
-        clCoins(ce);
+        // 2. Insertar en coins_transacciones para que la tienda lo vea
+        sPOST("coins_transacciones",{
+          cliente_id:ce.id,
+          tipo:op==="add"?"credito":"debito",
+          cantidad:cant,
+          descripcion:conc,
+          estado:"aprobado"
+        }).then(function(){
+          toast((op==="add"?"+":"-")+cant+" coins → saldo: "+nuevo);
+          clCoins(ce);
+        });
       });
     }
     wireCoins();
