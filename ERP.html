@@ -3675,23 +3675,15 @@ function rReportes(el){
 
     // ── ESTADO DE RESULTADOS ──────────────────────────────────────────
     var vTot=vF.reduce(function(a,v){return a+parseFloat(v.monto_venta||0);},0);
-    // Costo de ventas: desde lineas.costo_unit de cada venta
-    // Misma fuente que la tabla de ventas para que siempre cuadren
-    var cVen=vF.reduce(function(a,v){
-      var costoV=parseFloat(v.costo_productos||0);
-      var fuente="costo_productos";
-      if(costoV===0){
-        fuente="lineas";
-        costoV=(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
-          var cu=parseFloat(l.costo_unit||l.cu||0);
-          var cant=parseFloat(l.cant||l.cantidad||l.qty||0);
-          return b+cant*cu;
-        },0);
-      }
-      console.log("CVEN ticket#"+v.ticket+" costo="+costoV.toFixed(2)+" fuente="+fuente);
-      return a+costoV;
+    // Costo de ventas: desde lotes de salida tipo venta — misma fuente que el inventario
+    var ticketsDelPeriodo=new Set(vF.map(function(v){return String(v.ticket);}));
+    var cVen=lotesRep.filter(function(lt){
+      if(lt.movimiento!=="salida"||lt.tipo!=="venta")return false;
+      var ref=lt.num_ref?String(lt.num_ref).replace("V-",""):"";
+      return ref&&ticketsDelPeriodo.has(ref);
+    }).reduce(function(a,lt){
+      return a+parseFloat(lt.cantidad||0)*parseFloat(lt.costo_unit||0);
     },0);
-    console.log("=== TOTAL CVEN ===", cVen);
     var uBruta=vTot-cVen;
     // Gastos = TODOS los egresos excepto Pago Proveedores (ese es pasivo, no gasto operativo)
     var gastosSoloGastos=mF.filter(function(m){
@@ -3743,10 +3735,8 @@ function rReportes(el){
     var valInv=Object.keys(stockBal).reduce(function(a,sku){
       var s=stockBal[sku];
       var val=s.cantidad>0?Math.max(0,s.cantidad)*s.costoUnit:0;
-      if(val>0)console.log("INV SKU="+sku+" cant="+s.cantidad.toFixed(2)+" cu="+s.costoUnit+" val="+val.toFixed(2));
       return a+val;
     },0);
-    console.log("=== TOTAL INVENTARIO ===", valInv);
     var activos=efec+porCobrar+valInv;
 
     // Inversión socios (todos los movs)
@@ -3779,7 +3769,6 @@ function rReportes(el){
         }
       }
     });
-    console.log("=== PAGOS MAP P ===", JSON.stringify(pagosMapP));
     // Agrupar compras por num_compra (igual que pestaña Compras)
     var gruposCompra={};
     comprasRep.forEach(function(co){
@@ -3793,10 +3782,8 @@ function rReportes(el){
       var totalCompra=gruposCompra[n];
       var pagado=pagosMapP[parseInt(n)]||0;
       var ad=Math.max(0,totalCompra-pagado);
-      console.log("Compra #"+n+" total="+totalCompra+" pagado="+pagado+" adeudo="+ad.toFixed(2));
       if(ad>0.01)deudaProv+=ad;
     });
-    console.log("=== DEUDA PROV TOTAL ===", deudaProv);
 
     // Deuda repartidores — desde envios directamente
     var pagosRepMovs=movs.filter(function(m){return m.movimiento==="Pago Repartidores"&&m.egreso;});
@@ -3829,14 +3816,12 @@ function rReportes(el){
       html+=srow("(-) Costo de Ventas",fmt(d.cVen),"#8B949E");
       html+='<div style="margin:4px 0 8px 12px">';
       d.vF.forEach(function(v){
-        var costoV=parseFloat(v.costo_productos||0);
-        var fuente=costoV>0?"costo_prod":"lineas";
-        if(costoV===0){
-          costoV=(Array.isArray(v.lineas)?v.lineas:[]).reduce(function(b,l){
-            return b+parseFloat(l.cant||l.cantidad||l.qty||0)*parseFloat(l.costo_unit||l.cu||0);
-          },0);
-        }
-        html+=srow("  #"+v.ticket+" "+( v.cliente_nombre||"")+" ["+fuente+"]",fmt(costoV),"#4A9EFF");
+        var costoV=lotesRep.filter(function(lt){
+          return lt.movimiento==="salida"&&lt.tipo==="venta"&&lt.num_ref===("V-"+v.ticket);
+        }).reduce(function(a,lt){
+          return a+parseFloat(lt.cantidad||0)*parseFloat(lt.costo_unit||0);
+        },0);
+        html+=srow("  #"+v.ticket+" "+(v.cliente_nombre||""),fmt(costoV),"#4A9EFF");
       });
       html+='</div>';
       html+='<div style="height:1px;background:#30363D;margin:8px 0"></div>';
@@ -3866,7 +3851,7 @@ function rReportes(el){
       html+=srow("UTIL. NETA P&L (periodo)",fmt(d.uNeta),d.uNeta>=0?"#00C896":"#F85149",true);
       var diff=patrimonio-d.uNeta;
       if(Math.abs(diff)>0.5){
-        html+=srow("Diferencia (gastos otros periodos)",fmt(diff),"#E3B341",false);
+        html+=srow("Variación de valuación inventario",fmt(Math.abs(diff)),"#E3B341",false);
       }
       html+='</div></div>';
       rc.innerHTML=html;
