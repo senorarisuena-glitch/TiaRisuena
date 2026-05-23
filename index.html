@@ -1320,7 +1320,13 @@ function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('
 async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
-  renderHeroes();renderCoins();updUI();goPage('inicio');
+  renderHeroes();renderCoins();updUI();
+  // Si ya hay sesion activa, ir directo a usuario; si no, inicio
+  if(S.user){
+    goPage('usuario');
+  } else {
+    goPage('inicio');
+  }
   cargarMenuDinamico();
   if(S.user)initRealtime();
 }
@@ -3748,7 +3754,13 @@ function initRealtime(){if(!sb||!S.user)return;sb.channel('pedidos-nuevos').on('
 async function init(){
   loadCart();
   try{await cargarSesion();}catch(e){console.log('session:',e);}
-  renderHeroes();renderCoins();updUI();goPage('inicio');
+  renderHeroes();renderCoins();updUI();
+  // Si ya hay sesion activa, ir directo a usuario; si no, inicio
+  if(S.user){
+    goPage('usuario');
+  } else {
+    goPage('inicio');
+  }
   cargarMenuDinamico();
   if(S.user)initRealtime();
 }
