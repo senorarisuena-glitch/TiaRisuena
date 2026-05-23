@@ -997,7 +997,7 @@ function goSub(s){
 // UI UPDATE
 // ══════════════════════════════════════════
 function updUI(){
-  const bal = S.user ? S.user.saldo_mxn : S.bal;
+  const bal = S.user ? S.user.coins : S.bal;
   const coins = S.user ? S.user.coins : S.coins;
   document.getElementById('hBal').textContent = bal;
   document.getElementById('hCoins').textContent = coins;
@@ -1060,7 +1060,7 @@ async function registrarUsuario(){
     direccion:dir1.trim()||null,
     facebook:fb||null,email:email||null,
     password:pass||null,
-    coins:coins,saldo_mxn:0,
+    coins:coins,
     gastado:0,pedidos_count:0
   }).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
@@ -1143,7 +1143,7 @@ async function registrarUsuario(){
   if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   S.cart=[];S.coins=0;
   var coins=fb?200:100;
-  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
+  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   var codigoNuevo='CLI'+String(res.data.id).padStart(3,'0');
   await sb.from('clientes').update({codigo:codigoNuevo}).eq('id',res.data.id);
@@ -1163,7 +1163,7 @@ async function llenarPerfil(){
   var niv=getNivel(u.gastado||0);
   var nivEl=document.getElementById('pNivel');
   if(nivEl){nivEl.textContent=niv.lvl.nombre;nivEl.style.color=niv.lvl.color;}
-  set('pBal',(u.saldo_mxn||0).toLocaleString());set('pCoins',(u.coins||0).toLocaleString());
+  set('pBal',(u.coins||0).toLocaleString());set('pCoins',(u.coins||0).toLocaleString());
   set('pGastado',(u.gastado||0).toLocaleString());set('pCompras',u.pedidos_count||0);
   set('pNivelActual',niv.lvl.nombre);
   var sigNiv=NIVELES[niv.idx+1];
@@ -1414,7 +1414,7 @@ function goSub(s){
 // UI UPDATE
 // ══════════════════════════════════════════
 function updUI(){
-  const bal = S.user ? S.user.saldo_mxn : S.bal;
+  const bal = S.user ? S.user.coins : S.bal;
   const coins = S.user ? S.user.coins : S.coins;
   document.getElementById('hBal').textContent = bal;
   document.getElementById('hCoins').textContent = coins;
@@ -1489,7 +1489,7 @@ async function registrarUsuario(){
     direccion:dir1||null,
     facebook:fb||null, email:email||null,
     password:pass||null,
-    coins:fb?200:100, saldo_mxn:0,
+    coins:fb?200:100,
     gastado:0, pedidos_count:0
   }).select().single();
 
@@ -1600,7 +1600,7 @@ async function llenarPerfil(){
     document.getElementById('pProgTexto').textContent = '¡Nivel máximo alcanzado!';
   }
 
-  document.getElementById('pBal').textContent = (u.saldo_mxn||0).toLocaleString();
+  document.getElementById('pBal').textContent = (u.coins||0).toLocaleString();
   document.getElementById('pCoins').textContent = (u.coins||0).toLocaleString();
   document.getElementById('pGastado').textContent = (u.gastado||0).toLocaleString();
   document.getElementById('pCompras').textContent = u.pedidos_count||0;
@@ -3577,7 +3577,7 @@ async function registrarUsuario(){
   if(ex.data){if(msg){msg.textContent='Ese telefono ya esta registrado';msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   S.cart=[];S.coins=0;
   var coins=fb?200:100;
-  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,saldo_mxn:0,gastado:0,pedidos_count:0}).select().single();
+  var res=await sb.from('clientes').insert({nombre:nombre.trim(),apodo:apodo.trim()||null,telefono:tel,direccion:dir1.trim()||null,facebook:fb||null,email:email||null,password:pass||null,coins:coins,gastado:0,pedidos_count:0}).select().single();
   if(res.error){if(msg){msg.textContent='Error: '+res.error.message;msg.style.color='var(--red)';}if(btnR)btnR.disabled=false;return;}
   var codigoNuevo='CLI'+String(res.data.id).padStart(3,'0');
   await sb.from('clientes').update({codigo:codigoNuevo}).eq('id',res.data.id);
@@ -3597,7 +3597,7 @@ async function llenarPerfil(){
   var niv=getNivel(u.gastado||0);
   var nivEl=document.getElementById('pNivel');
   if(nivEl){nivEl.textContent=niv.lvl.nombre;nivEl.style.color=niv.lvl.color;}
-  set('pBal',(u.saldo_mxn||0).toLocaleString());set('pCoins',(u.coins||0).toLocaleString());
+  set('pBal',(u.coins||0).toLocaleString());set('pCoins',(u.coins||0).toLocaleString());
   set('pGastado',(u.gastado||0).toLocaleString());set('pCompras',u.pedidos_count||0);
   set('pNivelActual',niv.lvl.nombre);
   var sigNiv=NIVELES[niv.idx+1];
