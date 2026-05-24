@@ -154,6 +154,7 @@ var CATALOGO_SKU=[
   {sku:"HONGOP5",desc:"Hongo Flor Premium 5",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"HONGOEX1",desc:"Hongo Flor Exotica 1",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"HONGOEX2",desc:"Hongo Flor Exotica 2",cat:"Insumos Extracto",tipo:"insumo"},
+  {sku:"HONGOEX3",desc:"Hongo Flor Exotica 3",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"HONGOG1",desc:"Hongo Flor Green House 1",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"HONGOG2",desc:"Hongo Flor Green House 2",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"HONGOI1",desc:"Hongo Flor Indoor 1",cat:"Insumos Extracto",tipo:"insumo"},
@@ -167,6 +168,7 @@ var CATALOGO_SKU=[
   {sku:"GUARUMOP5",desc:"Guarumo Flor Premium 5",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"GUARUMOEX1",desc:"Guarumo Flor Exotica 1",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"GUARUMOEX2",desc:"Guarumo Flor Exotica 2",cat:"Insumos Extracto",tipo:"insumo"},
+  {sku:"GUARUMOEX3",desc:"Guarumo Flor Exotica 3",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"GUARUMOG1",desc:"Guarumo Flor Green House 1",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"GUARUMOG2",desc:"Guarumo Flor Green House 2",cat:"Insumos Extracto",tipo:"insumo"},
   {sku:"GUARUMOI1",desc:"Guarumo Flor Indoor 1",cat:"Insumos Extracto",tipo:"insumo"},
@@ -180,6 +182,7 @@ var CATALOGO_SKU=[
   {sku:"PRERROLP5",desc:"Prerrol Flor Premium 5",cat:"Insumos Gallos",tipo:"insumo"},
   {sku:"PRERROLEX1",desc:"Prerrol Flor Exotica 1",cat:"Insumos Gallos",tipo:"insumo"},
   {sku:"PRERROLEX2",desc:"Prerrol Flor Exotica 2",cat:"Insumos Gallos",tipo:"insumo"},
+  {sku:"PRERROLEX3",desc:"Prerrol Flor Exotica 3",cat:"Insumos Gallos",tipo:"insumo"},
   {sku:"PRERROLG1",desc:"Prerrol Flor Green House 1",cat:"Insumos Gallos",tipo:"insumo"},
   {sku:"PRERROLG2",desc:"Prerrol Flor Green House 2",cat:"Insumos Gallos",tipo:"insumo"},
   {sku:"PRERROLI1",desc:"Prerrol Flor Indoor 1",cat:"Insumos Gallos",tipo:"insumo"},
@@ -274,6 +277,16 @@ var CATALOGO_SKU=[
   {sku:"28EX2",desc:"Oz Exotica 2",cat:"Flor Exotica",tipo:"terminado"},
   {sku:"50EX2",desc:"50 Gr Exotica 2",cat:"Flor Exotica",tipo:"terminado"},
   {sku:"100EX2",desc:"100 Gr Exotica 2",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"1EX3",desc:"1 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"1.5EX3",desc:"1.5 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"3.5EX3",desc:"3.5 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"5EX3",desc:"5 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"7EX3",desc:"7 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"10EX3",desc:"10 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"14EX3",desc:"Media Oz Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"28EX3",desc:"Oz Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"50EX3",desc:"50 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
+  {sku:"100EX3",desc:"100 Gr Exotica 3",cat:"Flor Exotica",tipo:"terminado"},
   {sku:"1G1",desc:"1 Gr Green House 1",cat:"Flor Green House",tipo:"terminado"},
   {sku:"1.5G1",desc:"1.5 Gr Green House 1",cat:"Flor Green House",tipo:"terminado"},
   {sku:"3.5G1",desc:"3.5 Gr Green House 1",cat:"Flor Green House",tipo:"terminado"},
@@ -452,6 +465,16 @@ var MESES=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Di
 var CUENTAS=[{id:1,n:"Caja Chica"},{id:2,n:"Mercado Pago"},{id:3,n:"Kiyoshi"},{id:4,n:"Spin Oxxo"}];
 var PROVS=[{id:1,n:"Buenadela"},{id:2,n:"420 Gdl"},{id:3,n:"Mercado Libre"},{id:4,n:"Joinet"},{id:5,n:"Envases Velazco"}];
 var REPS=[{id:"r1",n:"Uber"},{id:"r2",n:"Didi"},{id:"r3",n:"Indrive"},{id:"r4",n:"Repartidor 1"},{id:"r5",n:"Repartidor 2"}];
+// Cargar repartidores frescos de Supabase al iniciar
+(function loadReps(){
+  if(typeof sGET==="function"){
+    sGET("repartidores","activo=eq.true&order=id").then(function(rows){
+      if(rows&&rows.length) REPS=rows.map(function(r){return{id:r.id,n:r.nombre};});
+    });
+  } else {
+    setTimeout(loadReps, 500);
+  }
+})();
 
 // Cargar bancos y repartidores desde Supabase al iniciar
 function cargarCatalogos(){
@@ -2421,7 +2444,16 @@ function rProduccion(el){
             invStock[sku].cantidad-=parseFloat(ins.cant||ins.cantidad||0);
           });
         });
-        inv=Object.keys(invStock).map(function(s){return Object.assign({sku:s},invStock[s]);}).filter(function(x){return x.cantidad>0;});
+        // Restar ventas de granel (insumos vendidos directo sin produccion)
+        sGET("lotes","movimiento=eq.salida&tipo=eq.venta&order=id").then(function(lotesVenta){
+          (Array.isArray(lotesVenta)?lotesVenta:[]).forEach(function(lt){
+            var sku=lt.sku;if(!sku)return;
+            if(invStock[sku]){
+              invStock[sku].cantidad-=parseFloat(lt.cantidad)||0;
+            }
+          });
+          inv=Object.keys(invStock).map(function(s){return Object.assign({sku:s},invStock[s]);}).filter(function(x){return x.cantidad>0;});
+        });
       });
     });
   }
