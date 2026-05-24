@@ -463,6 +463,18 @@ function selHtml(id,opts,val){return '<select id="'+id+'"><option value="">— s
 
 var MESES=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 var CUENTAS=[{id:1,n:"Caja Chica"},{id:2,n:"Mercado Pago"},{id:3,n:"Kiyoshi"},{id:4,n:"Spin Oxxo"}];
+// Cargar cuentas bancarias desde Supabase
+(function loadBancos(){
+  if(typeof sGET==="function"){
+    sGET("bancos","order=id").then(function(rows){
+      if(rows&&rows.length){
+        CUENTAS=rows.map(function(r){return{id:r.id,n:r.nombre,tipo:r.tipo};});
+      }
+    });
+  } else {
+    setTimeout(loadBancos,500);
+  }
+})();
 var PROVS=[{id:1,n:"Buenadela"},{id:2,n:"420 Gdl"},{id:3,n:"Mercado Libre"},{id:4,n:"Joinet"},{id:5,n:"Envases Velazco"}];
 var REPS=[{id:"r1",n:"Uber"},{id:"r2",n:"Didi"},{id:"r3",n:"Indrive"},{id:"r4",n:"Repartidor 1"},{id:"r5",n:"Repartidor 2"}];
 // Cargar repartidores frescos de Supabase al iniciar
