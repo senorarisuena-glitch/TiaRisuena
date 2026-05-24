@@ -3681,7 +3681,16 @@ function rReportes(el){
   window.setModo=function(v){
     modoFiltro=v;
     if(v==='semana'){var w=getWeekRange();fechaDesde=w.desde;fechaHasta=w.hasta;}
+    if(v==='dia'){
+      // Usar fecha de hoy por default al cambiar a dia especifico
+      var hoyD=new Date().toISOString().slice(0,10);
+      fechaDesde=hoyD;fechaHasta=hoyD;
+      dia=hoyD.slice(8,10);anio=hoyD.slice(0,4);mes=hoyD.slice(5,7);
+    }
+    if(v==='mes'||v==='rango'){fechaDesde='';fechaHasta='';}
     document.getElementById('filtros-rep').innerHTML=buildFilterUI();
+    // Enfocar el input de fecha si es dia especifico
+    if(v==='dia'){setTimeout(function(){var inp=document.getElementById('rfechaD');if(inp)inp.focus();},100);}
     renderRep();
   };
   window.setFechaD=function(v){fechaDesde=v;fechaHasta=v;dia=v.slice(8,10);anio=v.slice(0,4);mes=v.slice(5,7);renderRep();};
