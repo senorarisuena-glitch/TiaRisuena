@@ -3692,17 +3692,17 @@ function rReportes(el){
   window.setMes=function(v){mes=v;renderRep();};
   window.setModo=function(v){
     modoFiltro=v;
-    if(v==='semana'){var w=getWeekRange();fechaDesde=w.desde;fechaHasta=w.hasta;}
+    if(v==='semana'){var w=getWeekRange();fechaDesde=w.desde;fechaHasta=w.hasta;dia='';}
     if(v==='dia'){
-      // Usar fecha de hoy por default al cambiar a dia especifico
       var hoyD=new Date().toISOString().slice(0,10);
-      fechaDesde=hoyD;fechaHasta=hoyD;
-      dia=hoyD.slice(8,10);anio=hoyD.slice(0,4);mes=hoyD.slice(5,7);
+      if(!fechaDesde)fechaDesde=hoyD;
+      fechaHasta=fechaDesde;
+      dia=fechaDesde.slice(8,10);anio=fechaDesde.slice(0,4);mes=fechaDesde.slice(5,7);
     }
-    if(v==='mes'||v==='rango'){fechaDesde='';fechaHasta='';}
+    if(v==='mes'){fechaDesde='';fechaHasta='';dia='';}
+    if(v==='rango'){fechaDesde='';fechaHasta='';dia='';}
     document.getElementById('filtros-rep').innerHTML=buildFilterUI();
-    // Enfocar el input de fecha si es dia especifico
-    if(v==='dia'){setTimeout(function(){var inp=document.getElementById('rfechaD');if(inp)inp.focus();},100);}
+    if(v==='dia'){setTimeout(function(){var inp=document.getElementById('rfechaD');if(inp){inp.focus();inp.click();}},150);}
     renderRep();
   };
   window.setFechaD=function(v){fechaDesde=v;fechaHasta=v;dia=v.slice(8,10);anio=v.slice(0,4);mes=v.slice(5,7);renderRep();};
@@ -3866,8 +3866,11 @@ function rReportes(el){
       html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">'+kbox("VENTAS",fmt(d.vTot))+kbox("UTIL. BRUTA",fmt(d.uBruta),"#00C896")+kbox("UTIL. NETA",fmt(d.uNeta),d.uNeta>=0?"#00C896":"#F85149")+'</div>';
       html+='<div class="card"><div style="font-size:10px;color:#8B949E;letter-spacing:.12em;margin-bottom:12px">ESTADO DE RESULTADOS — '+pLabel+'</div>';
       html+=srow("Ventas",fmt(d.vTot));
+      html+='<div style="display:flex;justify-content:space-between;align-items:center">';
       html+=srow("(-) Costo de Ventas",fmt(d.cVen),"#8B949E");
-      html+='<div style="margin:4px 0 8px 12px">';
+      html+='<button onclick="var el=document.getElementById(\'cvtickets\');el.style.display=el.style.display===\'none\'?\'block\':\'none\';this.textContent=el.style.display===\'none\'?\'+\':\'-\';" style="background:none;border:1px solid #30363D;color:#8B949E;border-radius:2px;padding:1px 8px;font-family:monospace;font-size:11px;cursor:pointer;margin-left:8px">-</button>';
+      html+='</div>';
+      html+='<div id="cvtickets" style="margin:4px 0 8px 12px">';
       d.vF.forEach(function(v){
         var costoV=lotesRep.filter(function(lt){
           return lt.movimiento==="salida"&&lt.tipo==="venta"&&lt.num_ref===("V-"+v.ticket);
