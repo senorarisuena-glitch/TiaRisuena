@@ -1093,13 +1093,11 @@ function actualizarStatsCliente(cliId, monto){
     function marcarSeg(seg){
       var hist=(seg.historial||[]).concat([{estado:"entregado",fecha:fecha}]);
       sPATCH("seguimientos","id=eq."+seg.id,{estado:"entregado",historial:hist}).then(function(){
-        // Also update envio if all its pedidos are entregado
         if(seg.num_envio){
           sGET("envios","order=id").then(function(envs){
             envs=Array.isArray(envs)?envs:[];
             var envio=envs.find(function(e){return String(e.num_envio)===String(seg.num_envio)});
             if(envio){
-              // Check localStorage for all segs with this num_envio
               var allSegs=JSON.parse(localStorage.getItem("erp_seguimientos")||"[]");
               var linkedSegs=allSegs.filter(function(s){return String(s.num_envio)===String(seg.num_envio)});
               var allDone=linkedSegs.every(function(s){return s.id===seg.id||s.estado==="entregado"});
@@ -1113,8 +1111,21 @@ function actualizarStatsCliente(cliId, monto){
     sGET("seguimientos","order=id").then(function(rows){
       rows=Array.isArray(rows)?rows:[];
       var segId=String(id).replace("seg_","");
-      var seg=rows.find(function(r){return String(r.id)===String(segId)||String(r.pedido_id)===String(id)});
-      if(seg)marcarSeg(seg);
+      // Buscar por id exacto, pedido_id, o id numerico
+      var seg=rows.find(function(r){
+        return String(r.id)===segId ||
+               String(r.id)===String(id) ||
+               String(r.pedido_id)===String(id) ||
+               String(r.pedido_id)===segId;
+      });
+      if(seg){
+        marcarSeg(seg);
+      } else {
+        // Ultimo recurso: buscar por id como numero
+        var segNum=rows.find(function(r){return Number(r.id)===Number(segId)||Number(r.id)===Number(id)});
+        if(segNum){marcarSeg(segNum);}
+        else{toast("Error: pedido no encontrado (id:"+id+")","err");}
+      }
     });
   };
   load();
