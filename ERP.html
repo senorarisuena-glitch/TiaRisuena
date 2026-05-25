@@ -801,7 +801,7 @@ function rPedidos(el){
           return (e.pedidos||[]).some(function(p){return String(p.ticket)===String(s.pedido_ticket);});
         });
         if(!envio&&s.num_envio)envio=envios.find(function(e){return String(e.num_envio)===String(s.num_envio);});
-        var estadoReal=envio?envio.status:(s.estado||"preparando");
+        var estadoReal=s.estado==="entregado"?"entregado":(envio?envio.status:(s.estado||"preparando"));
         var ventaData=allVentas.find(function(v){return String(v.ticket)===String(s.pedido_ticket)||String(v.id)===String(s.venta_id);});
         return{
           id:"seg_"+s.id,
