@@ -2467,11 +2467,19 @@ function rProduccion(el){
             invStock[sku].cantidad-=parseFloat(ins.cant||ins.cantidad||0);
           });
         });
-        // Restar ventas de granel (insumos vendidos directo sin produccion)
-        sGET("lotes","movimiento=eq.salida&tipo=eq.venta&order=id").then(function(lotesVenta){
-          (Array.isArray(lotesVenta)?lotesVenta:[]).forEach(function(lt){
+        // Leer lotes completos para tener stock real de insumos
+        sGET("lotes","order=id").then(function(todosLotes){
+          (Array.isArray(todosLotes)?todosLotes:[]).forEach(function(lt){
             var sku=lt.sku;if(!sku)return;
-            if(invStock[sku]){
+            var ci=CATALOGO_SKU.find(function(s){return s.sku===sku;});
+            var tipo=ci?ci.tipo:"";
+            // Solo procesar insumos y mixtos desde lotes
+            if(tipo!=="insumo"&&tipo!=="mixto")return;
+            if(!invStock[sku])invStock[sku]={cantidad:0,cu:lt.costo_unit||0,desc:ci?ci.desc:sku,cat:ci?ci.cat:""};
+            if(lt.movimiento==="entrada"){
+              invStock[sku].cantidad+=parseFloat(lt.cantidad)||0;
+              if(parseFloat(lt.costo_unit)>0)invStock[sku].cu=parseFloat(lt.costo_unit);
+            } else {
               invStock[sku].cantidad-=parseFloat(lt.cantidad)||0;
             }
           });
