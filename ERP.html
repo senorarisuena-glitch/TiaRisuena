@@ -3217,6 +3217,13 @@ function rInventario(el){
             stock[lt.sku].lotesDetalle.push({id:lt.id,num_ref:lt.num_ref||"",fecha:lt.fecha,tipo:lt.tipo,movimiento:"salida",cantidad:cant,cu:cu,concepto:lt.concepto||""});
           }
         });
+        // Guardar total global para que balance lo use
+        var _invTotal=Object.keys(stock).reduce(function(a,nom){
+          var s=stock[nom];
+          var val=s.cantidad>0?Math.max(0,s.cantidad)*s.costoUnit:0;
+          return a+val;
+        },0);
+        window._INV_TOTAL=_invTotal;
         var terminados=[],insumos=[],fijos=[],todos=[];
         Object.keys(stock).sort().forEach(function(nom){
           var s=stock[nom];
@@ -3818,32 +3825,39 @@ function rReportes(el){
     CATALOGO_SKU.forEach(function(s){
       if(!stockBal[s.sku])stockBal[s.sku]={cantidad:0,costoUnit:0};
     });
-    // Calcular inventario con promedio ponderado acumulado
-    var stockBalTotal={};
+    // FIFO por capas — igual que módulo inventario
     lotesRep.forEach(function(lt){
       if(!lt.sku)return;
-      if(!stockBalTotal[lt.sku])stockBalTotal[lt.sku]={totalCant:0,totalVal:0};
+      if(!stockBal[lt.sku])stockBal[lt.sku]={cantidad:0,costoUnit:0,capas:[]};
       var cant=parseFloat(lt.cantidad)||0;
       var cu=parseFloat(lt.costo_unit)||0;
-      if(lt.movimiento==='entrada'&&cu>0){
-        stockBalTotal[lt.sku].totalCant+=cant;
-        stockBalTotal[lt.sku].totalVal+=cant*cu;
-      }
-    });
-    lotesRep.forEach(function(lt){
-      if(!lt.sku)return;
-      if(!stockBal[lt.sku])stockBal[lt.sku]={cantidad:0,costoUnit:0};
-      var cant=parseFloat(lt.cantidad)||0;
-      var cu=parseFloat(lt.costo_unit)||0;
-      var cuProm=stockBalTotal[lt.sku]&&stockBalTotal[lt.sku].totalCant>0?stockBalTotal[lt.sku].totalVal/stockBalTotal[lt.sku].totalCant:cu;
       if(lt.movimiento==='entrada'){
         stockBal[lt.sku].cantidad+=cant;
-        if(cu>0)stockBal[lt.sku].costoUnit=cuProm;
+        if(cu>0){
+          var capaB=null;
+          for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){if(stockBal[lt.sku].capas[ci].cu===cu){capaB=stockBal[lt.sku].capas[ci];break;}}
+          if(capaB){capaB.cantidad+=cant;}else{stockBal[lt.sku].capas.push({cu:cu,cantidad:cant});}
+          var tvB=0,tcB=0;
+          for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){tvB+=stockBal[lt.sku].capas[ci].cu*stockBal[lt.sku].capas[ci].cantidad;tcB+=stockBal[lt.sku].capas[ci].cantidad;}
+          stockBal[lt.sku].costoUnit=tcB>0?tvB/tcB:cu;
+        }
       } else {
         stockBal[lt.sku].cantidad-=cant;
+        var restB=cant;
+        for(var ci=0;ci<stockBal[lt.sku].capas.length&&restB>0;ci++){
+          var cap=stockBal[lt.sku].capas[ci];
+          if(cap.cantidad<=restB){restB-=cap.cantidad;cap.cantidad=0;}
+          else{cap.cantidad-=restB;restB=0;}
+        }
+        var capasActivas=[];
+        for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){if(stockBal[lt.sku].capas[ci].cantidad>0)capasActivas.push(stockBal[lt.sku].capas[ci]);}
+        stockBal[lt.sku].capas=capasActivas;
+        var tvB2=0,tcB2=0;
+        for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){tvB2+=stockBal[lt.sku].capas[ci].cu*stockBal[lt.sku].capas[ci].cantidad;tcB2+=stockBal[lt.sku].capas[ci].cantidad;}
+        if(tcB2>0)stockBal[lt.sku].costoUnit=tvB2/tcB2;
       }
     });
-    var valInv=Object.keys(stockBal).reduce(function(a,sku){
+    var valInv=window._INV_TOTAL||Object.keys(stockBal).reduce(function(a,sku){
       var s=stockBal[sku];
       var val=s.cantidad>0?Math.max(0,s.cantidad)*s.costoUnit:0;
       return a+val;
