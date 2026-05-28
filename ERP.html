@@ -3825,43 +3825,26 @@ function rReportes(el){
     CATALOGO_SKU.forEach(function(s){
       if(!stockBal[s.sku])stockBal[s.sku]={cantidad:0,costoUnit:0};
     });
-    // FIFO por capas — igual que módulo inventario
+    // Inventario: valor = entradas a costo - salidas a costo
+    var invValMap={};
     lotesRep.forEach(function(lt){
       if(!lt.sku)return;
-      if(!stockBal[lt.sku])stockBal[lt.sku]={cantidad:0,costoUnit:0,capas:[]};
+      if(!invValMap[lt.sku])invValMap[lt.sku]=0;
       var cant=parseFloat(lt.cantidad)||0;
       var cu=parseFloat(lt.costo_unit)||0;
-      if(lt.movimiento==='entrada'){
-        stockBal[lt.sku].cantidad+=cant;
-        if(cu>0){
-          var capaB=null;
-          for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){if(stockBal[lt.sku].capas[ci].cu===cu){capaB=stockBal[lt.sku].capas[ci];break;}}
-          if(capaB){capaB.cantidad+=cant;}else{stockBal[lt.sku].capas.push({cu:cu,cantidad:cant});}
-          var tvB=0,tcB=0;
-          for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){tvB+=stockBal[lt.sku].capas[ci].cu*stockBal[lt.sku].capas[ci].cantidad;tcB+=stockBal[lt.sku].capas[ci].cantidad;}
-          stockBal[lt.sku].costoUnit=tcB>0?tvB/tcB:cu;
-        }
-      } else {
-        stockBal[lt.sku].cantidad-=cant;
-        var restB=cant;
-        for(var ci=0;ci<stockBal[lt.sku].capas.length&&restB>0;ci++){
-          var cap=stockBal[lt.sku].capas[ci];
-          if(cap.cantidad<=restB){restB-=cap.cantidad;cap.cantidad=0;}
-          else{cap.cantidad-=restB;restB=0;}
-        }
-        var capasActivas=[];
-        for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){if(stockBal[lt.sku].capas[ci].cantidad>0)capasActivas.push(stockBal[lt.sku].capas[ci]);}
-        stockBal[lt.sku].capas=capasActivas;
-        var tvB2=0,tcB2=0;
-        for(var ci=0;ci<stockBal[lt.sku].capas.length;ci++){tvB2+=stockBal[lt.sku].capas[ci].cu*stockBal[lt.sku].capas[ci].cantidad;tcB2+=stockBal[lt.sku].capas[ci].cantidad;}
-        if(tcB2>0)stockBal[lt.sku].costoUnit=tvB2/tcB2;
-      }
+      if(lt.movimiento==='entrada'){invValMap[lt.sku]+=cant*cu;}
+      else{invValMap[lt.sku]-=cant*cu;}
     });
-    var valInv=window._INV_TOTAL||Object.keys(stockBal).reduce(function(a,sku){
-      var s=stockBal[sku];
-      var val=s.cantidad>0?Math.max(0,s.cantidad)*s.costoUnit:0;
-      return a+val;
-    },0);
+    lotesRep.forEach(function(lt){
+      if(!lt.sku)return;
+      if(!stockBal[lt.sku])stockBal[lt.sku]={cantidad:0,costoUnit:0};
+      var cant=parseFloat(lt.cantidad)||0;
+      var cu=parseFloat(lt.costo_unit)||0;
+      if(lt.movimiento==='entrada'){stockBal[lt.sku].cantidad+=cant;}
+      else{stockBal[lt.sku].cantidad-=cant;}
+    });
+    var valInv=0;
+    Object.keys(invValMap).forEach(function(sku){if(invValMap[sku]>0)valInv+=invValMap[sku];});
     var activos=efec+porCobrar+valInv;
 
     // Inversión socios (todos los movs)
