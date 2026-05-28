@@ -3173,6 +3173,7 @@ function rInventario(el){
       }
       syncCatalogo(function(){
         CATALOGO_SKU.forEach(function(s){ensure(s.sku,s.tipo,s.cat);});
+        // FIFO por capas de costo
         lotes.forEach(function(lt){
           if(!lt.sku)return;
           var ci=CATALOGO_SKU.find(function(s){return s.sku===lt.sku;});
@@ -3182,11 +3183,37 @@ function rInventario(el){
           if(lt.movimiento==="entrada"){
             stock[lt.sku].cantidad+=cant;
             stock[lt.sku].entradas+=cant;
-            if(cu>0)stock[lt.sku].costoUnit=cu;
+            // FIFO: agregar capa de costo
+            if(cu>0){
+              // Buscar si ya existe capa con mismo costo
+              var capa=stock[lt.sku].capas?stock[lt.sku].capas.find(function(c){return c.cu===cu;}):null;
+              if(!stock[lt.sku].capas)stock[lt.sku].capas=[];
+              if(capa){capa.cantidad+=cant;}else{stock[lt.sku].capas.push({cu:cu,cantidad:cant});}
+              // costoUnit = promedio ponderado de capas activas
+              var totalVal=stock[lt.sku].capas.reduce(function(a,x){return a+x.cu*x.cantidad;},0);
+              var totalCant=stock[lt.sku].capas.reduce(function(a,x){return a+x.cantidad;},0);
+              stock[lt.sku].costoUnit=totalCant>0?totalVal/totalCant:cu;
+            }
             stock[lt.sku].lotesDetalle.push({id:lt.id,num_ref:lt.num_ref||"",fecha:lt.fecha,tipo:lt.tipo,movimiento:"entrada",cantidad:cant,cu:cu,concepto:lt.concepto||""});
           } else {
             stock[lt.sku].cantidad-=cant;
             stock[lt.sku].salidas+=cant;
+            // FIFO: consumir capas más antiguas primero
+            if(stock[lt.sku].capas&&stock[lt.sku].capas.length>0){
+              var restante=cant;
+              var i=0;
+              while(restante>0&&i<stock[lt.sku].capas.length){
+                var capa=stock[lt.sku].capas[i];
+                if(capa.cantidad<=restante){restante-=capa.cantidad;capa.cantidad=0;}
+                else{capa.cantidad-=restante;restante=0;}
+                i++;
+              }
+              stock[lt.sku].capas=stock[lt.sku].capas.filter(function(x){return x.cantidad>0;});
+              // Recalcular costoUnit con capas restantes
+              var totalVal2=stock[lt.sku].capas.reduce(function(a,x){return a+x.cu*x.cantidad;},0);
+              var totalCant2=stock[lt.sku].capas.reduce(function(a,x){return a+x.cantidad;},0);
+              if(totalCant2>0)stock[lt.sku].costoUnit=totalVal2/totalCant2;
+            }
             stock[lt.sku].lotesDetalle.push({id:lt.id,num_ref:lt.num_ref||"",fecha:lt.fecha,tipo:lt.tipo,movimiento:"salida",cantidad:cant,cu:cu,concepto:lt.concepto||""});
           }
         });
