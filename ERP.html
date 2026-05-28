@@ -3843,8 +3843,9 @@ function rReportes(el){
       if(lt.movimiento==='entrada'){stockBal[lt.sku].cantidad+=cant;}
       else{stockBal[lt.sku].cantidad-=cant;}
     });
-    var valInv=0;
-    Object.keys(invValMap).forEach(function(sku){if(invValMap[sku]>0)valInv+=invValMap[sku];});
+    // Usar el valor calculado por el módulo de inventario (FIFO) si está disponible
+    var valInv=window._INV_TOTAL&&window._INV_TOTAL>0?window._INV_TOTAL:0;
+    if(!valInv){Object.keys(invValMap).forEach(function(sku){if(invValMap[sku]>0)valInv+=invValMap[sku];});}
     var activos=efec+porCobrar+valInv;
 
     // Inversión socios (todos los movs)
