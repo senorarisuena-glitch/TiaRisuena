@@ -3821,14 +3821,32 @@ function rReportes(el){
     lotesRep.forEach(function(lt){
       if(!lt.sku)return;
       var ci=CATALOGO_SKU.find(function(s){return s.sku===lt.sku;});
-      if(!stockBal[lt.sku])stockBal[lt.sku]={cantidad:0,costoUnit:0};
+      if(!stockBal[lt.sku])stockBal[lt.sku]={cantidad:0,costoUnit:0,capas:[]};
       var cant=parseFloat(lt.cantidad)||0;
       var cu=parseFloat(lt.costo_unit)||0;
       if(lt.movimiento==="entrada"){
         stockBal[lt.sku].cantidad+=cant;
-        if(cu>0)stockBal[lt.sku].costoUnit=cu;
+        if(cu>0){
+          var capa=stockBal[lt.sku].capas.find(function(x){return x.cu===cu;});
+          if(capa){capa.cantidad+=cant;}else{stockBal[lt.sku].capas.push({cu:cu,cantidad:cant});}
+          var tv=stockBal[lt.sku].capas.reduce(function(a,x){return a+x.cu*x.cantidad;},0);
+          var tc=stockBal[lt.sku].capas.reduce(function(a,x){return a+x.cantidad;},0);
+          stockBal[lt.sku].costoUnit=tc>0?tv/tc:cu;
+        }
       } else {
         stockBal[lt.sku].cantidad-=cant;
+        if(stockBal[lt.sku].capas.length>0){
+          var restante=cant;
+          for(var i=0;i<stockBal[lt.sku].capas.length&&restante>0;i++){
+            var cap=stockBal[lt.sku].capas[i];
+            if(cap.cantidad<=restante){restante-=cap.cantidad;cap.cantidad=0;}
+            else{cap.cantidad-=restante;restante=0;}
+          }
+          stockBal[lt.sku].capas=stockBal[lt.sku].capas.filter(function(x){return x.cantidad>0;});
+          var tv2=stockBal[lt.sku].capas.reduce(function(a,x){return a+x.cu*x.cantidad;},0);
+          var tc2=stockBal[lt.sku].capas.reduce(function(a,x){return a+x.cantidad;},0);
+          if(tc2>0)stockBal[lt.sku].costoUnit=tv2/tc2;
+        }
       }
     });
     var valInv=Object.keys(stockBal).reduce(function(a,sku){
