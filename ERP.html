@@ -3759,7 +3759,7 @@ function rReportes(el){
     renderRep();
   };
   window.setFechaD=function(v){fechaDesde=v;fechaHasta=v;dia=v.slice(8,10);anio=v.slice(0,4);mes=v.slice(5,7);renderRep();};
-  window.setDesde=function(v){fechaDesde=v;renderRep();};
+  window.setDesde=function(v){fechaDesde=v;if(!fechaHasta)fechaHasta=v;renderRep();};
   window.setHasta=function(v){fechaHasta=v;renderRep();};
   window.setDia=function(v){dia=v;renderRep();};
 
